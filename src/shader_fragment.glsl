@@ -98,6 +98,7 @@ void main()
 //
 //
 //    }
+    vec3 Kd0;
     if ( object_id == BUNNY )
     {
         // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
@@ -119,22 +120,30 @@ void main()
         float maxz = bbox_max.z;
 
         U = (position_model.x - minx)/(maxx-minx);
-        V = (position_model.y - miny)/(maxy-miny);;
+        V = (position_model.y - miny)/(maxy-miny);
+        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+        Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
+        // Equação de Iluminação
+        float lambert = max(0,dot(n,l));
+
+        color.rgb = Kd0 * (lambert + 0.01);
     }
-//    else if ( object_id == MAIN_ROOM )
-//    {
-//        // Coordenadas de textura da sala principal
-//        U = texcoords.x;
-//        V = texcoords.y;
-//    }
+   else if ( object_id == MAIN_ROOM )
+   {
+       // Coordenadas de textura da sala principal
+       U = texcoords.x;
+       V = texcoords.y;
+       // Não está utilizando nenhuma iluminação aqui
+       Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
+       color.rgb = Kd0;
+   }
+//        // Equação de Iluminação
+//        float lambert = max(0,dot(n,l));
+//
+//        color.rgb = Kd0 * (lambert + 0.01);
 
-    // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
-    vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
 
-    // Equação de Iluminação
-    float lambert = max(0,dot(n,l));
 
-    color.rgb = Kd0 * (lambert + 0.01);
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:

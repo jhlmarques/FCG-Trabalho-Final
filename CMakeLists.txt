@@ -9,9 +9,12 @@ SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${PROJECT_SOURCE_DIR}/bin/Release")
 include_directories(BEFORE SYSTEM ${PROJECT_SOURCE_DIR}/include)
 
 set(SOURCES
-    src/main.cpp
     src/glad.c
-    src/textrendering.cpp
+    src/globals.cpp
+    src/labfunctions.cpp
+    src/labstructures.cpp
+    src/main.cpp
+    src/matrices.cpp
     src/stb_image.cpp
     src/tiny_obj_loader.cpp
 )

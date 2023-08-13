@@ -114,9 +114,11 @@ int main(int argc, char* argv[])
 
     float prev_time = (float)glfwGetTime();
 
-    // Câmera (inicialmente em modo "free")
-    // O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
-    Camera camera(0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
+    /*
+    
+        PLACEHOLDER/TESTAGEM
+    
+    */
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -145,14 +147,13 @@ int main(int argc, char* argv[])
 
         float r = g_CameraDistance;
 
-        camera.setViewMagnitude(r);
-        camera.setViewPolarCoords(g_CameraPhi, g_CameraTheta);
+        mainCamera.setViewVector(g_CameraPhi, g_CameraTheta, r);
 
         float speed = 0.5f; // Velocidade da câmera
         
-        glm::vec4 pos = camera.getPosition();
-        glm::vec4 w = camera.getWVec();
-        glm::vec4 u = camera.getUVec();
+        glm::vec4 pos = mainCamera.getPosition();
+        glm::vec4 w = mainCamera.getWVec();
+        glm::vec4 u = mainCamera.getUVec();
 
         if (g_wPressed)
             pos += -w * speed * delta_t;
@@ -163,10 +164,9 @@ int main(int argc, char* argv[])
         if (g_dPressed)
             pos += u * speed * delta_t;
 
-        camera.setPosition(pos.x, pos.y, pos.z);
+        mainCamera.setPosition(pos.x, pos.y, pos.z);
 
-        camera.applyChanges();
-        glm::mat4 const& view = camera.getViewMatrix();
+        glm::mat4 const& view = mainCamera.getViewMatrix();
 
         // Agora computamos a matriz de Projeção.
         glm::mat4 projection;

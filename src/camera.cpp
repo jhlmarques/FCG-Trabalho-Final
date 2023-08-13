@@ -1,15 +1,13 @@
 #include "camera.h"
 
+Camera mainCamera(0.0f, 0.0f, -5.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
 
-Camera::Camera(float px, float py, float pz, float ux, float uy, float uz){
+Camera::Camera(float px, float py, float pz, float vx, float vy, float vz, float ux, float uy, float uz){
     position  = glm::vec4(px, py, pz, 1.0f);
+    view      = glm::vec4(vx, vy, vz, 0.0f);
     up        = glm::vec4(ux, uy, uz, 0.0f);
     
-    distance = std::numeric_limits<float>::epsilon();
-    lookat = false;
     lookAtPoint = position + view;
-    // Calcula vetor e matriz view, além de outros;
-    applyChanges();
 }
 
 // Define a posição da câmera
@@ -24,65 +22,53 @@ glm::vec4 Camera::getPosition(){
     return position;
 }
 
-// Define como o vetor view é calculado.
-void Camera::setCameraMode(bool lookat){
-    this->lookat = lookat;
-}
-// Define o ponto utilizado para calcular o vetor view no modo Look At
-void Camera::setViewLookAtPoint(glm::vec4& point){
-    lookAtPoint = point;
-}
-
-// Define a magnitude do vetor view fixo no modo Free
-void Camera::setViewMagnitude(float distance){
-    if(distance < std::numeric_limits<float>::epsilon()){
-        distance = std::numeric_limits<float>::epsilon();
-    }
-    else{
-        this->distance = distance;
-    }
+// Recalcula vetor view com a posição da câmera e um ponto
+void Camera::lookAt(glm::vec4& point){
+    lookAtPoint = position;
+    view = lookAtPoint - position;
     
-}
-
-// Define as coordenadas polares usadas para o cálculo do vetor view fixo no modo Free
-void Camera::setViewPolarCoords(float phi, float theta){
-    this->phi = phi;
-    this->theta = theta;
-}
-
-// Recalcula elementos da câmera
-void Camera::applyChanges(){
-    // Recalcula vetor view
-    if(lookat){
-        view = lookAtPoint - position;
-    }
-    else{
-        view.x = distance*cos(phi)*sin(theta);
-        view.y = distance*sin(phi);
-        view.z = distance*cos(phi)*cos(theta);
-
-    }
-    
-    // Recalcula matriz view
-    viewMatrix =  Matrix_Camera_View(position, view, up);
-
     // Recalcula w e u
     w = -view / norm(view);
     u = crossproduct(up, w)/norm(crossproduct(up, w));
 
 }
 
+// Ajusta o vetor view usando coordenadas esféricas
+void Camera::setViewVector(float phi, float theta, float r){
+    
+    if(r < std::numeric_limits<float>::epsilon()){
+        r = std::numeric_limits<float>::epsilon();
+    }
+    
+    view.x = r*cos(phi)*sin(theta);
+    view.y = r*sin(phi);
+    view.z = r*cos(phi)*cos(theta);
+
+    // Recalcula ponto fixo
+    lookAtPoint = position + view;
+
+    // Recalcula w e u
+    w = -view / norm(view);
+    u = crossproduct(up, w)/norm(crossproduct(up, w));
+    
+
+}
+
+glm::vec4 const& Camera::getLookAtPoint(){
+    return lookAtPoint;
+}
+
 // Matriz view da câmera
-glm::mat4 const& Camera::getViewMatrix(){    
-    return viewMatrix;
+glm::mat4 Camera::getViewMatrix(){    
+    return Matrix_Camera_View(position, view, up);
 }
 
 // Vetor w
 glm::vec4 Camera::getWVec(){
-    return w;
+    return -view / norm(view);
 }
 
 // Vetor u
 glm::vec4 Camera::getUVec(){
-    return u;
+    return crossproduct(up, w)/norm(crossproduct(up, w));
 }

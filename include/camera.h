@@ -1,6 +1,6 @@
 /*
 
-    Câmera
+    
 
 */
 #ifndef __CAMERA_H__
@@ -11,7 +11,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "matrices.h"
-
 
 class Camera{
 
@@ -25,43 +24,30 @@ class Camera{
     glm::vec4 w;
     glm::vec4 u;    
 
-    // LOOK AT
     glm::vec4 lookAtPoint;
-
-    // FREE
-    float phi;
-    float theta;
-    float distance;
-
-    bool lookat;
 
     public:
     
-    Camera(float px, float py, float pz, float ux, float uy, float uz);
+    Camera(float px, float py, float pz, float vx, float vy, float vz, float ux, float uy, float uz);
 
-    // Define posição da câmera
+    // Define posição da 
+    // TO-DO: POSIÇÃO != LOOK AT
     void setPosition(float x, float y, float z);
 
-    // Retorna posição da câmera
+    // Retorna posição da 
     glm::vec4 getPosition();
 
-    // Define como o vetor view é calculado.
-    void setCameraMode(bool lookat);
+    // Recalcula vetor view com a posição da  e um ponto
+    void lookAt(glm::vec4& point);
 
-    // Define o ponto utilizado para calcular o vetor view no modo Look At
-    void setViewLookAtPoint(glm::vec4& point);
+    // Ajusta o vetor view usando coordenadas esféricas
+    void setViewVector(float phi, float theta, float r);
 
-    // Define a magnitude do vetor view fixo no modo Free
-    void setViewMagnitude(float distance);
-
-    // Define as coordenadas polares usadas para o cálculo do vetor view fixo no modo Free
-    void setViewPolarCoords(float phi, float theta);
-    
-    // Recalcula elementos da câmera
-    void applyChanges();
+    // Obtém ponto o qual a  está olhando
+    glm::vec4 const& getLookAtPoint();
     
     // Matriz view da câmera
-    glm::mat4 const& getViewMatrix();
+    glm::mat4 getViewMatrix();
 
     // Vetor w
     glm::vec4 getWVec();
@@ -72,6 +58,11 @@ class Camera{
 
 
 };
+
+//  principal (inicialmente em modo "free")
+// O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
+extern Camera mainCamera;
+
 
 #endif // __CAMERA_H__
 

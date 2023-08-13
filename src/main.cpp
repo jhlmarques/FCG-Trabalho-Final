@@ -1,5 +1,6 @@
 #include "labfunctions.h"
 #include "camera.h"
+#include "tile.h"
 #include "globals.h"
 
 #define MAIN_ROOM 0
@@ -120,6 +121,10 @@ int main(int argc, char* argv[])
     
     */
 
+    Tile tile(0.0f, 0.0f, -5.0f);
+
+
+
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
@@ -145,26 +150,30 @@ int main(int argc, char* argv[])
         float delta_t = current_time - prev_time;
         prev_time = current_time;
 
-        float r = g_CameraDistance;
+        // float r = g_CameraDistance;
 
-        mainCamera.setViewVector(g_CameraPhi, g_CameraTheta, r);
+        // mainCamera.setViewVector(g_CameraPhi, g_CameraTheta, r);
 
-        float speed = 0.5f; // Velocidade da câmera
+        // float speed = 0.5f; // Velocidade da câmera
         
-        glm::vec4 pos = mainCamera.getPosition();
-        glm::vec4 w = mainCamera.getWVec();
-        glm::vec4 u = mainCamera.getUVec();
+        // glm::vec4 pos = mainCamera.getPosition();
+        // glm::vec4 w = mainCamera.getWVec();
+        // glm::vec4 u = mainCamera.getUVec();
 
-        if (g_wPressed)
-            pos += -w * speed * delta_t;
-        if (g_sPressed)
-            pos += w * speed * delta_t;
-        if (g_aPressed)
-            pos += -u * speed * delta_t;
-        if (g_dPressed)
-            pos += u * speed * delta_t;
+        // if (g_wPressed)
+        //     pos += -w * speed * delta_t;
+        // if (g_sPressed)
+        //     pos += w * speed * delta_t;
+        // if (g_aPressed)
+        //     pos += -u * speed * delta_t;
+        // if (g_dPressed)
+        //     pos += u * speed * delta_t;
 
-        mainCamera.setPosition(pos.x, pos.y, pos.z);
+        // mainCamera.setPosition(pos.x, pos.y, pos.z);
+
+        // Realiza operações dentro do tile
+        mainCamera.setPosition(tile.getCenterPos());
+        tile.handleMovement();
 
         glm::mat4 const& view = mainCamera.getViewMatrix();
 

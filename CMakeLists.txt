@@ -13,6 +13,7 @@ set(SOURCES
     src/globals.cpp
     src/labfunctions.cpp
     src/labstructures.cpp
+    src/camera.cpp
     src/main.cpp
     src/matrices.cpp
     src/stb_image.cpp

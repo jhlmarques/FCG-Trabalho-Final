@@ -4,7 +4,7 @@
 #include "globals.h"
 
 #define MAIN_ROOM 0
-#define BUNNY  1
+#define TILE_FLOOR  1
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -97,13 +97,13 @@ int main(int argc, char* argv[])
     // ComputeNormals(&spheremodel);
     // BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
-     ObjModel bunnymodel("../../data/bunny.obj");
-     ComputeNormals(&bunnymodel);
-     BuildTrianglesAndAddToVirtualScene(&bunnymodel);
+    ObjModel main_room("../../data/main_room.obj");
+    ComputeNormals(&main_room);
+    BuildTrianglesAndAddToVirtualScene(&main_room);
 
-     ObjModel main_room("../../data/main_room.obj");
-     ComputeNormals(&main_room);
-     BuildTrianglesAndAddToVirtualScene(&main_room);
+    ObjModel tile_floor("../../data/plane.obj");
+    ComputeNormals(&tile_floor);
+    BuildTrianglesAndAddToVirtualScene(&tile_floor);
 
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
@@ -123,9 +123,9 @@ int main(int argc, char* argv[])
 
     // Vetor estático de todos tiles existentes
     std::vector<Tile> tileVector;
-    tileVector.emplace_back(0.0f, 0.0f, -5.0f);
-    tileVector.emplace_back(0.0f, 0.0f, -4.0f);
-    tileVector.emplace_back(0.0f, 0.0f, -3.0f);
+    tileVector.emplace_back(0.0f, 0.0f, 0.0f);
+    tileVector.emplace_back(0.0f, 0.0f, 4.0f);
+    tileVector.emplace_back(0.0f, 0.0f, 8.0f);
 
     tileVector[0].setNorth(&tileVector[1]);
     tileVector[1].setSouth(&tileVector[0]);
@@ -183,7 +183,9 @@ int main(int argc, char* argv[])
         // mainCamera.setPosition(pos.x, pos.y, pos.z);
 
         // Realiza operações dentro do tile
-        mainCamera.setPosition(cur_tile->getCenterPos());
+        auto tileCenter = cur_tile->getCenterPos();
+        tileCenter.y += CAMERA_HEAD_HEIGHT;
+        mainCamera.setPosition(tileCenter);
         cur_tile->handleMovement(&cur_tile);
 
         glm::mat4 const& view = mainCamera.getViewMatrix();
@@ -218,11 +220,22 @@ int main(int argc, char* argv[])
 
 //        glLineWidth(4.0f);
 
-        glCullFace(GL_FRONT);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, MAIN_ROOM);
-        DrawVirtualObject("the_main_room");
-        glCullFace(GL_BACK);
+        // DESENHA SALA PRINCIPAL
+        // glCullFace(GL_FRONT);
+        // glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        // glUniform1i(g_object_id_uniform, MAIN_ROOM);
+        // DrawVirtualObject("the_main_room");
+        // glCullFace(GL_BACK);
+
+        // DESENHA TILES
+        for(auto tile : tileVector){
+            auto coords = tile.getCenterPos();
+            // Move para posição correta
+            model = Matrix_Translate(coords.x, coords.y, coords.z);
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, TILE_FLOOR);
+            DrawVirtualObject("the_plane");
+        }
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário

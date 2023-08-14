@@ -24,6 +24,9 @@ glm::vec4 Tile::getCenterPos(){
 void Tile::handleMovement(Tile** curTile){
     static auto rotateLeft = Matrix_Rotate(M_PI_2, mainCamera.getVVec());
     static auto rotateRight = Matrix_Rotate(-M_PI_2, mainCamera.getVVec());
+    // Tempo desde o último input processado
+    static std::chrono::steady_clock::time_point lastProcessedInput;
+
 
     std::chrono::steady_clock::time_point cur_time = std::chrono::steady_clock::now();
 

@@ -41,9 +41,6 @@ class Tile{
     // Tile para o qual estamos olhando atualmente
     int8_t curFacingDirection = NORTH;
 
-    // Tempo desde o último input processado
-    std::chrono::steady_clock::time_point lastProcessedInput;
-
     public:
 
     Tile(float px, float py, float pz) :

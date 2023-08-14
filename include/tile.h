@@ -17,6 +17,11 @@
 #include "camera.h"
 #include "globals.h"
 
+#define NORTH 0
+#define EAST 1
+#define SOUTH 2
+#define WEST 3
+
 // forward declare
 class Tile;
 
@@ -24,7 +29,7 @@ class Tile{
 
     private:
 
-    // Posição na cena
+    // Posição na cena, em coordenadas globais
     glm::vec4 centerPos;
 
     // Tiles vizinhos, com nomes relativos às posições dos vizinhos da perspectiva inicial do jogo
@@ -33,14 +38,16 @@ class Tile{
     Tile* east  = nullptr;
     Tile* west  = nullptr;
 
+    // Tile para o qual estamos olhando atualmente
+    int8_t curFacingDirection = NORTH;
+
     // Tempo desde o último input processado
     std::chrono::steady_clock::time_point lastProcessedInput;
 
     public:
 
     Tile(float px, float py, float pz) :
-    centerPos(px, py, pz, 1.0f)
-    {}
+    centerPos{px, py, pz, 1.0f} {}
 
     void setNorth(Tile* t);
     void setSouth(Tile* t);
@@ -50,7 +57,7 @@ class Tile{
     glm::vec4 getCenterPos();
 
     // Realiza movimento
-    void handleMovement();
+    void handleMovement(Tile** curTile);
 
 
 };

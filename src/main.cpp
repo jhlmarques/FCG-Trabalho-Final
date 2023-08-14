@@ -121,7 +121,18 @@ int main(int argc, char* argv[])
     
     */
 
-    Tile tile(0.0f, 0.0f, -5.0f);
+    // Vetor estático de todos tiles existentes
+    std::vector<Tile> tileVector;
+    tileVector.emplace_back(0.0f, 0.0f, -5.0f);
+    tileVector.emplace_back(0.0f, 0.0f, -4.0f);
+    tileVector.emplace_back(0.0f, 0.0f, -3.0f);
+
+    tileVector[0].setNorth(&tileVector[1]);
+    tileVector[1].setSouth(&tileVector[0]);
+    tileVector[1].setNorth(&tileVector[2]);
+    tileVector[2].setSouth(&tileVector[1]);
+
+    Tile* cur_tile = &tileVector[0];
 
 
 
@@ -172,8 +183,8 @@ int main(int argc, char* argv[])
         // mainCamera.setPosition(pos.x, pos.y, pos.z);
 
         // Realiza operações dentro do tile
-        mainCamera.setPosition(tile.getCenterPos());
-        tile.handleMovement();
+        mainCamera.setPosition(cur_tile->getCenterPos());
+        cur_tile->handleMovement(&cur_tile);
 
         glm::mat4 const& view = mainCamera.getViewMatrix();
 

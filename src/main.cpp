@@ -88,8 +88,8 @@ int main(int argc, char* argv[])
     //
     LoadShadersFromFiles();
 
-    // Carregamos duas imagens para serem utilizadas como textura
-    LoadTextureImage("../../data/tc-earth_daymap_surface.jpg");      // TextureImage0
+    // Texturas
+    LoadTextureImage("../../data/floor_texture.jpg"); // TextureImage0
     LoadTextureImage("../../data/wall_texture.jpg"); // TextureImage1
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
@@ -124,10 +124,10 @@ int main(int argc, char* argv[])
     // Vetor estático de todos tiles existentes
     std::vector<Tile> tileVector;
     tileVector.emplace_back(0.0f, 0.0f, 0.0f);
-    tileVector.emplace_back(0.0f, 0.0f, 4.0f);
-    tileVector.emplace_back(4.0f, 0.0f, 0.0f);
-    tileVector.emplace_back(0.0f, 0.0f, -4.0f);
-    tileVector.emplace_back(-4.0f, 0.0f, 0.0f);
+    tileVector.emplace_back(0.0f, 0.0f, TILE_WIDTH);
+    tileVector.emplace_back(TILE_WIDTH, 0.0f, 0.0f);
+    tileVector.emplace_back(0.0f, 0.0f, -TILE_WIDTH);
+    tileVector.emplace_back(-TILE_WIDTH, 0.0f, 0.0f);
 
     tileVector[0].setNorth(&tileVector[1]);
     tileVector[0].setWest(&tileVector[2]);
@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -10.0f; // Posição do "far plane"
+        float farplane  = -100.0f; // Posição do "far plane"
 
 
 
@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
         for(auto tile : tileVector){
             auto coords = tile.getCenterPos();
             // Move para posição correta
-            model = Matrix_Translate(coords.x, coords.y, coords.z);
+            model =  Matrix_Translate(coords.x, coords.y, coords.z) * Matrix_Scale(TILE_WIDTH/2.0f, 1.0f, TILE_WIDTH/2.0f);
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(g_object_id_uniform, TILE_FLOOR);
             DrawVirtualObject("the_plane");

@@ -101,8 +101,11 @@ void main()
     vec3 Kd0;
     if ( object_id == TILE_FLOOR){
         // O chão de um tile
-        // TO-DO: Texturas
-        color.rgb = vec3(0.5, 0.2, 0.0);
+        // Coordenadas de textura 
+        U = texcoords.x;
+        V = texcoords.y;
+        color.rgb = texture(TextureImage0, vec2(U,V)).rgb;
+        //color.rgb = vec3(0.5, 0.2, 0.0);
     }
     else if ( object_id == MAIN_ROOM )
     {

@@ -22,6 +22,8 @@
 #define SOUTH 2
 #define WEST 3
 
+#define TILE_WIDTH 6.0f
+
 // forward declare
 class Tile;
 

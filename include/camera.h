@@ -16,12 +16,13 @@
 #include "matrices.h"
 
 // Altura da câmera (deslocamento no eixo y). Simula altura da cabeça
-#define CAMERA_HEAD_HEIGHT 1.5f
+#define CAMERA_HEAD_HEIGHT 4.0f
 
 #define CAMERA_ROTATING 1
 #define CAMERA_MOVING 2
 
-#define CAMERA_MOVE_SPEED 3.0f
+#define CAMERA_ROTATE_SPEED 180.0f
+#define CAMERA_MOVE_SPEED 10.0f
 
 class Camera{
 

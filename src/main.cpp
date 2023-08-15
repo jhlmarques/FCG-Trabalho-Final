@@ -124,15 +124,33 @@ int main(int argc, char* argv[])
     // Vetor estático de todos tiles existentes
     std::vector<Tile> tileVector;
     tileVector.emplace_back(0.0f, 0.0f, 0.0f);
-    tileVector.emplace_back(0.0f, 0.0f, TILE_WIDTH);
-    tileVector.emplace_back(TILE_WIDTH, 0.0f, 0.0f);
-    tileVector.emplace_back(0.0f, 0.0f, -TILE_WIDTH);
-    tileVector.emplace_back(-TILE_WIDTH, 0.0f, 0.0f);
+    tileVector.emplace_back(0.0f, 0.0f, TILE_WIDTH); // n
+    tileVector.emplace_back(TILE_WIDTH, 0.0f, 0.0f); // w
+    tileVector.emplace_back(0.0f, 0.0f, -TILE_WIDTH);// s
+    tileVector.emplace_back(-TILE_WIDTH, 0.0f, 0.0f); // e
+
+    tileVector.emplace_back(TILE_WIDTH, 0.0f, TILE_WIDTH); // NW
+    tileVector.emplace_back(TILE_WIDTH, 0.0f, -TILE_WIDTH); // SW 
+    tileVector.emplace_back(-TILE_WIDTH, 0.0f, -TILE_WIDTH); // SE
+    tileVector.emplace_back(-TILE_WIDTH, 0.0f, TILE_WIDTH); // NE
 
     tileVector[0].setNorth(&tileVector[1]);
     tileVector[0].setWest(&tileVector[2]);
     tileVector[0].setSouth(&tileVector[3]);
     tileVector[0].setEast(&tileVector[4]);
+
+    tileVector[1].setWest(&tileVector[5]);
+    tileVector[2].setNorth(&tileVector[5]);
+
+    tileVector[3].setWest(&tileVector[6]);
+    tileVector[2].setSouth(&tileVector[6]);
+
+    tileVector[4].setSouth(&tileVector[7]);
+    tileVector[3].setEast(&tileVector[7]);
+
+    tileVector[1].setEast(&tileVector[8]);
+    tileVector[4].setNorth(&tileVector[8]);
+
 
     Tile* cur_tile = &tileVector[0];
 

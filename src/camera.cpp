@@ -142,7 +142,7 @@ bool Camera::animate(){
         glm::mat4 rotation;
         
         // 90 graus/seg
-        auto radiansFromDeltaT = rotationSign*glm::radians(90*delta_t);
+        auto radiansFromDeltaT = rotationSign*glm::radians(CAMERA_ROTATE_SPEED*delta_t);
         
         // Talvez tenha uma maneira mais esperta de fazer isso, mas foi o que consegui pensar as
         // 23:12

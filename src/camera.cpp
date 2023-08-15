@@ -125,7 +125,7 @@ bool Camera::animate(){
         // Anda em linha reta ao novo ponto
         glm::vec4 direction = destinationPoint - position;
         float dNorm = norm(direction);
-        
+
         // Se está perto o suficiente, pula para o ponto
         if(dNorm < 0.1){
             position = destinationPoint;
@@ -138,15 +138,38 @@ bool Camera::animate(){
         }
     }
     if(animationFlags & CAMERA_ROTATING){
+        // Matriz de rotação
+        glm::mat4 rotation;
+        
+        // 90 graus/seg
+        auto radiansFromDeltaT = rotationSign*glm::radians(90*delta_t);
+        
+        // Talvez tenha uma maneira mais esperta de fazer isso, mas foi o que consegui pensar as
+        // 23:12
+        if(((rotationSign > 0) && ((radiansToRotate - radiansFromDeltaT) < 0)) || \
+            ((rotationSign < 0) && ((radiansFromDeltaT - radiansToRotate ) < 0))){
+            // Rotaciona a quantidade exata necessária
+            rotation = Matrix_Rotate(radiansToRotate, view);
+            radiansToRotate = 0.0f;
+            animationFlags ^= CAMERA_ROTATING;
+        }
+        else{
+            // Rotaciona conforme delta_t
+            rotation = Matrix_Rotate(radiansFromDeltaT, up);
+            radiansToRotate -= radiansFromDeltaT;    
+        }
 
+        // Aplica matriz de rotação a view
+        view = rotation * view;
     }
 
     return true;
 }
 
 // Configura a câmera para rotacionar
-void Camera::setDegreesToRotate(float degrees){
-    degreesToRotate = degrees;
+void Camera::setradiansToRotate(float degrees){
+    radiansToRotate = degrees;
+    rotationSign = degrees > 0 ? 1 : -1;
     animationFlags |= CAMERA_ROTATING;
 }
 

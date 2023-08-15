@@ -40,7 +40,8 @@ class Camera{
 
     // Animação
     uint8_t animationFlags;
-    float degreesToRotate;
+    float radiansToRotate;
+    int8_t rotationSign;
     glm::vec4 destinationPoint;
 
     public:
@@ -88,7 +89,7 @@ class Camera{
     bool animate();
 
     // Configura a câmera para rotacionar
-    void setDegreesToRotate(float degrees);
+    void setradiansToRotate(float degrees);
     
     // Define um ponto o qual a câmera deve se movimentar a
     void setDestinationPoint(glm::vec4 dst);

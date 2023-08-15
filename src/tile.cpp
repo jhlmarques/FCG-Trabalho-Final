@@ -70,34 +70,33 @@ void Tile::handleMovement(Tile** curTile){
 
     }
     else if(g_aPressed){
-        // TO-DO: ANIMAÇÃO
         // Vira para a esquerda
-        auto v = mainCamera.getViewVec();
-        glm::vec4 v_hat = rotateLeft * v;
-        mainCamera.setViewVector(v_hat);
+        // Animação
+        mainCamera.setradiansToRotate(M_PI_2);
 
         curFacingDirection--;
         if(curFacingDirection < 0){
             curFacingDirection = 3;
         }
 
+
     }
     else if(g_sPressed){
         // TO-DO: ANIMAÇÃO
         // Volta do puzzle para o centro do quadrado
-        mainCamera.setPosition(centerPos);
+        // mainCamera.setPosition(centerPos);
     }
     else if(g_dPressed){
-        // TO-DO: ANIMAÇÃO
         // Vira para a direita
-        auto v = mainCamera.getViewVec();
-        glm::vec4 v_hat = rotateRight * v;
-        mainCamera.setViewVector(v_hat);
+        // Animação
+        mainCamera.setradiansToRotate(-M_PI_2);
 
         curFacingDirection++;
         if(curFacingDirection > 3){
             curFacingDirection = 0;
         }
+
+
     }
     else{
         return;

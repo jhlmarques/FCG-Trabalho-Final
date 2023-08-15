@@ -2,18 +2,22 @@
 
 void Tile::setNorth(Tile* t){
     north = t;
+    t->south = this;
 }
 
 void Tile::setSouth(Tile* t){
     south = t;
+    t->north = this;
 }
 
 void Tile::setEast(Tile* t){
     east = t;
+    t->west = this;
 }
 
 void Tile::setWest(Tile* t){
     west = t;
+    t->east = this;
 }
 
 glm::vec4 Tile::getCenterPos(){

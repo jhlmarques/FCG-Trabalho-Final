@@ -45,3 +45,6 @@ bool g_wPressed = false;
 bool g_aPressed = false;
 bool g_sPressed = false;
 bool g_dPressed = false;
+
+// Estado atual da movimentação da câmera
+bool g_movingCameraToTile = false;

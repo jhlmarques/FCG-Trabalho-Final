@@ -22,6 +22,8 @@
 #define SOUTH 2
 #define WEST 3
 
+#define TILE_MOVE_SPEED 3.0f
+
 // forward declare
 class Tile;
 
@@ -39,7 +41,7 @@ class Tile{
     Tile* west  = nullptr;
 
     // Tile para o qual estamos olhando atualmente
-    int8_t curFacingDirection = NORTH;
+    int8_t curFacingDirection = NORTH; // Z positivo
 
     public:
 

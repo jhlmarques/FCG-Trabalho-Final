@@ -125,14 +125,23 @@ int main(int argc, char* argv[])
     std::vector<Tile> tileVector;
     tileVector.emplace_back(0.0f, 0.0f, 0.0f);
     tileVector.emplace_back(0.0f, 0.0f, 4.0f);
-    tileVector.emplace_back(0.0f, 0.0f, 8.0f);
+    tileVector.emplace_back(4.0f, 0.0f, 0.0f);
+    tileVector.emplace_back(0.0f, 0.0f, -4.0f);
+    tileVector.emplace_back(-4.0f, 0.0f, 0.0f);
 
     tileVector[0].setNorth(&tileVector[1]);
-    tileVector[1].setSouth(&tileVector[0]);
-    tileVector[1].setNorth(&tileVector[2]);
-    tileVector[2].setSouth(&tileVector[1]);
+    tileVector[0].setWest(&tileVector[2]);
+    tileVector[0].setSouth(&tileVector[3]);
+    tileVector[0].setEast(&tileVector[4]);
 
     Tile* cur_tile = &tileVector[0];
+
+    // Move câmera para esse ponto
+    auto tileCenter = cur_tile->getCenterPos();
+    tileCenter.y += CAMERA_HEAD_HEIGHT;
+
+    mainCamera.setPosition(tileCenter);
+    mainCamera.setViewVector(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
 
 
@@ -161,32 +170,39 @@ int main(int argc, char* argv[])
         float delta_t = current_time - prev_time;
         prev_time = current_time;
 
-        // float r = g_CameraDistance;
-
-        // mainCamera.setViewVector(g_CameraPhi, g_CameraTheta, r);
-
-        // float speed = 0.5f; // Velocidade da câmera
-        
-        // glm::vec4 pos = mainCamera.getPosition();
-        // glm::vec4 w = mainCamera.getWVec();
-        // glm::vec4 u = mainCamera.getUVec();
-
-        // if (g_wPressed)
-        //     pos += -w * speed * delta_t;
-        // if (g_sPressed)
-        //     pos += w * speed * delta_t;
-        // if (g_aPressed)
-        //     pos += -u * speed * delta_t;
-        // if (g_dPressed)
-        //     pos += u * speed * delta_t;
-
-        // mainCamera.setPosition(pos.x, pos.y, pos.z);
-
         // Realiza operações dentro do tile
         auto tileCenter = cur_tile->getCenterPos();
         tileCenter.y += CAMERA_HEAD_HEIGHT;
-        mainCamera.setPosition(tileCenter);
-        cur_tile->handleMovement(&cur_tile);
+        
+        // Se estamos no processo de movimentarmo-nos a um novo tile, movemos a câmera apenas
+        if(g_movingCameraToTile){
+            // Anda em linha reta ao novo ponto
+            auto pos = mainCamera.getPosition();
+            glm::vec4 direction = tileCenter - pos;
+            float dNorm = norm(direction);
+            glm::vec4 newPos; 
+            // Se está perto o suficiente, pula para o ponto
+            if(dNorm < 0.1){
+                newPos = tileCenter;
+                g_movingCameraToTile = false;
+            }
+            // Senão, move-se
+            else{
+                glm::vec4 nDirection = direction / norm(direction);
+                newPos = pos + (nDirection * delta_t * TILE_MOVE_SPEED);
+            }
+            mainCamera.setPosition(newPos);
+            
+
+        }
+        // Se não estamos na posição correta, colocamos a câmera em movimento
+        else if(mainCamera.getPosition() != tileCenter){
+            g_movingCameraToTile = true;
+        }
+        // Se estamos, pegamos input de movimentação
+        else{
+            cur_tile->handleMovement(&cur_tile);
+        }
 
         glm::mat4 const& view = mainCamera.getViewMatrix();
 

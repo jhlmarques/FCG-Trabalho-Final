@@ -47,4 +47,4 @@ bool g_sPressed = false;
 bool g_dPressed = false;
 
 // Estado atual da movimentação da câmera
-bool g_movingCameraToTile = false;
+uint8_t g_movingCamera = 0;

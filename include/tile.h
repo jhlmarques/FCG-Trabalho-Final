@@ -22,8 +22,6 @@
 #define SOUTH 2
 #define WEST 3
 
-#define TILE_MOVE_SPEED 3.0f
-
 // forward declare
 class Tile;
 

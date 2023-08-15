@@ -107,3 +107,51 @@ glm::vec4 Camera::getVVec(){
 glm::vec4 Camera::getWVec(){
     return w;
 }
+
+
+// Retorna verdadeiro se uma animação foi realizada
+bool Camera::animate(){
+    static float lastAnimationTime = (float) glfwGetTime();
+
+    float current_time = (float) glfwGetTime();
+    float delta_t = current_time - lastAnimationTime;
+    lastAnimationTime = current_time;
+    
+    if(!animationFlags){
+        return false;
+    }
+    
+    if(animationFlags & CAMERA_MOVING){
+        // Anda em linha reta ao novo ponto
+        glm::vec4 direction = destinationPoint - position;
+        float dNorm = norm(direction);
+        
+        // Se está perto o suficiente, pula para o ponto
+        if(dNorm < 0.1){
+            position = destinationPoint;
+            animationFlags ^= CAMERA_MOVING;
+        }
+        // Senão, move-se
+        else{
+            glm::vec4 nDirection = direction / norm(direction);
+            position = position + (nDirection * delta_t * CAMERA_MOVE_SPEED);
+        }
+    }
+    if(animationFlags & CAMERA_ROTATING){
+
+    }
+
+    return true;
+}
+
+// Configura a câmera para rotacionar
+void Camera::setDegreesToRotate(float degrees){
+    degreesToRotate = degrees;
+    animationFlags |= CAMERA_ROTATING;
+}
+
+// Define um ponto o qual a câmera deve se movimentar a
+void Camera::setDestinationPoint(glm::vec4 dst){
+    destinationPoint = dst;
+    animationFlags |= CAMERA_MOVING;
+}

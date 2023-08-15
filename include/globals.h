@@ -42,6 +42,5 @@ extern bool g_aPressed;
 extern bool g_sPressed;
 extern bool g_dPressed;
 
-extern bool g_movingCameraToTile;
 
 #endif // __GLOBALS_H__

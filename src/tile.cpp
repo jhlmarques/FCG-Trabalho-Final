@@ -63,6 +63,9 @@ void Tile::handleMovement(Tile** curTile){
             // do jogo e que pode ser então modificada?
             *curTile = dst;
             dst->curFacingDirection = curFacingDirection;
+            auto pointToMove = dst->getCenterPos();
+            pointToMove.y += CAMERA_HEAD_HEIGHT;
+            mainCamera.setDestinationPoint(pointToMove);
         }
 
     }

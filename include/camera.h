@@ -10,10 +10,18 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <glad/glad.h> 
+#include <GLFW/glfw3.h>
+
 #include "matrices.h"
 
 // Altura da câmera (deslocamento no eixo y). Simula altura da cabeça
 #define CAMERA_HEAD_HEIGHT 1.5f
+
+#define CAMERA_ROTATING 1
+#define CAMERA_MOVING 2
+
+#define CAMERA_MOVE_SPEED 3.0f
 
 class Camera{
 
@@ -29,6 +37,11 @@ class Camera{
     glm::vec4 v;   
 
     glm::vec4 lookAtPoint;
+
+    // Animação
+    uint8_t animationFlags;
+    float degreesToRotate;
+    glm::vec4 destinationPoint;
 
     public:
     
@@ -71,13 +84,21 @@ class Camera{
     // Vetor w
     glm::vec4 getWVec();
 
+    // Retorna verdadeiro se uma animação foi realizada
+    bool animate();
+
+    // Configura a câmera para rotacionar
+    void setDegreesToRotate(float degrees);
+    
+    // Define um ponto o qual a câmera deve se movimentar a
+    void setDestinationPoint(glm::vec4 dst);
+
 
 };
 
 //  principal (inicialmente em modo "free")
 // O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
 extern Camera mainCamera;
-
 
 #endif // __CAMERA_H__
 

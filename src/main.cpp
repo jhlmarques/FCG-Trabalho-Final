@@ -165,42 +165,9 @@ int main(int argc, char* argv[])
         // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
         // os shaders de vértice e fragmentos).
         glUseProgram(g_GpuProgramID);
-
-        float current_time = (float)glfwGetTime();
-        float delta_t = current_time - prev_time;
-        prev_time = current_time;
-
-        // Realiza operações dentro do tile
-        auto tileCenter = cur_tile->getCenterPos();
-        tileCenter.y += CAMERA_HEAD_HEIGHT;
         
-        // Se estamos no processo de movimentarmo-nos a um novo tile, movemos a câmera apenas
-        if(g_movingCameraToTile){
-            // Anda em linha reta ao novo ponto
-            auto pos = mainCamera.getPosition();
-            glm::vec4 direction = tileCenter - pos;
-            float dNorm = norm(direction);
-            glm::vec4 newPos; 
-            // Se está perto o suficiente, pula para o ponto
-            if(dNorm < 0.1){
-                newPos = tileCenter;
-                g_movingCameraToTile = false;
-            }
-            // Senão, move-se
-            else{
-                glm::vec4 nDirection = direction / norm(direction);
-                newPos = pos + (nDirection * delta_t * TILE_MOVE_SPEED);
-            }
-            mainCamera.setPosition(newPos);
-            
-
-        }
-        // Se não estamos na posição correta, colocamos a câmera em movimento
-        else if(mainCamera.getPosition() != tileCenter){
-            g_movingCameraToTile = true;
-        }
-        // Se estamos, pegamos input de movimentação
-        else{
+        // Apenas realizamos um movimento se a câmera não está animando
+        if(!mainCamera.animate()){
             cur_tile->handleMovement(&cur_tile);
         }
 

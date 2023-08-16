@@ -46,5 +46,9 @@ bool g_aPressed = false;
 bool g_sPressed = false;
 bool g_dPressed = false;
 
+// Direção (ou ausência de direção) de scroll do mouse
+ScrollDirection g_scrolledDirection;
+
 // Estado atual da movimentação da câmera
 uint8_t g_movingCamera = 0;
+

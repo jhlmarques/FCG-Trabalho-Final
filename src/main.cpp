@@ -383,9 +383,12 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // Atualizamos a distância da câmera para a origem utilizando a
-    // movimentação da "rodinha", simulando um ZOOM.
-    g_CameraDistance -= 0.1f*yoffset;
+    if(yoffset > 0.0){
+        g_scrolledDirection = SCROLL_UP;
+    }
+    else if(yoffset < -0.0){
+        g_scrolledDirection = SCROLL_DOWN;
+    }
 
     // Uma câmera look-at nunca pode estar exatamente "em cima" do ponto para
     // onde ela está olhando, pois isto gera problemas de divisão por zero na

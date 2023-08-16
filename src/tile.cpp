@@ -29,16 +29,38 @@ void Tile::handleMovement(Tile** curTile){
     static auto rotateLeft = Matrix_Rotate(M_PI_2, mainCamera.getVVec());
     static auto rotateRight = Matrix_Rotate(-M_PI_2, mainCamera.getVVec());
     // Tempo desde o último input processado
-    static std::chrono::steady_clock::time_point lastProcessedInput;
+    static float lastProcessedInput = (float) glfwGetTime();;
+    // Estado atual de scroll (basicamente a inclinação)
+    static ScrollDirection curScrollDirection = SCROLL_NONE;
 
 
-    std::chrono::steady_clock::time_point cur_time = std::chrono::steady_clock::now();
-
-    if((cur_time - lastProcessedInput) < std::chrono::milliseconds(500)){
+    float cur_time = (float) glfwGetTime();
+    if((cur_time - lastProcessedInput) < 0.5f){
         return;
     }
 
-    if(g_wPressed){
+    // Não podemos tratar outros movimentos enquanto estivermos 
+    // com input de scroll novo ou com a câmera inclinada
+    // para cima (por questão de design e facilidade de código)
+    if( (g_scrolledDirection != SCROLL_NONE)  ||
+        (curScrollDirection != SCROLL_NONE))
+        {
+        // Faz algo se houve scroll para uma direção contrária
+        if((g_scrolledDirection != SCROLL_NONE) && (g_scrolledDirection != curScrollDirection)){
+            if(g_scrolledDirection == SCROLL_UP){
+                mainCamera.setradiansToRotate(M_PI_4, Z);
+            }
+            else if(g_scrolledDirection == SCROLL_DOWN){
+                mainCamera.setradiansToRotate(-M_PI_4, Z);
+            }
+            // Se não estávamos inclinados, agora estamos; senão, estamos olhando reto
+            curScrollDirection = (curScrollDirection == SCROLL_NONE) ? g_scrolledDirection : SCROLL_NONE;
+        }
+        g_scrolledDirection = SCROLL_NONE; // Reseta scroll
+
+    }
+    // Comandos de movimento
+    else if(g_wPressed){
         Tile* dst;
 
         switch (curFacingDirection)
@@ -72,7 +94,7 @@ void Tile::handleMovement(Tile** curTile){
     else if(g_aPressed){
         // Vira para a esquerda
         // Animação
-        mainCamera.setradiansToRotate(M_PI_2);
+        mainCamera.setradiansToRotate(M_PI_2, Y);
 
         curFacingDirection--;
         if(curFacingDirection < 0){
@@ -89,7 +111,7 @@ void Tile::handleMovement(Tile** curTile){
     else if(g_dPressed){
         // Vira para a direita
         // Animação
-        mainCamera.setradiansToRotate(-M_PI_2);
+        mainCamera.setradiansToRotate(-M_PI_2, Y);
 
         curFacingDirection++;
         if(curFacingDirection > 3){

@@ -24,6 +24,12 @@
 #define CAMERA_ROTATE_SPEED 180.0f
 #define CAMERA_MOVE_SPEED 10.0f
 
+enum cameraAxis{
+    X,
+    Y,
+    Z
+};
+
 class Camera{
 
     private:
@@ -43,6 +49,7 @@ class Camera{
     uint8_t animationFlags;
     float radiansToRotate;
     int8_t rotationSign;
+    cameraAxis rotationAxis;
     glm::vec4 destinationPoint;
 
     public:
@@ -90,7 +97,7 @@ class Camera{
     bool animate();
 
     // Configura a câmera para rotacionar
-    void setradiansToRotate(float degrees);
+    void setradiansToRotate(float radians, cameraAxis axis);
     
     // Define um ponto o qual a câmera deve se movimentar a
     void setDestinationPoint(glm::vec4 dst);

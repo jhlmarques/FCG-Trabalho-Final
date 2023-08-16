@@ -43,4 +43,12 @@ extern bool g_sPressed;
 extern bool g_dPressed;
 
 
+enum ScrollDirection{
+    SCROLL_NONE,
+    SCROLL_UP,
+    SCROLL_DOWN
+};
+
+extern ScrollDirection g_scrolledDirection;
+
 #endif // __GLOBALS_H__

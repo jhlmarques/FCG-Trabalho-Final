@@ -149,27 +149,36 @@ bool Camera::animate(){
         if(((rotationSign > 0) && ((radiansToRotate - radiansFromDeltaT) < 0)) || \
             ((rotationSign < 0) && ((radiansFromDeltaT - radiansToRotate ) < 0))){
             // Rotaciona a quantidade exata necessária
-            rotation = Matrix_Rotate(radiansToRotate, view);
+            switch(rotationAxis){
+                case X: rotation = Matrix_Rotate(radiansToRotate, w); break;
+                case Y: rotation = Matrix_Rotate(radiansToRotate, v); break;
+                case Z: rotation = Matrix_Rotate(radiansToRotate, u); break;
+            }
             radiansToRotate = 0.0f;
             animationFlags ^= CAMERA_ROTATING;
         }
         else{
             // Rotaciona conforme delta_t
-            rotation = Matrix_Rotate(radiansFromDeltaT, up);
+            switch(rotationAxis){
+                case X: rotation = Matrix_Rotate(radiansFromDeltaT, w); break;
+                case Y: rotation = Matrix_Rotate(radiansFromDeltaT, v); break;
+                case Z: rotation = Matrix_Rotate(radiansFromDeltaT, u); break;
+            }
             radiansToRotate -= radiansFromDeltaT;    
         }
 
         // Aplica matriz de rotação a view
-        view = rotation * view;
+        setViewVector(rotation * view);
     }
 
     return true;
 }
 
 // Configura a câmera para rotacionar
-void Camera::setradiansToRotate(float degrees){
-    radiansToRotate = degrees;
-    rotationSign = degrees > 0 ? 1 : -1;
+void Camera::setradiansToRotate(float radians, cameraAxis axis){
+    radiansToRotate = radians;
+    rotationSign = radians > 0 ? 1 : -1;
+    rotationAxis = axis;
     animationFlags |= CAMERA_ROTATING;
 }
 

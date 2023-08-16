@@ -21,6 +21,7 @@ uniform mat4 projection;
 // Identificador que define qual objeto está sendo desenhado no momento
 #define MAIN_ROOM 0
 #define TILE_FLOOR 1
+#define GENERIC_OBJECT 2
 
 uniform int object_id;
 
@@ -68,44 +69,14 @@ void main()
     float U = 0.0;
     float V = 0.0;
 
-//    if ( object_id == SPHERE )
-//    {
-//        // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
-//        // projeção esférica EM COORDENADAS DO MODELO. Utilize como referência
-//        // o slides 134-150 do documento Aula_20_Mapeamento_de_Texturas.pdf.
-//        // A esfera que define a projeção deve estar centrada na posição
-//        // "bbox_center" definida abaixo.
-//
-//        // Você deve utilizar:
-//        //   função 'length( )' : comprimento Euclidiano de um vetor
-//        //   função 'atan( , )' : arcotangente. Veja https://en.wikipedia.org/wiki/Atan2.
-//        //   função 'asin( )'   : seno inverso.
-//        //   constante M_PI
-//        //   variável position_model
-//
-//        float rho = 1.5f;
-//
-//        vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
-//        vec4 p_sphere_point= bbox_center + rho*(position_model-bbox_center)/(length(position_model-bbox_center));
-//
-//        vec4 p_sphere_vec = p_sphere_point - bbox_center;
-//
-//        float theta = atan(p_sphere_vec.x, p_sphere_vec.z);
-//        float phi = asin(p_sphere_vec.y/rho);
-//
-//        U = (theta + M_PI)/(2*M_PI);
-//        V = (phi + M_PI/2)/M_PI;
-//
-//
-//    }
     vec3 Kd0;
     if ( object_id == TILE_FLOOR){
         // O chão de um tile
         // Coordenadas de textura 
         U = texcoords.x;
         V = texcoords.y;
+
         color.rgb = texture(TextureImage0, vec2(U,V)).rgb;
-        //color.rgb = vec3(0.5, 0.2, 0.0);
     }
     else if ( object_id == MAIN_ROOM )
     {
@@ -115,6 +86,23 @@ void main()
         // Não está utilizando nenhuma iluminação aqui
         Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
         color.rgb = Kd0;
+    }
+    else if ( object_id == GENERIC_OBJECT)
+    {
+        // Cálculo de texturas com coordenadas esféricas
+        vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+        vec4 p_vec = position_model - bbox_center;
+        vec4 p_hat = bbox_center + (p_vec / length(p_vec));
+        
+        float phi = asin(p_hat[1]);
+        float theta = atan(p_hat[0],p_hat[2]);
+
+        U = (theta + M_PI) / (2 * M_PI);
+        V = (phi + M_PI_2) / M_PI;
+
+        // Coordenadas de textura da sala principal
+        Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
+        color.rgb = Kd0;        
     }
 //        // Equação de Iluminação
 //        float lambert = max(0,dot(n,l));

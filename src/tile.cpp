@@ -128,3 +128,11 @@ void Tile::handleMovement(Tile** curTile){
     lastProcessedInput = cur_time;
 
 }
+
+void Tile::addObject(const char* obj_str, glm::vec4 positionInTile){
+    objects.emplace_back(obj_str, positionInTile);
+}
+
+std::vector<TileObject> const& Tile::getObjects(){
+    return objects;
+} 

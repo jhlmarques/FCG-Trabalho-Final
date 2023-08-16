@@ -5,6 +5,7 @@
 
 #define MAIN_ROOM 0
 #define TILE_FLOOR  1
+#define GENERIC_OBJECT 2
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -105,6 +106,10 @@ int main(int argc, char* argv[])
     ComputeNormals(&tile_floor);
     BuildTrianglesAndAddToVirtualScene(&tile_floor);
 
+    ObjModel bunny("../../data/bunny.obj");
+    ComputeNormals(&bunny);
+    BuildTrianglesAndAddToVirtualScene(&bunny);
+
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
 
@@ -150,6 +155,10 @@ int main(int argc, char* argv[])
 
     tileVector[1].setEast(&tileVector[8]);
     tileVector[4].setNorth(&tileVector[8]);
+
+    // Assumindo que o "plano" tem distância do centro ao lado entre 0 e 1
+    tileVector[1].addObject("the_bunny", glm::vec4(-0.7f, 1.0f, 0.0f, 1.0f));
+    tileVector[2].addObject("the_bunny", glm::vec4(-0.3f, 1.0f, 0.2f, 1.0f));
 
 
     Tile* cur_tile = &tileVector[0];
@@ -231,11 +240,27 @@ int main(int argc, char* argv[])
         // DESENHA TILES
         for(auto tile : tileVector){
             auto coords = tile.getCenterPos();
-            // Move para posição correta
-            model =  Matrix_Translate(coords.x, coords.y, coords.z) * Matrix_Scale(TILE_WIDTH/2.0f, 1.0f, TILE_WIDTH/2.0f);
+            auto scale = Matrix_Scale(TILE_WIDTH/2.0f, 1.0f, TILE_WIDTH/2.0f);
+            
+            // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
+            model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
+
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(g_object_id_uniform, TILE_FLOOR);
             DrawVirtualObject("the_plane");
+
+            // Desenha objetos
+            for (auto obj : tile.getObjects()){
+                // Ajusta coordenadas de acordo com o esticamento do plano
+                // (as coordenadas do objeto no plano assumem que o plano está em escala 1x,
+                // logo precisamos escalar esse deslocamento de acordo com o plano)
+                auto obj_coords = ((obj.positionInTile * scale) + coords);
+                model = Matrix_Translate(obj_coords.x, obj_coords.y, obj_coords.z);
+                glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+                glUniform1i(g_object_id_uniform, GENERIC_OBJECT); // TO-DO: ARRUMAR
+                DrawVirtualObject(obj.obj_str);
+            }
+
         }
 
         // O framebuffer onde OpenGL executa as operações de renderização não
@@ -389,15 +414,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     else if(yoffset < -0.0){
         g_scrolledDirection = SCROLL_DOWN;
     }
-
-    // Uma câmera look-at nunca pode estar exatamente "em cima" do ponto para
-    // onde ela está olhando, pois isto gera problemas de divisão por zero na
-    // definição do sistema de coordenadas da câmera. Isto é, a variável abaixo
-    // nunca pode ser zero. Versões anteriores deste código possuíam este bug,
-    // o qual foi detectado pelo aluno Vinicius Fraga (2017/2).
-    const float verysmallnumber = std::numeric_limits<float>::epsilon();
-    if (g_CameraDistance < verysmallnumber)
-        g_CameraDistance = verysmallnumber;
+    
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null

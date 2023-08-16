@@ -12,7 +12,7 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <chrono>
+#include <vector>
 
 #include "camera.h"
 #include "globals.h"
@@ -23,6 +23,14 @@
 #define WEST 3
 
 #define TILE_WIDTH 12.0f
+
+
+// Um objeto (modelo 3D com interação com o jogador) contido num tile
+struct TileObject{
+    const char* obj_str;
+    glm::vec4 positionInTile; // Posição relativa ao tile
+    TileObject(const char* obj_str, glm::vec4 positionInTile) : obj_str(obj_str), positionInTile(positionInTile) {}
+};
 
 // forward declare
 class Tile;
@@ -43,6 +51,10 @@ class Tile{
     // Tile para o qual estamos olhando atualmente
     int8_t curFacingDirection = NORTH; // Z positivo
 
+    // Objetos contidos desse tile. Interações via mouse com um objeto só são permitidas
+    // se estamos no tile dele
+    std::vector<TileObject> objects;
+
     public:
 
     Tile(float px, float py, float pz) :
@@ -57,6 +69,12 @@ class Tile{
 
     // Realiza movimento
     void handleMovement(Tile** curTile);
+
+    // Adiciona um objeto ao tile
+    void addObject(const char* obj_str, glm::vec4 positionInTile);
+
+    // Acesso de leitura aos objetos
+    std::vector<TileObject> const& getObjects();
 
 
 };

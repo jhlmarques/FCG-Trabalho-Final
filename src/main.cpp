@@ -123,10 +123,13 @@ int main(int argc, char* argv[])
     BuildTrianglesAndAddToVirtualScene(&model_bunny);
 
     float prev_time = (float)glfwGetTime();
-
+    // Note que, no sistema de coordenadas da câmera, os planos near e far
+    // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
+    float nearplane = -0.1f;  // Posição do "near plane"
+    float farplane  = -100.0f; // Posição do "far plane"
+    // Projeção Perspectiva.
+    float field_of_view = 3.141592 / 3.0f;
     
-
-
     /*
     
         Objetos do jogo
@@ -141,6 +144,15 @@ int main(int argc, char* argv[])
     // Um coelho. Por algum motivo, mapeado com coordenadas de textura esféricas em uma textura de parede
     GameObject obj_bunny("the_bunny", OBJ_SPHERICAL);
     obj_bunny.setDiffMap(&wallTexture);
+
+    
+    /*
+        SETUP DO LOBBY PRINCIPAL
+    */
+
+    //  Câmera do lobby principal (inicialmente em modo "free")
+    // O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
+    Camera mainCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
 
     // Vetor estático de todos tiles existentes
     std::vector<Tile> tileVector;
@@ -176,7 +188,6 @@ int main(int argc, char* argv[])
     tileVector[1].addObject(&obj_bunny, glm::vec4(-0.7f, 1.0f, 0.0f, 1.0f));
     tileVector[2].addObject(&obj_bunny, glm::vec4(-0.3f, 1.0f, 0.2f, 1.0f));
 
-
     Tile* cur_tile = &tileVector[0];
 
     // Move câmera para esse ponto
@@ -186,21 +197,17 @@ int main(int argc, char* argv[])
     mainCamera.setPosition(tileCenter);
     mainCamera.setViewVector(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
-    // Instanciação da câmera do puzzle que aponta para a origem
+    /*
+        SETUP DO PUZZLE DO COELHO
+    */
+
+    // Instanciação da câmera de lookat puzzle que aponta para a origem 
     Camera roomLookatCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
     glm::vec4 roomLookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
     roomLookatCamera.lookAt(roomLookatPoint);
     roomLookatCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
     
-
-    // Note que, no sistema de coordenadas da câmera, os planos near e far
-    // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
-    float nearplane = -0.1f;  // Posição do "near plane"
-    float farplane  = -100.0f; // Posição do "far plane"
-
-    // Projeção Perspectiva.
-    float field_of_view = 3.141592 / 3.0f;
-
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
@@ -222,15 +229,15 @@ int main(int argc, char* argv[])
         // os shaders de vértice e fragmentos).
         glUseProgram(g_GpuProgramID);
 
-        // Agora computamos a matriz de Projeção e enviamos para a GPU.
+        // Somente utilizamos a matriz de projeção em perspectiva
         glm::mat4 projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         glUniformMatrix4fv(g_projection_uniform, 1 , GL_FALSE , glm::value_ptr(projection));
         
         if (g_lastNumberPressed == GLFW_KEY_0 || g_lastNumberPressed == GLFW_KEY_UNKNOWN){
-            glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
+            glm::mat4 model = Matrix_Identity(); 
             // Apenas realizamos um movimento se a câmera não está animando
             if(!mainCamera.animate()){
-                cur_tile->handleMovement(&cur_tile);
+                cur_tile->handleMovement(&cur_tile, mainCamera);
             }
 
             glm::mat4 const& view = mainCamera.getViewMatrix();
@@ -267,6 +274,7 @@ int main(int argc, char* argv[])
             }
         }
         else if (g_lastNumberPressed == GLFW_KEY_1){
+            // Recalcula a posição da câmera de acordo com o clique do mouse do usuário
             roomLookatCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
 
             glm::mat4 model = Matrix_Identity();
@@ -275,8 +283,8 @@ int main(int argc, char* argv[])
 
             glm::mat4 const& view = roomLookatCamera.getViewMatrix();
 
-           // Enviamos as matrizes "view" para a placa de vídeo
-            glUniformMatrix4fv(g_view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
+            // Enviamos as matrizes "view" para a placa de vídeo
+            glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
 
             obj_bunny.draw();
         }

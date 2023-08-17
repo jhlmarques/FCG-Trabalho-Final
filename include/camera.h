@@ -107,10 +107,6 @@ class Camera{
 
 };
 
-//  principal (inicialmente em modo "free")
-// O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
-extern Camera mainCamera;
-
 #endif // __CAMERA_H__
 
 

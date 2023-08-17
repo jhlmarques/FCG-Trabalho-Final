@@ -1,7 +1,5 @@
 #include "camera.h"
 
-Camera mainCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
-
 Camera::Camera(float px, float py, float pz, float vx, float vy, float vz, float ux, float uy, float uz){
     position  = glm::vec4(px, py, pz, 1.0f);
     view      = glm::vec4(vx, vy, vz, 0.0f);

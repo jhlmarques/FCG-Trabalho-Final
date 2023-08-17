@@ -4,8 +4,10 @@
 #include <glad/glad.h>
 #include "texture.h"
 #include "labfunctions.h"
+#include "globals.h"
 
 #define OBJ_GENERIC 0
+#define OBJ_SPHERICAL 1
 
 
 // Um objeto do jogo. Contém mapas de textura e outras informações relevantes

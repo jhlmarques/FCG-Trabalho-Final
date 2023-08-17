@@ -18,12 +18,11 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-// Identificador que define qual objeto está sendo desenhado no momento
-#define MAIN_ROOM 0
-#define TILE_FLOOR 1
-#define GENERIC_OBJECT 2
+// Identificador do tipo de objeto
+#define GENERIC_OBJECT 0
+#define SPHERICAL_OBJECT 1
 
-uniform int object_id;
+uniform int object_type;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
 uniform vec4 bbox_min;
@@ -73,52 +72,34 @@ void main()
 
     vec3 Kd0;
 
-    U = texcoords.x;
-    V = texcoords.y;
+    // Aqui usamos o tipo do objeto. Possivelmente podemos ir passando
+    // outros atributos para o shader, como por exemplo o tipo de interpolação de iluminação
 
-    color.rgb = texture(diffMap, vec2(U,V)).rgb;
+    // Objetos genéricos (falta de um nome melhor) usam as coordenadas
+    // de textura do objeto
+    if ( object_type == GENERIC_OBJECT){
+        U = texcoords.x;
+        V = texcoords.y;
+        Kd0 = texture(diffMap, vec2(U,V)).rgb;
+    }
+    // Meio que um placeholder, mas mapeia textura com coordenadas esféricas
+    else if ( object_type == SPHERICAL_OBJECT){
 
-    // if ( object_id == TILE_FLOOR){
-    //     // O chão de um tile
-    //     // Coordenadas de textura 
-    //     U = texcoords.x;
-    //     V = texcoords.y;
-
-    //     color.rgb = texture(TextureImage0, vec2(U,V)).rgb;
-    // }
-    // else if ( object_id == MAIN_ROOM )
-    // {
-    //     // Coordenadas de textura da sala principal
-    //     U = texcoords.x;
-    //     V = texcoords.y;
-    //     // Não está utilizando nenhuma iluminação aqui
-    //     Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
-    //     color.rgb = Kd0;
-    // }
-    // else if ( object_id == GENERIC_OBJECT)
-    // {
-    //     // Cálculo de texturas com coordenadas esféricas
-    //     vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
-    //     vec4 p_vec = position_model - bbox_center;
-    //     vec4 p_hat = bbox_center + (p_vec / length(p_vec));
+        // Cálculo de texturas com coordenadas esféricas
+        vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+        vec4 p_vec = position_model - bbox_center;
+        vec4 p_hat = bbox_center + (p_vec / length(p_vec));
         
-    //     float phi = asin(p_hat[1]);
-    //     float theta = atan(p_hat[0],p_hat[2]);
+        float phi = asin(p_hat[1]);
+        float theta = atan(p_hat[0],p_hat[2]);
+        U = (theta + M_PI) / (2 * M_PI);
+        V = (phi + M_PI_2) / M_PI;
 
-    //     U = (theta + M_PI) / (2 * M_PI);
-    //     V = (phi + M_PI_2) / M_PI;
+        Kd0 = texture(diffMap, vec2(U,V)).rgb;
+    }
 
-    //     // Coordenadas de textura da sala principal
-    //     Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
-    //     color.rgb = Kd0;        
-    // }
-//        // Equação de Iluminação
-//        float lambert = max(0,dot(n,l));
-//
-//        color.rgb = Kd0 * (lambert + 0.01);
-
-
-
+    float lambert = max(0,dot(n,l));
+    color.rgb = Kd0 * (lambert + 0.01);
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:

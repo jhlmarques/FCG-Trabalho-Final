@@ -134,8 +134,8 @@ int main(int argc, char* argv[])
     // O objeto que representa um tile, ou seja, um pedaço de chão
     GameObject obj_tile("the_plane", OBJ_GENERIC);
     obj_tile.setDiffMap(&floorTexture);
-    // Um coelho
-    GameObject obj_bunny("the_bunny", OBJ_GENERIC);
+    // Um coelho. Por algum motivo, mapeado com coordenadas de textura esféricas em uma textura de parede
+    GameObject obj_bunny("the_bunny", OBJ_SPHERICAL);
     obj_bunny.setDiffMap(&wallTexture);
 
 
@@ -260,7 +260,6 @@ int main(int argc, char* argv[])
             model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
 
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, TILE_FLOOR);
             
             // Desenhamos um tile
             obj_tile.draw();
@@ -273,7 +272,6 @@ int main(int argc, char* argv[])
                 auto obj_coords = ((t_obj.positionInTile * scale) + coords);
                 model = Matrix_Translate(obj_coords.x, obj_coords.y, obj_coords.z);
                 glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, GENERIC_OBJECT); // TO-DO: ARRUMAR
                 
                 // Objeto se desenha
                 t_obj.obj->draw();

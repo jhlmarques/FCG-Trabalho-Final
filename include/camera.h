@@ -56,24 +56,26 @@ class Camera{
     
     Camera(float px, float py, float pz, float vx, float vy, float vz, float ux, float uy, float uz);
 
-    // Define posição da câmera
-    // TO-DO: POSIÇÃO != LOOK AT
-    void setPosition(float x, float y, float z);
+    // Define posição da câmera com coordenadas esféricas 
+    void setPositionSpheric(float phi, float theta, float r);
 
-    // Define a posição da câmera
+    // Define posição da câmera com coordenadas cartesianas
+    void setPositionCartesian(float x, float y, float z);
+
+    // Define a posição da câmera com um ponto
     void setPosition(glm::vec4 position);
 
-    // Retorna posição da 
+    // Retorna posição da câmera
     glm::vec4 getPosition();
 
-    // Recalcula vetor view com a posição da  e um ponto
+    // Recalcula vetor view com a posição da câmera e o novo ponto que a câmera irá ficar fixa
     void lookAt(glm::vec4& point);
 
-    // Define o vetor view
+    // Define o vetor view diretamente (utilizado para câmeras livres)
     void setViewVector(glm::vec4 view);
 
-    // Ajusta o vetor view usando coordenadas esféricas
-    void setViewVector(float phi, float theta, float r);
+    // Define o vetor view usando coordenadas esféricas (utilizado para câmeras lookat)
+    void setViewVectorSpheric(float phi, float theta, float r);
 
     // Obtém ponto o qual a  está olhando
     glm::vec4 const& getLookAtPoint();

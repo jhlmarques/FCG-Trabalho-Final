@@ -43,6 +43,7 @@ extern bool g_aPressed;
 extern bool g_sPressed;
 extern bool g_dPressed;
 
+extern int g_lastNumberPressed;
 
 enum ScrollDirection{
     SCROLL_NONE,

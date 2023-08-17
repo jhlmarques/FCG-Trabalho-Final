@@ -47,6 +47,9 @@ bool g_aPressed = false;
 bool g_sPressed = false;
 bool g_dPressed = false;
 
+// Variáveis que controlam o estado do último número apertado
+int g_lastNumberPressed = GLFW_KEY_UNKNOWN;
+
 // Direção (ou ausência de direção) de scroll do mouse
 ScrollDirection g_scrolledDirection;
 

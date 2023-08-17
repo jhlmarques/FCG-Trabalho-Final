@@ -124,6 +124,9 @@ int main(int argc, char* argv[])
 
     float prev_time = (float)glfwGetTime();
 
+    
+
+
     /*
     
         Objetos do jogo
@@ -138,8 +141,6 @@ int main(int argc, char* argv[])
     // Um coelho. Por algum motivo, mapeado com coordenadas de textura esféricas em uma textura de parede
     GameObject obj_bunny("the_bunny", OBJ_SPHERICAL);
     obj_bunny.setDiffMap(&wallTexture);
-
-
 
     // Vetor estático de todos tiles existentes
     std::vector<Tile> tileVector;
@@ -185,7 +186,20 @@ int main(int argc, char* argv[])
     mainCamera.setPosition(tileCenter);
     mainCamera.setViewVector(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
+    // Instanciação da câmera do puzzle que aponta para a origem
+    Camera roomLookatCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+    glm::vec4 roomLookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    roomLookatCamera.lookAt(roomLookatPoint);
+    roomLookatCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
+    
 
+    // Note que, no sistema de coordenadas da câmera, os planos near e far
+    // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
+    float nearplane = -0.1f;  // Posição do "near plane"
+    float farplane  = -100.0f; // Posição do "far plane"
+
+    // Projeção Perspectiva.
+    float field_of_view = 3.141592 / 3.0f;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -207,77 +221,64 @@ int main(int argc, char* argv[])
         // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
         // os shaders de vértice e fragmentos).
         glUseProgram(g_GpuProgramID);
+
+        // Agora computamos a matriz de Projeção e enviamos para a GPU.
+        glm::mat4 projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
+        glUniformMatrix4fv(g_projection_uniform, 1 , GL_FALSE , glm::value_ptr(projection));
         
-        // Apenas realizamos um movimento se a câmera não está animando
-        if(!mainCamera.animate()){
-            cur_tile->handleMovement(&cur_tile);
-        }
-
-        glm::mat4 const& view = mainCamera.getViewMatrix();
-
-        // Agora computamos a matriz de Projeção.
-        glm::mat4 projection;
-
-        // Note que, no sistema de coordenadas da câmera, os planos near e far
-        // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
-        float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -100.0f; // Posição do "far plane"
-
-
-
-
-        // Projeção Perspectiva.
-        // Para definição do field of view (FOV), veja slides 205-215 do documento Aula_09_Projecoes.pdf.
-        float field_of_view = 3.141592 / 3.0f;
-        projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
-
-        glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
-
-        // Enviamos as matrizes "view" e "projection" para a placa de vídeo
-        // (GPU). Veja o arquivo "shader_vertex.glsl", onde estas são
-        // efetivamente aplicadas em todos os pontos.
-        glUniformMatrix4fv(g_view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
-        glUniformMatrix4fv(g_projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
-
-        // Desenhamos a sala principal
-
-        model = Matrix_Identity();
-
-//        glLineWidth(4.0f);
-
-        // DESENHA SALA PRINCIPAL
-        // glCullFace(GL_FRONT);
-        // glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        // glUniform1i(g_object_id_uniform, MAIN_ROOM);
-        // DrawVirtualObject("the_main_room");
-        // glCullFace(GL_BACK);
-
-        // DESENHA TILES
-        for(auto tile : tileVector){
-            auto coords = tile.getCenterPos();
-            auto scale = Matrix_Scale(TILE_WIDTH/2.0f, 1.0f, TILE_WIDTH/2.0f);
-            
-            // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
-            model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
-
-            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            
-            // Desenhamos um tile
-            obj_tile.draw();
-
-            // Desenha objetos
-            for (auto t_obj : tile.getObjects()){
-                // Ajusta coordenadas de acordo com o esticamento do plano
-                // (as coordenadas do objeto no plano assumem que o plano está em escala 1x,
-                // logo precisamos escalar esse deslocamento de acordo com o plano)
-                auto obj_coords = ((t_obj.positionInTile * scale) + coords);
-                model = Matrix_Translate(obj_coords.x, obj_coords.y, obj_coords.z);
-                glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-                
-                // Objeto se desenha
-                t_obj.obj->draw();
+        if (g_lastNumberPressed == GLFW_KEY_0 || g_lastNumberPressed == GLFW_KEY_UNKNOWN){
+            glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
+            // Apenas realizamos um movimento se a câmera não está animando
+            if(!mainCamera.animate()){
+                cur_tile->handleMovement(&cur_tile);
             }
 
+            glm::mat4 const& view = mainCamera.getViewMatrix();
+
+            // Enviamos as matrizes "view" para a placa de vídeo
+            glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
+
+            // DESENHA TILES
+            for(auto tile : tileVector){
+                auto coords = tile.getCenterPos();
+                auto scale = Matrix_Scale(TILE_WIDTH/2.0f, 1.0f, TILE_WIDTH/2.0f);
+                
+                // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
+                model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
+
+                glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+                
+                // Desenhamos um tile
+                obj_tile.draw();
+
+                // Desenha objetos
+                for (auto t_obj : tile.getObjects()){
+                    // Ajusta coordenadas de acordo com o esticamento do plano
+                    // (as coordenadas do objeto no plano assumem que o plano está em escala 1x,
+                    // logo precisamos escalar esse deslocamento de acordo com o plano)
+                    auto obj_coords = ((t_obj.positionInTile * scale) + coords);
+                    model = Matrix_Translate(obj_coords.x, obj_coords.y, obj_coords.z);
+                    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+                    
+                    // Objeto se desenha
+                    t_obj.obj->draw();
+                }
+
+            }
+        }
+        else if (g_lastNumberPressed == GLFW_KEY_1){
+            roomLookatCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
+
+            glm::mat4 model = Matrix_Identity();
+            model = Matrix_Translate(roomLookatPoint.x, roomLookatPoint.y, roomLookatPoint.z);
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+
+            glm::mat4 const& view = roomLookatCamera.getViewMatrix();
+
+           // Enviamos as matrizes "view" para a placa de vídeo
+            glUniformMatrix4fv(g_view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
+
+            obj_bunny.draw();
         }
 
         // O framebuffer onde OpenGL executa as operações de renderização não
@@ -349,7 +350,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     // para radianos. Este fator controla a "velocidade" de rotação da câmera de
     // acordo com a movimentação do mouse (a "sensitividade" do mouse).
     g_CameraTheta -= 0.003f*dx;
-    g_CameraPhi -= 0.003f*dy;
+    g_CameraPhi += 0.003f*dy;
 
     // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
     float phimax = 3.141592f/2;
@@ -418,6 +419,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
             g_dPressed = false;
         else if (action == GLFW_REPEAT)
             ;
+    }
+
+    if (key == GLFW_KEY_0){
+        g_lastNumberPressed = GLFW_KEY_0;
+    }
+    else if (key == GLFW_KEY_1)
+    {
+        g_lastNumberPressed = GLFW_KEY_1;
     }
 
 }

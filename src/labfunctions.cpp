@@ -131,9 +131,12 @@ void LoadShadersFromFiles()
 
     // Variáveis em "shader_fragment.glsl" para acesso das imagens de textura
     glUseProgram(g_GpuProgramID);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage0"), 0);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage1"), 1);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
+
+    // MODIFICAÇÃO: Nomes dos samplers
+    // Para cada objeto desenhado, iremos carregar seus mapas de textura nessas texture units
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "diffMap"), 0);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "normalMap"), 1);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "AOMap"), 2);
     glUseProgram(0);
 }
 

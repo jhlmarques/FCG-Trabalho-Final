@@ -16,6 +16,100 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+class Texture{
+
+    // ID do Sampler Object
+    GLuint sampler_id;
+    // ID do Texture object
+    GLuint texture_id;
+    // Texture unit à qual a textura está atualmente ligada
+    GLuint bound_unit;
+
+    public:
+    Texture(const char* filename);
+    ~Texture();
+    // Realiza bind dessa textura a um texture unit
+    void bind(GLuint unit);
+    // Realiza unbind dessa textura a um texture unit
+    void unbind();
+
+};
+
+
+// Carrega um arquivo de textura e retorna o id da textura
+Texture::Texture(const char* filename)
+{
+    printf("Carregando imagem \"%s\"... ", filename);
+
+    stbi_set_flip_vertically_on_load(true);
+    int width;
+    int height;
+    int channels;
+    
+    unsigned char* data = stbi_load(filename, &width, &height, &channels, 3);
+
+    if ( data == NULL )
+    {
+        fprintf(stderr, "ERROR: Cannot open image file \"%s\".\n", filename);
+        std::exit(EXIT_FAILURE);
+    }
+
+    printf("OK (%dx%d).\n", width, height);
+
+    // Agora criamos objetos na GPU com OpenGL para armazenar a textura
+    glGenTextures(1, &texture_id);
+    glGenSamplers(1, &sampler_id);
+
+    // Parâmetros de sampling
+    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Agora enviamos a imagem lida do disco para a GPU
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+
+    // Binding da textura, fazendo com que operações GL a afetem
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    // A esse ponto, a textura está carregada na GPU
+
+    stbi_image_free(data);
+}
+
+Texture::~Texture(){
+    // Removemos nossa textura da GPU
+    glDeleteTextures(1, &texture_id);
+    glDeleteSamplers(1, &sampler_id);
+}
+
+// Realiza bind dessa textura a um texture unit
+void Texture::bind(GLuint unit){
+    glActiveTexture(unit);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glBindSampler(unit, sampler_id);
+    bound_unit = unit;
+}
+
+// Unbind do objeto de textura do slot atual (definido em bind())
+void Texture::unbind(){
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindSampler(bound_unit, 0);
+}
+
+
+
+
+
+
+
+
+
 int main(int argc, char* argv[])
 {
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
@@ -84,23 +178,54 @@ int main(int argc, char* argv[])
 
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
-    // Carregamos os shaders de vértices e de fragmentos que serão utilizados
-    // para renderização. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
-    //
-    LoadShadersFromFiles();
+
+
+    /*
+    
+        MODIFICAÇÕES A PARTIR DAQUI
+    
+    
+    
+    */
+
+    // Criação do programa de GPU
+    GLuint vertex_shader_id = LoadShader_Vertex("../../src/shader_vertex.glsl");
+    GLuint fragment_shader_id = LoadShader_Fragment("../../src/shader_fragment.glsl");
+    // Deletamos o programa de GPU anterior, caso ele exista.
+    if ( g_GpuProgramID != 0 )
+        glDeleteProgram(g_GpuProgramID);
+    g_GpuProgramID = CreateGpuProgram(vertex_shader_id, fragment_shader_id);
+
+    // Configurações das variáveis utilizadas no shader
+
+    // Transformações
+    g_model_uniform      = glGetUniformLocation(g_GpuProgramID, "model"); // Variável da matriz "model"
+    g_view_uniform       = glGetUniformLocation(g_GpuProgramID, "view"); // Variável da matriz "view" em shader_vertex.glsl
+    g_projection_uniform = glGetUniformLocation(g_GpuProgramID, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
+    
+    // Informações do objeto
+    g_object_id_uniform  = glGetUniformLocation(g_GpuProgramID, "object_id"); // Variável "object_id" em shader_fragment.glsl
+    g_bbox_min_uniform   = glGetUniformLocation(g_GpuProgramID, "bbox_min");
+    g_bbox_max_uniform   = glGetUniformLocation(g_GpuProgramID, "bbox_max");
+
+    // Alteração de valores
+    glUseProgram(g_GpuProgramID);
+
+    // Configuração dos samplers a texture units
+    // Carregamos texturas para dentro do programa ao fazer
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "diffMap"), 0);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "normalMap"), 1);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "AOMap"), 2);
+    
+    glUseProgram(0);
 
     // Texturas
-    LoadTextureImage("../../data/floor_texture.jpg"); // TextureImage0
-    LoadTextureImage("../../data/wall_texture.jpg"); // TextureImage1
+    // Imediatamente carregadas à GPU
+    // Precisamos fazer bind() quando queremos utilizá-las
+    Texture floorTexture("../../data/floor_texture.jpg");
+    Texture wallTexture("../../data/wall_texture.jpg");
 
-    // Construímos a representação de objetos geométricos através de malhas de triângulos
-    // ObjModel spheremodel("../../data/sphere.obj");
-    // ComputeNormals(&spheremodel);
-    // BuildTrianglesAndAddToVirtualScene(&spheremodel);
-
-    ObjModel main_room("../../data/main_room.obj");
-    ComputeNormals(&main_room);
-    BuildTrianglesAndAddToVirtualScene(&main_room);
+    // Objetos
 
     ObjModel tile_floor("../../data/plane.obj");
     ComputeNormals(&tile_floor);
@@ -247,7 +372,11 @@ int main(int argc, char* argv[])
 
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(g_object_id_uniform, TILE_FLOOR);
+            
+            // Desenhamos usando a textura do chão
+            floorTexture.bind(0);
             DrawVirtualObject("the_plane");
+            floorTexture.unbind();
 
             // Desenha objetos
             for (auto obj : tile.getObjects()){
@@ -258,7 +387,11 @@ int main(int argc, char* argv[])
                 model = Matrix_Translate(obj_coords.x, obj_coords.y, obj_coords.z);
                 glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
                 glUniform1i(g_object_id_uniform, GENERIC_OBJECT); // TO-DO: ARRUMAR
+                
+                // Desenhamos usando textura de parede
+                wallTexture.bind(0);
                 DrawVirtualObject(obj.obj_str);
+                wallTexture.unbind();
             }
 
         }

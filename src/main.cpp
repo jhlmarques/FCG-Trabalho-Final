@@ -134,6 +134,7 @@ int main(int argc, char* argv[])
     // O objeto que representa um tile, ou seja, um pedaço de chão
     GameObject obj_tile("the_plane", OBJ_GENERIC);
     obj_tile.setDiffMap(&floorTexture);
+    obj_tile.setTextureScale(TILE_WIDTH / 2.0F);
     // Um coelho. Por algum motivo, mapeado com coordenadas de textura esféricas em uma textura de parede
     GameObject obj_bunny("the_bunny", OBJ_SPHERICAL);
     obj_bunny.setDiffMap(&wallTexture);

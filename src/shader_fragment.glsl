@@ -18,6 +18,9 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+// Escala da textura do objeto
+uniform float object_texture_scale;
+
 // Identificador do tipo de objeto
 #define GENERIC_OBJECT 0
 #define SPHERICAL_OBJECT 1
@@ -80,7 +83,7 @@ void main()
     if ( object_type == GENERIC_OBJECT){
         U = texcoords.x;
         V = texcoords.y;
-        Kd0 = texture(diffMap, vec2(U,V)).rgb;
+        Kd0 = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
     }
     // Meio que um placeholder, mas mapeia textura com coordenadas esféricas
     else if ( object_type == SPHERICAL_OBJECT){
@@ -95,7 +98,7 @@ void main()
         U = (theta + M_PI) / (2 * M_PI);
         V = (phi + M_PI_2) / M_PI;
 
-        Kd0 = texture(diffMap, vec2(U,V)).rgb;
+        Kd0 = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
     }
 
     float lambert = max(0,dot(n,l));

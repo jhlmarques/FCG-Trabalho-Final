@@ -20,13 +20,16 @@ class GameObject{
     Texture* normalMap;
     // Tipo de objeto
     GLuint type;
+    // Escala da textura do objeto
+    float textureScale;
 
     public:
     GameObject(const char* objName, GLuint type) : 
-        objName(objName), diffMap(nullptr), normalMap(nullptr), type(type) {}
+        objName(objName), diffMap(nullptr), normalMap(nullptr), type(type), textureScale(1.0f) {}
 
     void setDiffMap(Texture* diffMap);
     void setNormalMap(Texture* normalMap);
+    void setTextureScale(float scale);
 
     // Desenha o objeto
     void draw();

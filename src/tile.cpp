@@ -129,8 +129,8 @@ void Tile::handleMovement(Tile** curTile){
 
 }
 
-void Tile::addObject(const char* obj_str, glm::vec4 positionInTile){
-    objects.emplace_back(obj_str, positionInTile);
+void Tile::addObject(GameObject* obj, glm::vec4 positionInTile){
+    objects.emplace_back(obj, positionInTile);
 }
 
 std::vector<TileObject> const& Tile::getObjects(){

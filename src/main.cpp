@@ -2,6 +2,8 @@
 #include "camera.h"
 #include "tile.h"
 #include "globals.h"
+#include "texture.h"
+#include "gameobject.h"
 
 #define MAIN_ROOM 0
 #define TILE_FLOOR  1
@@ -15,98 +17,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-
-class Texture{
-
-    // ID do Sampler Object
-    GLuint sampler_id;
-    // ID do Texture object
-    GLuint texture_id;
-    // Texture unit à qual a textura está atualmente ligada
-    GLuint bound_unit;
-
-    public:
-    Texture(const char* filename);
-    ~Texture();
-    // Realiza bind dessa textura a um texture unit
-    void bind(GLuint unit);
-    // Realiza unbind dessa textura a um texture unit
-    void unbind();
-
-};
-
-
-// Carrega um arquivo de textura e retorna o id da textura
-Texture::Texture(const char* filename)
-{
-    printf("Carregando imagem \"%s\"... ", filename);
-
-    stbi_set_flip_vertically_on_load(true);
-    int width;
-    int height;
-    int channels;
-    
-    unsigned char* data = stbi_load(filename, &width, &height, &channels, 3);
-
-    if ( data == NULL )
-    {
-        fprintf(stderr, "ERROR: Cannot open image file \"%s\".\n", filename);
-        std::exit(EXIT_FAILURE);
-    }
-
-    printf("OK (%dx%d).\n", width, height);
-
-    // Agora criamos objetos na GPU com OpenGL para armazenar a textura
-    glGenTextures(1, &texture_id);
-    glGenSamplers(1, &sampler_id);
-
-    // Parâmetros de sampling
-    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glSamplerParameteri(sampler_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Agora enviamos a imagem lida do disco para a GPU
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-
-    // Binding da textura, fazendo com que operações GL a afetem
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    // A esse ponto, a textura está carregada na GPU
-
-    stbi_image_free(data);
-}
-
-Texture::~Texture(){
-    // Removemos nossa textura da GPU
-    glDeleteTextures(1, &texture_id);
-    glDeleteSamplers(1, &sampler_id);
-}
-
-// Realiza bind dessa textura a um texture unit
-void Texture::bind(GLuint unit){
-    glActiveTexture(unit);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    glBindSampler(unit, sampler_id);
-    bound_unit = unit;
-}
-
-// Unbind do objeto de textura do slot atual (definido em bind())
-void Texture::unbind(){
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindSampler(bound_unit, 0);
-}
-
-
-
-
-
-
 
 
 
@@ -178,7 +88,13 @@ int main(int argc, char* argv[])
 
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
+    // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
+    glEnable(GL_DEPTH_TEST);
 
+    // Habilitamos o Backface Culling. Veja slides 23-34 do documento Aula_13_Clipping_and_Culling.pdf e slides 112-123 do documento Aula_14_Laboratorio_3_Revisao.pdf.
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     /*
     
@@ -188,36 +104,7 @@ int main(int argc, char* argv[])
     
     */
 
-    // Criação do programa de GPU
-    GLuint vertex_shader_id = LoadShader_Vertex("../../src/shader_vertex.glsl");
-    GLuint fragment_shader_id = LoadShader_Fragment("../../src/shader_fragment.glsl");
-    // Deletamos o programa de GPU anterior, caso ele exista.
-    if ( g_GpuProgramID != 0 )
-        glDeleteProgram(g_GpuProgramID);
-    g_GpuProgramID = CreateGpuProgram(vertex_shader_id, fragment_shader_id);
-
-    // Configurações das variáveis utilizadas no shader
-
-    // Transformações
-    g_model_uniform      = glGetUniformLocation(g_GpuProgramID, "model"); // Variável da matriz "model"
-    g_view_uniform       = glGetUniformLocation(g_GpuProgramID, "view"); // Variável da matriz "view" em shader_vertex.glsl
-    g_projection_uniform = glGetUniformLocation(g_GpuProgramID, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
-    
-    // Informações do objeto
-    g_object_id_uniform  = glGetUniformLocation(g_GpuProgramID, "object_id"); // Variável "object_id" em shader_fragment.glsl
-    g_bbox_min_uniform   = glGetUniformLocation(g_GpuProgramID, "bbox_min");
-    g_bbox_max_uniform   = glGetUniformLocation(g_GpuProgramID, "bbox_max");
-
-    // Alteração de valores
-    glUseProgram(g_GpuProgramID);
-
-    // Configuração dos samplers a texture units
-    // Carregamos texturas para dentro do programa ao fazer
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "diffMap"), 0);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "normalMap"), 1);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "AOMap"), 2);
-    
-    glUseProgram(0);
+    LoadShadersFromFiles();
 
     // Texturas
     // Imediatamente carregadas à GPU
@@ -225,31 +112,33 @@ int main(int argc, char* argv[])
     Texture floorTexture("../../data/floor_texture.jpg");
     Texture wallTexture("../../data/wall_texture.jpg");
 
-    // Objetos
+    // Carregamento de modelos de objetos
 
-    ObjModel tile_floor("../../data/plane.obj");
-    ComputeNormals(&tile_floor);
-    BuildTrianglesAndAddToVirtualScene(&tile_floor);
+    ObjModel model_tile_floor("../../data/plane.obj");
+    ComputeNormals(&model_tile_floor);
+    BuildTrianglesAndAddToVirtualScene(&model_tile_floor);
 
-    ObjModel bunny("../../data/bunny.obj");
-    ComputeNormals(&bunny);
-    BuildTrianglesAndAddToVirtualScene(&bunny);
-
-    // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
-    glEnable(GL_DEPTH_TEST);
-
-    // Habilitamos o Backface Culling. Veja slides 23-34 do documento Aula_13_Clipping_and_Culling.pdf e slides 112-123 do documento Aula_14_Laboratorio_3_Revisao.pdf.
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    ObjModel model_bunny("../../data/bunny.obj");
+    ComputeNormals(&model_bunny);
+    BuildTrianglesAndAddToVirtualScene(&model_bunny);
 
     float prev_time = (float)glfwGetTime();
 
     /*
     
-        PLACEHOLDER/TESTAGEM
-    
+        Objetos do jogo
+        ObjModels + Iluminação e outras coisas que viermos a querer
+
     */
+
+    // O objeto que representa um tile, ou seja, um pedaço de chão
+    GameObject obj_tile("the_plane", OBJ_GENERIC);
+    obj_tile.setDiffMap(&floorTexture);
+    // Um coelho
+    GameObject obj_bunny("the_bunny", OBJ_GENERIC);
+    obj_bunny.setDiffMap(&wallTexture);
+
+
 
     // Vetor estático de todos tiles existentes
     std::vector<Tile> tileVector;
@@ -282,8 +171,8 @@ int main(int argc, char* argv[])
     tileVector[4].setNorth(&tileVector[8]);
 
     // Assumindo que o "plano" tem distância do centro ao lado entre 0 e 1
-    tileVector[1].addObject("the_bunny", glm::vec4(-0.7f, 1.0f, 0.0f, 1.0f));
-    tileVector[2].addObject("the_bunny", glm::vec4(-0.3f, 1.0f, 0.2f, 1.0f));
+    tileVector[1].addObject(&obj_bunny, glm::vec4(-0.7f, 1.0f, 0.0f, 1.0f));
+    tileVector[2].addObject(&obj_bunny, glm::vec4(-0.3f, 1.0f, 0.2f, 1.0f));
 
 
     Tile* cur_tile = &tileVector[0];
@@ -373,25 +262,21 @@ int main(int argc, char* argv[])
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(g_object_id_uniform, TILE_FLOOR);
             
-            // Desenhamos usando a textura do chão
-            floorTexture.bind(0);
-            DrawVirtualObject("the_plane");
-            floorTexture.unbind();
+            // Desenhamos um tile
+            obj_tile.draw();
 
             // Desenha objetos
-            for (auto obj : tile.getObjects()){
+            for (auto t_obj : tile.getObjects()){
                 // Ajusta coordenadas de acordo com o esticamento do plano
                 // (as coordenadas do objeto no plano assumem que o plano está em escala 1x,
                 // logo precisamos escalar esse deslocamento de acordo com o plano)
-                auto obj_coords = ((obj.positionInTile * scale) + coords);
+                auto obj_coords = ((t_obj.positionInTile * scale) + coords);
                 model = Matrix_Translate(obj_coords.x, obj_coords.y, obj_coords.z);
                 glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
                 glUniform1i(g_object_id_uniform, GENERIC_OBJECT); // TO-DO: ARRUMAR
                 
-                // Desenhamos usando textura de parede
-                wallTexture.bind(0);
-                DrawVirtualObject(obj.obj_str);
-                wallTexture.unbind();
+                // Objeto se desenha
+                t_obj.obj->draw();
             }
 
         }

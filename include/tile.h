@@ -16,6 +16,7 @@
 
 #include "camera.h"
 #include "globals.h"
+#include "gameobject.h"
 
 #define NORTH 0
 #define EAST 1
@@ -27,9 +28,9 @@
 
 // Um objeto (modelo 3D com interação com o jogador) contido num tile
 struct TileObject{
-    const char* obj_str;
+    GameObject* obj;
     glm::vec4 positionInTile; // Posição relativa ao tile
-    TileObject(const char* obj_str, glm::vec4 positionInTile) : obj_str(obj_str), positionInTile(positionInTile) {}
+    TileObject(GameObject* obj, glm::vec4 positionInTile) : obj(obj), positionInTile(positionInTile) {}
 };
 
 // forward declare
@@ -71,7 +72,7 @@ class Tile{
     void handleMovement(Tile** curTile);
 
     // Adiciona um objeto ao tile
-    void addObject(const char* obj_str, glm::vec4 positionInTile);
+    void addObject(GameObject* obj, glm::vec4 positionInTile);
 
     // Acesso de leitura aos objetos
     std::vector<TileObject> const& getObjects();

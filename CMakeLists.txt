@@ -10,6 +10,7 @@ include_directories(BEFORE SYSTEM ${PROJECT_SOURCE_DIR}/include)
 
 set(SOURCES
     src/camera.cpp
+    src/gameobject.cpp
     src/glad.c
     src/globals.cpp
     src/labfunctions.cpp
@@ -17,6 +18,7 @@ set(SOURCES
     src/main.cpp
     src/matrices.cpp
     src/stb_image.cpp
+    src/texture.cpp
     src/tile.cpp
     src/tiny_obj_loader.cpp
 )

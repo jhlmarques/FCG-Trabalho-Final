@@ -62,21 +62,27 @@ void main()
 
     // Normal do fragmento atual, interpolada pelo rasterizador a partir das
     // normais de cada vértice.
-    vec4 n = normalize(normal);
-
-    // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
-    vec4 l = normalize(vec4(1.0,1.0,0.0,0.0));
+    vec4 n = normalize(normal);    
 
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
+
+    // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
+    // vec4 l = normalize(vec4(1.0,1.0,0.0,0.0));
+    vec4 l = v; // Fonte de luz vem da câmera
 
     // Coordenadas de textura U e V
     float U = 0.0;
     float V = 0.0;
 
+    vec3 Kd; // Refletância difusa do objeto
+    // Por enquanto deixei esses valores como os padrões (https://people.sc.fsu.edu/~jburkardt/data/mtl/mtl.html)
+    vec3 Ka = vec3(0.2,0.2,0.2);; // Refletância ambiente do objeto
+    vec3 Ks = vec3(0.8,0.8,0.8);; // Refletância especular do objeto
 
-    vec3 diff;
+    float q = 32.0f; // Expoente especular para o modelo de iluminação de Phong
 
+    
     // Aqui usamos o tipo do objeto. Possivelmente podemos ir passando
     // outros atributos para o shader, como por exemplo o tipo de interpolação de iluminação
 
@@ -85,7 +91,7 @@ void main()
     if ( object_type == GENERIC_OBJECT){
         U = texcoords.x;
         V = texcoords.y;
-        diff = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
+        Kd = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
     }
     // Meio que um placeholder, mas mapeia textura com coordenadas esféricas
     else if ( object_type == SPHERICAL_OBJECT){
@@ -100,11 +106,49 @@ void main()
         U = (theta + M_PI) / (2 * M_PI);
         V = (phi + M_PI_2) / M_PI;
 
-        diff = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
+        Kd = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
     }
 
-    float lambert = max(0,dot(n,l));
-    color.rgb = Kd0 * diff * (lambert + 0.01);
+    vec3 final_color;
+
+    /*
+        MODELOS DE ILUMINAÇÃO
+    */
+
+
+    
+    // Espectro da fonte de iluminação
+    vec3 I = vec3(1.0,1.0,1.0); 
+    
+    // ILUMINAÇÃO DE LAMBERT (DIFUSA)
+    // Termo difuso de Lambert
+    vec3 lambert_diffuse_term = Kd * I * max(0, dot(n, l)); 
+
+    // Equação da iluminação de lambert
+    vec3 lambert_shading = lambert_diffuse_term;
+
+    // ILUMINAÇÃO DE PHONG 
+    // Espectro da luz ambiente
+    vec3 Ia = vec3(0.2,0.2,0.2);
+    // Termo ambiente 
+    vec3 ambient_term = Ka * Ia; 
+    // Vetor que define o sentido da reflexão especular ideal.
+    vec4 r = -l + 2 * n * dot(n, l);
+    // Termo especular utilizando o modelo de iluminação de Phong
+    vec3 phong_specular_term  = Ks * I * pow(max(0, dot(r, v)), q); 
+
+    // Equação da iluminação de Phong
+    vec3 phong_shading = lambert_diffuse_term + ambient_term + phong_specular_term;
+
+    // ILUMINAÇÃO DE BLINN-PHONG
+    // Half-vector: vetor do meio do caminho entre v e l
+    vec4 h = normalize(v + l);
+    vec3 blinn_phong_term = Ks * I * pow(max(0, dot(n, h)), q);
+
+    // Equação da iluminação de Blinn-Phong
+    vec3 blinn_phong_shading = lambert_diffuse_term + ambient_term + blinn_phong_term;
+    
+    color.rgb = phong_shading;
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:

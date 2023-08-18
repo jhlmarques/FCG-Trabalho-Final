@@ -444,13 +444,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if(yoffset > 0.0){
-        g_scrolledDirection = SCROLL_UP;
+    if (g_lastNumberPressed == GLFW_KEY_0 || g_lastNumberPressed == GLFW_KEY_UNKNOWN){
+        if(yoffset > 0.0){
+            g_scrolledDirection = SCROLL_UP;
+        }
+        else if(yoffset < -0.0){
+            g_scrolledDirection = SCROLL_DOWN;
+        }
     }
-    else if(yoffset < -0.0){
-        g_scrolledDirection = SCROLL_DOWN;
-    }
-    
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null

@@ -24,6 +24,11 @@ class Texture{
     void bind(GLuint unit);
     // Realiza unbind dessa textura a um texture unit
     void unbind();
+
+    // Define o local onde ficam as texturas
+    static void setTextureFolderRoot(const char* path);
+    static std::string pathToTextureFolder;
+
 };
 
 

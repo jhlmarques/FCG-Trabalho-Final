@@ -2,6 +2,7 @@
 #include "stdio.h"
 
 std::map<std::string, std::pair<GLuint, GLuint>> g_loadedTextures;
+std::string Texture::pathToTextureFolder;
 
 Texture::Texture(std::string filename)
 {
@@ -19,12 +20,14 @@ Texture::Texture(std::string filename)
     int width;
     int height;
     int channels;
+
+    std::string fullPath = pathToTextureFolder + filename;
     
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 3);
+    unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &channels, 3);
 
     if ( data == NULL )
     {
-        fprintf(stderr, "ERROR: Cannot open image file \"%s\".\n", filename.c_str());
+        fprintf(stderr, "ERROR: Cannot open image file \"%s\".\n", fullPath.c_str());
         std::exit(EXIT_FAILURE);
     }
 
@@ -75,4 +78,9 @@ void Texture::unbind(){
     glActiveTexture(bound_unit);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindSampler(bound_unit, 0);
+}
+
+// Define o local onde ficam as texturas
+void Texture::setTextureFolderRoot(const char* path){
+    pathToTextureFolder = path;
 }

@@ -5,7 +5,7 @@
 // Carrega o objeto de índice "shape" de um arquivo .obj carregado
 // É possível que dê problemas para .obj com mais de um shape; cuidado (TO-DO)
 GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
-    textureScale(1.0), type(OBJ_GENERIC), defaultTexture("../../data/tc-earth_daymap_surface.jpg")
+    textureScale(1.0), type(OBJ_GENERIC), defaultTexture("textures/default.jpeg")
 {
 
     std::vector<float>  model_coefficients;

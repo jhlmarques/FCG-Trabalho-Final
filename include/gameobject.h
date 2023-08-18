@@ -47,9 +47,6 @@ class GameObject{
     // Desenha o objeto
     void draw();
 
-    // Recebe um ObjModel e retorna os GameObjects criados, com seus triângulos carregados na GPU
-    // Adaptação de BuildTrianglesAndAddToVirtualScene()
-    static void buildObjectsFromModel(ObjModel* model, std::vector<GameObject>& out);
 
 };
 

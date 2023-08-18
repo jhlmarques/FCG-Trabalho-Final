@@ -96,6 +96,7 @@ int main(int argc, char* argv[])
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+
     /*
     
         MODIFICAÇÕES A PARTIR DAQUI
@@ -106,25 +107,21 @@ int main(int argc, char* argv[])
 
     LoadShadersFromFiles();
 
-    // Texturas
-    // Imediatamente carregadas à GPU
-    // Precisamos fazer bind() quando queremos utilizá-las
-    Texture floorTexture("../../data/floor_texture.jpg");
-    Texture wallTexture("../../data/wall_texture.jpg");
+    Texture::setTextureFolderRoot("../../data/");
 
     // Carregamento de modelos de objetos
 
-    ObjModel model_tile_floor("../../data/plane.obj");
+    ObjModel model_tile_floor("../../data/plane.obj", "../../data/");
     ComputeNormals(&model_tile_floor);
     //BuildTrianglesAndAddToVirtualScene(&model_tile_floor);
     GameObject obj_tile(&model_tile_floor, 0);
 
-    ObjModel model_bunny("../../data/bunny.obj");
+    ObjModel model_bunny("../../data/bunny.obj", "../../data/");
     ComputeNormals(&model_bunny);
     //BuildTrianglesAndAddToVirtualScene(&model_bunny);
     GameObject obj_bunny(&model_bunny, 0);
 
-    ObjModel model_chair("../../data/modern_arm_chair_01_1k.obj");
+    ObjModel model_chair("../../data/modern_arm_chair_01_1k.obj", "../../data/");
     ComputeNormals(&model_chair);
     //BuildTrianglesAndAddToVirtualScene(&model_chair);
     GameObject obj_chair(&model_chair, 0);

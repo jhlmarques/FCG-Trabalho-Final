@@ -1,6 +1,9 @@
 #include "camera.h"
 
-Camera::Camera(float px, float py, float pz, float vx, float vy, float vz, float ux, float uy, float uz){
+Camera::Camera(float px, float py, float pz, float vx, float vy, float vz, float ux, float uy, float uz) : 
+    animationFlags(0), radiansToRotate(0.0f), rotationSign(1), rotationAxis(Y), 
+    destinationPoint(glm::vec4(0, 0, 0, 0))
+{
     position  = glm::vec4(px, py, pz, 1.0f);
     view      = glm::vec4(vx, vy, vz, 0.0f);
     up        = glm::vec4(ux, uy, uz, 0.0f);
@@ -8,6 +11,7 @@ Camera::Camera(float px, float py, float pz, float vx, float vy, float vz, float
     w = -view / norm(view);
     u = crossproduct(up, w)/norm(crossproduct(up, w));
     v = crossproduct(w, u);
+
 }
 
 void Camera::setPositionSpheric(float phi, float theta, float r){

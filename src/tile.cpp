@@ -129,10 +129,10 @@ void Tile::handleMovement(Tile** curTile, Camera& mainCamera){
 
 }
 
-void Tile::addObject(GameObject* obj, glm::vec4 positionInTile){
-    objects.emplace_back(obj, positionInTile);
+void Tile::addObject(GameObject* obj){
+    objects.emplace_back(obj);
 }
 
-std::vector<TileObject> const& Tile::getObjects(){
+std::vector<GameObject* > const& Tile::getObjects(){
     return objects;
 } 

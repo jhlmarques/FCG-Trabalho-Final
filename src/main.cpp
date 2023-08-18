@@ -176,10 +176,9 @@ int main(int argc, char* argv[])
     tileVector[1].setEast(&tileVector[8]);
     tileVector[4].setNorth(&tileVector[8]);
 
-    // Assumindo que o "plano" tem distância do centro ao lado entre 0 e 1
-    tileVector[1].addObject(&obj_bunny, glm::vec4(-0.7f, 1.0f, 0.0f, 1.0f));
-    tileVector[2].addObject(&obj_bunny, glm::vec4(-0.3f, 1.0f, 0.2f, 1.0f));
-    tileVector[3].addObject(&obj_chair, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    tileVector[1].addObject(&obj_bunny);
+    tileVector[2].addObject(&obj_bunny);
+    tileVector[3].addObject(&obj_chair);
 
     Tile* cur_tile = &tileVector[0];
 
@@ -226,17 +225,28 @@ int main(int argc, char* argv[])
         glm::mat4 projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         glUniformMatrix4fv(g_projection_uniform, 1 , GL_FALSE , glm::value_ptr(projection));
         
+        /*
+        
+            LOBBY PRINCIPAL
+
+            Uma sala com vários puzzles. O jogador se movimenta entre tiles, áreas
+            análogas aos espaços de um tabuleiro, e pode interagir com objetos que estão dentro
+            do seu tile.
+        
+        */
         if (g_lastNumberPressed == GLFW_KEY_0 || g_lastNumberPressed == GLFW_KEY_UNKNOWN){
-            glm::mat4 model = Matrix_Identity(); 
+            
             // Apenas realizamos um movimento se a câmera não está animando
             if(!mainCamera.animate()){
                 cur_tile->handleMovement(&cur_tile, mainCamera);
             }
 
+            // Transformação da câmera
             glm::mat4 const& view = mainCamera.getViewMatrix();
-
-            // Enviamos as matrizes "view" para a placa de vídeo
             glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
+
+
+            glm::mat4 model = Matrix_Identity(); 
 
             // DESENHA TILES
             for(auto tile : tileVector){
@@ -245,26 +255,28 @@ int main(int argc, char* argv[])
                 
                 // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
                 model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
-
                 glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-                
-                // Desenhamos um tile
                 obj_tile.draw();
-
-                // Desenha objetos
-                for (auto t_obj : tile.getObjects()){
-                    // Ajusta coordenadas de acordo com o esticamento do plano
-                    // (as coordenadas do objeto no plano assumem que o plano está em escala 1x,
-                    // logo precisamos escalar esse deslocamento de acordo com o plano)
-                    auto obj_coords = ((t_obj.positionInTile * scale) + coords);
-                    model = Matrix_Translate(obj_coords.x, obj_coords.y, obj_coords.z);
-                    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-                    
-                    // Objeto se desenha
-                    t_obj.obj->draw();
-                }
-
             }
+
+            // DESENHA OBJETOS
+            // TO-DO: Usar uma classe que represente um "interativo" - Um modelo 3D junto
+            // de um hitbox, possivelmente com alguma lógica interna
+
+            // Uma cadeira no tile norte
+            auto pos = tileVector[1].getCenterPos();
+            model =  Matrix_Translate(pos.x, pos.y, pos.z) * Matrix_Rotate_Y(M_PI) * Matrix_Scale(4.0f, 4.0f, 4.0f);
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            obj_chair.draw();
+
+
+        /*
+        
+
+            PRIMEIRO PUZZLE
+        
+        
+        */
         }
         else if (g_lastNumberPressed == GLFW_KEY_1){
             // Recalcula a posição da câmera de acordo com o clique do mouse do usuário

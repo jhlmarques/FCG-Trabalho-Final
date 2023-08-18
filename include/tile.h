@@ -26,13 +26,6 @@
 #define TILE_WIDTH 12.0f
 
 
-// Um objeto (modelo 3D com interação com o jogador) contido num tile
-struct TileObject{
-    GameObject* obj;
-    glm::vec4 positionInTile; // Posição relativa ao tile
-    TileObject(GameObject* obj, glm::vec4 positionInTile) : obj(obj), positionInTile(positionInTile) {}
-};
-
 // forward declare
 class Tile;
 
@@ -54,7 +47,7 @@ class Tile{
 
     // Objetos contidos desse tile. Interações via mouse com um objeto só são permitidas
     // se estamos no tile dele
-    std::vector<TileObject> objects;
+    std::vector<GameObject* > objects;
 
     public:
 
@@ -72,10 +65,10 @@ class Tile{
     void handleMovement(Tile** curTile, Camera& mainCamera);
 
     // Adiciona um objeto ao tile
-    void addObject(GameObject* obj, glm::vec4 positionInTile);
+    void addObject(GameObject* obj);
 
     // Acesso de leitura aos objetos
-    std::vector<TileObject> const& getObjects();
+    std::vector<GameObject* > const& getObjects();
 
 
 };

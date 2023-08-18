@@ -1,0 +1,26 @@
+# Blender 3.6.1 MTL File: 'modern_arm_chair_01_1k.blend'
+# www.blender.org
+
+newmtl modern_arm_chair_01_legs
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/modern_arm_chair_01_legs_diff_1k.png
+map_Ns textures/modern_arm_chair_01_legs_rough_1k.png
+map_refl textures/modern_arm_chair_01_legs_metal_1k.png
+map_Bump -bm 1.000000 textures/modern_arm_chair_01_legs_nor_gl_1k.png
+
+newmtl modern_arm_chair_01_pillow
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/modern_arm_chair_01_pillow_diff_1k.png
+map_Ns textures/modern_arm_chair_01_pillow_rough_1k.png
+map_refl textures/modern_arm_chair_01_pillow_metal_1k.png
+map_Bump -bm 1.000000 textures/modern_arm_chair_01_pillow_nor_gl_1k.png

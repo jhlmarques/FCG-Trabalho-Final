@@ -30,15 +30,23 @@ float g_CameraDistance = 3.5f; // Distância da câmera para a origem
 
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles().
 GLuint g_GpuProgramID = 0;
+// Transformações
 GLint g_model_uniform;
 GLint g_view_uniform;
 GLint g_projection_uniform;
-GLint g_object_texture_scale;
-GLint g_object_type_uniform;
+
+// GameObject
 GLint g_bbox_min_uniform;
 GLint g_bbox_max_uniform;
 
-// Número de texturas carregadas pela função LoadTextureImage()
+GLfloat g_kd_coeff;
+GLfloat g_ka_coeff;
+GLfloat g_ks_coeff;
+
+GLint g_object_texture_scale;
+GLint g_object_type_uniform;
+
+// Número de texturas carregadas pela função getCachedTextureImage()
 GLuint g_NumLoadedTextures = 0;
 
 // Variáveis que controlam o estado das teclas W, A, S, D.

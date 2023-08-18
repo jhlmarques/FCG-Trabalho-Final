@@ -32,7 +32,9 @@ uniform vec4 bbox_min;
 uniform vec4 bbox_max;
 
 // Variáveis para acesso das imagens de textura
-// No caso, mapas
+
+uniform vec3 Kd0;
+
 uniform sampler2D diffMap;
 uniform sampler2D normalMap;
 uniform sampler2D AOMap;
@@ -73,7 +75,7 @@ void main()
     float V = 0.0;
 
 
-    vec3 Kd0;
+    vec3 diff;
 
     // Aqui usamos o tipo do objeto. Possivelmente podemos ir passando
     // outros atributos para o shader, como por exemplo o tipo de interpolação de iluminação
@@ -83,7 +85,7 @@ void main()
     if ( object_type == GENERIC_OBJECT){
         U = texcoords.x;
         V = texcoords.y;
-        Kd0 = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
+        diff = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
     }
     // Meio que um placeholder, mas mapeia textura com coordenadas esféricas
     else if ( object_type == SPHERICAL_OBJECT){
@@ -98,11 +100,11 @@ void main()
         U = (theta + M_PI) / (2 * M_PI);
         V = (phi + M_PI_2) / M_PI;
 
-        Kd0 = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
+        diff = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
     }
 
     float lambert = max(0,dot(n,l));
-    color.rgb = Kd0 * (lambert + 0.01);
+    color.rgb = Kd0 * diff * (lambert + 0.01);
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:

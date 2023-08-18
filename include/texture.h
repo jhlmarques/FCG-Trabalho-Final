@@ -3,6 +3,10 @@
 
 #include <glad/glad.h>
 #include <stb_image.h>
+#include <map>
+#include <string>
+#include <memory>
+#include <stdexcept>
 
 class Texture{
 
@@ -14,15 +18,16 @@ class Texture{
     GLuint bound_unit;
 
     public:
-    Texture(const char* filename);
-    ~Texture();
+    Texture(std::string filename);
+    
     // Realiza bind dessa textura a um texture unit
     void bind(GLuint unit);
     // Realiza unbind dessa textura a um texture unit
     void unbind();
-
 };
 
 
+// Mapa de texturas carregadas (arquivo -> texture name, sampler id)
+extern std::map<std::string, std::pair<GLuint, GLuint>> g_loadedTextures;
 
 #endif // __TEXTURE_H__

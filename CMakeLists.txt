@@ -16,6 +16,7 @@ set(SOURCES
     src/labfunctions.cpp
     src/labstructures.cpp
     src/main.cpp
+    src/material.cpp
     src/matrices.cpp
     src/stb_image.cpp
     src/texture.cpp

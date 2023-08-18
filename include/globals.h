@@ -35,6 +35,9 @@ extern GLint g_object_texture_scale;
 extern GLint g_object_type_uniform;
 extern GLint g_bbox_min_uniform;
 extern GLint g_bbox_max_uniform;
+extern GLfloat g_kd_coeff;
+extern GLfloat g_ka_coeff;
+extern GLfloat g_ks_coeff;
 
 extern GLuint g_NumLoadedTextures;
 

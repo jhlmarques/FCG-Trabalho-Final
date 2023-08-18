@@ -116,11 +116,18 @@ int main(int argc, char* argv[])
 
     ObjModel model_tile_floor("../../data/plane.obj");
     ComputeNormals(&model_tile_floor);
-    BuildTrianglesAndAddToVirtualScene(&model_tile_floor);
+    //BuildTrianglesAndAddToVirtualScene(&model_tile_floor);
+    GameObject obj_tile(&model_tile_floor, 0);
 
     ObjModel model_bunny("../../data/bunny.obj");
     ComputeNormals(&model_bunny);
-    BuildTrianglesAndAddToVirtualScene(&model_bunny);
+    //BuildTrianglesAndAddToVirtualScene(&model_bunny);
+    GameObject obj_bunny(&model_bunny, 0);
+
+    ObjModel model_chair("../../data/modern_arm_chair_01_1k.obj");
+    ComputeNormals(&model_chair);
+    //BuildTrianglesAndAddToVirtualScene(&model_chair);
+    GameObject obj_chair(&model_chair, 0);
 
     float prev_time = (float)glfwGetTime();
     // Note que, no sistema de coordenadas da câmera, os planos near e far
@@ -130,22 +137,7 @@ int main(int argc, char* argv[])
     // Projeção Perspectiva.
     float field_of_view = 3.141592 / 3.0f;
     
-    /*
-    
-        Objetos do jogo
-        ObjModels + Iluminação e outras coisas que viermos a querer
 
-    */
-
-    // O objeto que representa um tile, ou seja, um pedaço de chão
-    GameObject obj_tile("the_plane", OBJ_GENERIC);
-    obj_tile.setDiffMap(&floorTexture);
-    obj_tile.setTextureScale(TILE_WIDTH / 2.0F);
-    // Um coelho. Por algum motivo, mapeado com coordenadas de textura esféricas em uma textura de parede
-    GameObject obj_bunny("the_bunny", OBJ_SPHERICAL);
-    obj_bunny.setDiffMap(&wallTexture);
-
-    
     /*
         SETUP DO LOBBY PRINCIPAL
     */
@@ -187,6 +179,7 @@ int main(int argc, char* argv[])
     // Assumindo que o "plano" tem distância do centro ao lado entre 0 e 1
     tileVector[1].addObject(&obj_bunny, glm::vec4(-0.7f, 1.0f, 0.0f, 1.0f));
     tileVector[2].addObject(&obj_bunny, glm::vec4(-0.3f, 1.0f, 0.2f, 1.0f));
+    tileVector[3].addObject(&obj_chair, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
     Tile* cur_tile = &tileVector[0];
 
@@ -286,7 +279,7 @@ int main(int argc, char* argv[])
             // Enviamos as matrizes "view" para a placa de vídeo
             glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
 
-            obj_bunny.draw();
+            obj_chair.draw();
         }
 
         // O framebuffer onde OpenGL executa as operações de renderização não

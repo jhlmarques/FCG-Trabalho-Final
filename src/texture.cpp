@@ -1,20 +1,30 @@
 #include "texture.h"
 #include "stdio.h"
 
-Texture::Texture(const char* filename)
+std::map<std::string, std::pair<GLuint, GLuint>> g_loadedTextures;
+
+Texture::Texture(std::string filename)
 {
-    printf("Carregando imagem \"%s\"... ", filename);
+    // Checa se a textura já está carregada na GPU
+    if(g_loadedTextures.count(filename) > 0){
+        texture_id = g_loadedTextures[filename].first;
+        sampler_id = g_loadedTextures[filename].second;
+
+        return;
+    }
+
+    printf("Carregando imagem \"%s\"... ", filename.c_str());
 
     stbi_set_flip_vertically_on_load(true);
     int width;
     int height;
     int channels;
     
-    unsigned char* data = stbi_load(filename, &width, &height, &channels, 3);
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 3);
 
     if ( data == NULL )
     {
-        fprintf(stderr, "ERROR: Cannot open image file \"%s\".\n", filename);
+        fprintf(stderr, "ERROR: Cannot open image file \"%s\".\n", filename.c_str());
         std::exit(EXIT_FAILURE);
     }
 
@@ -44,12 +54,12 @@ Texture::Texture(const char* filename)
     // A esse ponto, a textura está carregada na GPU
 
     stbi_image_free(data);
-}
 
-Texture::~Texture(){
-    // Removemos nossa textura da GPU
-    glDeleteTextures(1, &texture_id);
-    glDeleteSamplers(1, &sampler_id);
+    // Adiciona ao mapa global de texturas
+    g_loadedTextures[filename].first = texture_id;
+    g_loadedTextures[filename].second = sampler_id;
+
+
 }
 
 // Realiza bind dessa textura a um texture unit

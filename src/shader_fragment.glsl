@@ -33,7 +33,7 @@ uniform vec4 bbox_max;
 
 // Variáveis para acesso das imagens de textura
 
-uniform vec3 Kd0;
+uniform vec3 Kd0; // Pelo que eu testei ele ainda não faz nada
 
 uniform sampler2D diffMap;
 uniform sampler2D normalMap;
@@ -46,12 +46,26 @@ out vec4 color;
 #define M_PI   3.14159265358979323846
 #define M_PI_2 1.57079632679489661923
 
+// Fontes de luz 
+#define SPOTLIGHT 0
+#define BULB 1
+#define FLASHLIGHT 2
+// Modelos de iluminação
+#define LAMBERT 0
+#define PHONG 1
+#define BLINN_PHONG 2
+
+
 void main()
 {
     // Obtemos a posição da câmera utilizando a inversa da matriz que define o
     // sistema de coordenadas da câmera.
     vec4 origin = vec4(0.0, 0.0, 0.0, 1.0);
     vec4 camera_position = inverse(view) * origin;
+
+     // Placeholder para testes de iluminação
+    int light_src = BULB; 
+    int illumination_model = BLINN_PHONG;
 
     // O fragmento atual é coberto por um ponto que percente à superfície de um
     // dos objetos virtuais da cena. Este ponto, p, possui uma posição no
@@ -67,9 +81,16 @@ void main()
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
 
-    // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
-    // vec4 l = normalize(vec4(1.0,1.0,0.0,0.0));
-    vec4 l = v; // Fonte de luz vem da câmera
+    // Fonte de luz em relação a um ponto fixo (como se fosse uma lâmpada).
+    vec4 l_point = vec4(0.0,1.0,0.0,1.0);
+    vec4 l = (light_src == SPOTLIGHT || light_src == BULB) ? l_point - p : v;
+    // Fonte de luz spotlight, também utiliza a fonte de luz em um ponto fixo
+    
+    float aperture_angle = M_PI/6.0f;
+    vec4 v_direction = vec4(0.0,-1.0,0.0,0.0);
+    
+    float cos_beta = dot(v_direction/length(v_direction), normalize(p - l_point));
+    float cos_alpha = cos(aperture_angle);
 
     // Coordenadas de textura U e V
     float U = 0.0;
@@ -143,12 +164,27 @@ void main()
     // ILUMINAÇÃO DE BLINN-PHONG
     // Half-vector: vetor do meio do caminho entre v e l
     vec4 h = normalize(v + l);
-    vec3 blinn_phong_term = Ks * I * pow(max(0, dot(n, h)), q);
+    vec3 blinn_phong_specular_term = Ks * I * pow(max(0, dot(n, h)), q);
 
     // Equação da iluminação de Blinn-Phong
-    vec3 blinn_phong_shading = lambert_diffuse_term + ambient_term + blinn_phong_term;
+    vec3 blinn_phong_shading = lambert_diffuse_term + ambient_term + blinn_phong_specular_term;
     
-    color.rgb = phong_shading;
+    if (light_src == SPOTLIGHT && cos_beta < cos_alpha){
+        color.rgb = ambient_term;
+    }
+    else{
+        switch(illumination_model){
+            case LAMBERT:
+                color.rgb = lambert_shading;
+                break;
+            case PHONG:
+                color.rgb = phong_shading;
+                break;
+            case BLINN_PHONG:
+                color.rgb = blinn_phong_shading;
+                break;  
+        }
+    }
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:

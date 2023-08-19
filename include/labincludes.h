@@ -29,4 +29,6 @@
 
 #include <stb_image.h>
 
+#include "matrices.h"
+
 #endif // __LABINCLUDES_H__

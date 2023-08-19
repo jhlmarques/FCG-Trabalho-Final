@@ -19,8 +19,10 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
     glm::vec3 bbox_min = glm::vec3(maxval,maxval,maxval);
     glm::vec3 bbox_max = glm::vec3(minval,minval,minval);
 
-    //https://stackoverflow.com/questions/67638439/how-do-i-draw-an-obj-file-in-opengl-using-tinyobjloader
+    ComputeNormals(model);
+    
 
+    //https://stackoverflow.com/questions/67638439/how-do-i-draw-an-obj-file-in-opengl-using-tinyobjloader
     // Um objeto dentro do arquivo .obj
     tinyobj::shape_t shape = model->shapes[shapeIdx];
 
@@ -31,16 +33,19 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
     auto const& model_materials = model->materials;
     // Ids dos materiais de cada face
     auto const& mat_ids = shape.mesh.material_ids;
-
+    
     bool hasMaterials = model_materials.size() > 0;
+
     int cur_mat_idx = mat_ids[0]; // O índice de material atual, usado para checar se o material trocou entre as faces
     int cur_mat_first_index = 0;
     int cur_mat_idx_count = 0; // O número de índices de vértices sobre os quais o material está aplicado
 
     printf("Carregando objeto \"%s\"\n", shape.name.c_str());
+    
     if(hasMaterials){
         printf("%d materiais presentes\n", model_materials.size());
     }
+
 
     // Percorremos as faces (3 vértices)
     for(size_t face_idx = 0; face_idx < shape.mesh.num_face_vertices.size(); face_idx++){
@@ -120,7 +125,7 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
     rendering_mode = GL_TRIANGLES;       // Índices correspondem ao tipo de rasterização GL_TRIANGLES.
 
     // Se não tem materiais, preenche com material default
-    if(materials.empty()){
+    if(!hasMaterials){
         printf("Usando material default\n");
         materials.push_back(Material::createFromTexture(0, indices.size(), Texture("textures/default.jpeg")));
     }

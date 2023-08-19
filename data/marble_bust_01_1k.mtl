@@ -1,0 +1,13 @@
+# Blender 3.6.1 MTL File: 'marble_bust_01_1k.blend'
+# www.blender.org
+
+newmtl marble_bust_01
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/marble_bust_01_diff_1k.jpg
+map_Ns textures/marble_bust_01_rough_1k.jpg
+map_Bump -bm 1.000000 textures/marble_bust_01_nor_gl_1k.jpg

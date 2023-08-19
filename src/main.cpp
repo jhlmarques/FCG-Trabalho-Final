@@ -119,15 +119,13 @@ int main(int argc, char* argv[])
     // Carregamento de modelos de objetos
 
     ObjModel model_tile_floor("../../data/plane.obj", "../../data/");
-    ComputeNormals(&model_tile_floor);
     GameObject obj_tile(&model_tile_floor, 0);
 
     ObjModel model_bunny("../../data/bunny.obj", "../../data/");
-    ComputeNormals(&model_bunny);
     GameObject obj_bunny(&model_bunny, 0);
 
-    ObjModel model_chair("../../data/modern_arm_chair_01_1k.obj", "../../data/");
-    ComputeNormals(&model_chair);
+    //ObjModel model_chair("../../data/modern_arm_chair_01_1k.obj", "../../data/");
+    ObjModel model_chair("../../data/marble_bust_01_1k.obj", "../../data/");
     GameObject obj_chair(&model_chair, 0);
 
     ObjModel model_wooden_crate_9("../../data/wooden_crate_02_4k.obj", "../../data/");

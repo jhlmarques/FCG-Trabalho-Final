@@ -30,9 +30,6 @@ class GameObject{
     // Materiais do objeto
     std::vector<Material> materials;
 
-    Texture defaultTexture;
-
-
     // Tipo de objeto (para interações mais peculiares)
     GLuint type;
     // Escala da textura do objeto

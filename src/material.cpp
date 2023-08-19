@@ -1,17 +1,28 @@
 #include "material.h"
 
-Material::Material(GLuint firstIndex, tinyobj::material_t const& mat) :
-    firstIndex(firstIndex), numIndices(0),
+Material Material::createFromObjFile(GLuint firstIndex, GLuint numIndices, tinyobj::material_t const& mat){
+    return Material(firstIndex, numIndices, mat);
+}
+
+Material Material::createFromTexture(GLuint firstIndex, GLuint numIndices, Texture tex){
+    return Material(firstIndex, numIndices, tex);
+}
+
+Material::Material(GLuint firstIndex, GLuint numIndices, Texture& tex): 
+firstIndex(firstIndex), numIndices(numIndices),
+kd(1.0f, 1.0f, 1.0f), diffMap(tex)
+{
+
+}
+
+Material::Material(GLuint firstIndex, GLuint numIndices, tinyobj::material_t const& mat) :
+    firstIndex(firstIndex), numIndices(numIndices),
     kd(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]), diffMap(mat.diffuse_texname),
     ka(mat.ambient[0], mat.ambient[1], mat.ambient[2]), ambientMap(mat.ambient_texname),
     ks(mat.specular[0], mat.specular[1], mat.specular[2]), specularMap(mat.specular_highlight_texname),
     ns(mat.shininess)
 {
 
-}
-
-void Material::addIdx(){
-    numIndices++;
 }
 
 void Material::bindToShader(){

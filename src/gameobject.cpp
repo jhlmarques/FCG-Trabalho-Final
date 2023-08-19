@@ -5,7 +5,7 @@
 // Carrega o objeto de índice "shape" de um arquivo .obj carregado
 // É possível que dê problemas para .obj com mais de um shape; cuidado (TO-DO)
 GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
-    textureScale(1.0), type(OBJ_GENERIC), defaultTexture("textures/default.jpeg")
+    textureScale(1.0), type(OBJ_GENERIC)
 {
 
     std::vector<float>  model_coefficients;
@@ -31,11 +31,12 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
     // Materiais contidos no .obj
     auto const& model_materials = model->materials;
     // Ids dos materiais de cada face
-    auto const& matIds = shape.mesh.material_ids;
+    auto const& mat_ids = shape.mesh.material_ids;
 
     bool hasMaterials = model_materials.size() > 0;
-    int curMatIdx = -1; // O índice de material atual, usado para checar se o material trocou entre as faces
-    Material* curMat;
+    int cur_mat_idx = mat_ids[0]; // O índice de material atual, usado para checar se o material trocou entre as faces
+    int cur_mat_first_index = 0;
+    int cur_mat_idx_count = 0; // O número de índices de vértices sobre os quais o material está aplicado
 
     printf("Carregando objeto \"%s\"\n", shape.name.c_str());
     if(hasMaterials){
@@ -86,32 +87,46 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
                 texture_coefficients.push_back( v );
             }
 
+        }
 
-            if(hasMaterials){
-                const int idx = matIds[face_idx];
-                // Checa se essa face tem um material diferente
-                // Se sim, troca textura
-                // TO-DO: Deixar mais eficiente
-                if(idx != curMatIdx){
-                    const auto& material = model_materials[idx];
-                    materials.emplace_back(cur_idx, material);
-                    curMat = &materials.back();
-                    curMatIdx = idx;
-                }
+        if(hasMaterials){
 
-                // Conta mais um índice aplicado ao material
-                curMat->addIdx();
-
+            const int idx = mat_ids[face_idx];
+            // Checa se essa face tem um material diferente
+            if(idx != cur_mat_idx){
+                // Se sim, guarda o material que estava até agora sendo utilizado
+                const auto& material = model_materials[cur_mat_idx];
+                materials.push_back(Material::createFromObjFile(cur_mat_first_index, cur_mat_idx_count, material));
+                // Começa a contar os índices que o novo material se aplica
+                cur_mat_first_index = 3*(face_idx);
+                cur_mat_idx_count = 0;
+                cur_mat_idx = idx;
             }
+            
+            cur_mat_idx_count += 3;
 
         }
 
+    }
+
+    // Cria último material
+    if(hasMaterials){
+        const auto& material = model_materials[cur_mat_idx];
+        materials.push_back(Material::createFromObjFile(cur_mat_first_index, cur_mat_idx_count, material));
     }
 
     name           = shape.name;
     first_index    = 0; // Primeiro índice
     num_indices    = indices.size(); // Número de indices
     rendering_mode = GL_TRIANGLES;       // Índices correspondem ao tipo de rasterização GL_TRIANGLES.
+
+    // Se não tem materiais, preenche com material default
+    if(materials.empty()){
+        printf("Usando material default\n");
+        materials.push_back(Material::createFromTexture(0, indices.size(), Texture("textures/default.jpeg")));
+    }
+
+
 
     // Envia triângulos para a GPU
 
@@ -193,35 +208,22 @@ void GameObject::draw(){
     glUniform4f(g_bbox_min_uniform, bbox_min.x, bbox_min.y, bbox_min.z, 1.0f);
     glUniform4f(g_bbox_max_uniform, bbox_max.x, bbox_max.y, bbox_max.z, 1.0f);
 
-    // Iluminação
 
     // Informações adicionais
     glUniform1f(g_object_texture_scale, textureScale);
     glUniform1i(g_object_type_uniform, type);
     
-    // Draw
-    if(!materials.size()){
-        // Bind à texture unit 0
-        defaultTexture.bind(0);
+
+    // Materiais
+    for(auto mat : materials){
+        mat.bindToShader();
         glDrawElements(
             GL_TRIANGLES,
-            num_indices,
+            mat.getNumIndices(),
             GL_UNSIGNED_INT,
-            (void*)(first_index * sizeof(GLuint))
+            (void*)(mat.getFirstIndex() * sizeof(GLuint))
         );
-        defaultTexture.unbind();
-    }
-    else{
-        for(auto mat : materials){
-            mat.bindToShader();
-            glDrawElements(
-                GL_TRIANGLES,
-                mat.getNumIndices(),
-                GL_UNSIGNED_INT,
-                (void*)(mat.getFirstIndex() * sizeof(GLuint))
-            );
-            mat.unbind();
-        }
+        mat.unbind();
     }
 
 

@@ -22,14 +22,19 @@ class Material{
     Texture ambientMap;
     Texture specularMap;
     
+    Material(GLuint firstIndex, GLuint numIndices, Texture& tex);
+    Material(GLuint firstIndex, GLuint numIndices, tinyobj::material_t const& mat);
 
     public:
-    Material(GLuint firstIndex, tinyobj::material_t const& mat);
     void addIdx();
     void bindToShader();
     void unbind();
     GLuint getFirstIndex();
     GLuint getNumIndices();
+
+    // Named constructors
+    static Material createFromObjFile(GLuint firstIndex, GLuint numIndices, tinyobj::material_t const& mat);
+    static Material createFromTexture(GLuint firstIndex, GLuint numIndices, Texture tex);
 
 };
 

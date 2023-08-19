@@ -138,6 +138,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "diffMap"), GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "ambientlMap"), GL_TEXTURE1);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "specularMap"), GL_TEXTURE2);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "bumpMap"), GL_TEXTURE3);
     glUseProgram(0);
 }
 

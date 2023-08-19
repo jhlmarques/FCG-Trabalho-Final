@@ -21,6 +21,9 @@ class Material{
     Texture diffMap;
     Texture ambientMap;
     Texture specularMap;
+    Texture bumpMap;
+
+    bool useBumpMap;
     
     Material(GLuint firstIndex, GLuint numIndices, Texture& tex);
     Material(GLuint firstIndex, GLuint numIndices, tinyobj::material_t const& mat);

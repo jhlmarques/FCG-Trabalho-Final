@@ -33,6 +33,9 @@ uniform vec4 bbox_max;
 
 // Mapas de textura provenientes do material
 
+// Decide entre utilizar as normais do material ou as computadas
+uniform bool useBMap;
+
 uniform vec3 Kd0;
 uniform vec3 Ka0;
 uniform vec3 Ks0;
@@ -40,6 +43,7 @@ uniform float ns; // Expoente especular
 uniform sampler2D diffMap;
 uniform sampler2D ambientMap;
 uniform sampler2D specularMap;
+uniform sampler2D bumpMap;
 
 // Posição, direção e abertura da fonte de luz da sala
 uniform vec4 light_position;
@@ -64,32 +68,6 @@ out vec4 color;
 
 void main()
 {
-    // Obtemos a posição da câmera utilizando a inversa da matriz que define o
-    // sistema de coordenadas da câmera.
-    vec4 origin = vec4(0.0, 0.0, 0.0, 1.0);
-    vec4 camera_position = inverse(view) * origin;
-
-    // O fragmento atual é coberto por um ponto que percente à superfície de um
-    // dos objetos virtuais da cena. Este ponto, p, possui uma posição no
-    // sistema de coordenadas global (World coordinates). Esta posição é obtida
-    // através da interpolação, feita pelo rasterizador, da posição de cada
-    // vértice.
-    vec4 p = position_world;
-
-    // Normal do fragmento atual, interpolada pelo rasterizador a partir das
-    // normais de cada vértice.
-    vec4 n = normalize(normal);    
-
-    // Vetor que define o sentido da câmera em relação ao ponto atual.
-    vec4 v = normalize(camera_position - p);
-
-    // Posição da fonte de luz
-    vec4 l = light_position - p;
-    
-    const float epsilon = 1e-5;    
-    float cos_beta = dot(normalize(light_direction), normalize(p - light_position));
-    float cos_alpha = cos(light_aperture_angle);
-
     // Coordenadas de textura U e V
     float U = 0.0;
     float V = 0.0;
@@ -116,6 +94,34 @@ void main()
         U = (theta + M_PI) / (2 * M_PI);
         V = (phi + M_PI_2) / M_PI;
     }
+
+    // Obtemos a posição da câmera utilizando a inversa da matriz que define o
+    // sistema de coordenadas da câmera.
+        // Obtemos a posição da câmera utilizando a inversa da matriz que define o
+    // sistema de coordenadas da câmera.
+    vec4 origin = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 camera_position = inverse(view) * origin;
+
+    // O fragmento atual é coberto por um ponto que percente à superfície de um
+    // dos objetos virtuais da cena. Este ponto, p, possui uma posição no
+    // sistema de coordenadas global (World coordinates). Esta posição é obtida
+    // através da interpolação, feita pelo rasterizador, da posição de cada
+    // vértice.
+    vec4 p = position_world;
+
+    // Normal do fragmento atual, interpolada pelo rasterizador a partir das
+    // normais de cada vértice.
+    vec4 n = normalize(normal);    
+
+    // Vetor que define o sentido da câmera em relação ao ponto atual.
+    vec4 v = normalize(camera_position - p);
+
+    // Posição da fonte de luz
+    vec4 l = light_position - p;
+    
+    const float epsilon = 1e-5;    
+    float cos_beta = dot(normalize(light_direction), normalize(p - light_position));
+    float cos_alpha = cos(light_aperture_angle);
 
     /*
         MODELOS DE ILUMINAÇÃO

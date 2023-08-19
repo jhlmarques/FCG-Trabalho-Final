@@ -18,6 +18,7 @@ class Texture{
     GLuint bound_unit;
 
     public:
+    Texture();
     Texture(std::string filename);
     
     // Realiza bind dessa textura a um texture unit

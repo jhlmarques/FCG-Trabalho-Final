@@ -4,6 +4,9 @@
 std::map<std::string, std::pair<GLuint, GLuint>> g_loadedTextures;
 std::string Texture::pathToTextureFolder;
 
+// Textura vazia
+Texture::Texture() : texture_id(0), sampler_id(0) {}
+
 Texture::Texture(std::string filename)
 {
     // Checa se a textura já está carregada na GPU
@@ -13,6 +16,14 @@ Texture::Texture(std::string filename)
 
         return;
     }
+
+    // Filename vazio leva a textura vazia
+    if(filename.empty()){
+        printf("Usando textura vazia...\n");
+        Texture();
+        return;
+    }
+
 
     printf("Carregando imagem \"%s\"... ", filename.c_str());
 

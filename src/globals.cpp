@@ -39,9 +39,10 @@ GLint g_projection_uniform;
 GLint g_bbox_min_uniform;
 GLint g_bbox_max_uniform;
 
-GLfloat g_kd_coeff;
-GLfloat g_ka_coeff;
-GLfloat g_ks_coeff;
+// Samplers, os quais são associados a TEXTURE UNITs
+GLfloat g_diffMap_uniform;
+GLfloat g_ambientMap_uniform;
+GLfloat g_specularMap_uniform;
 
 GLint g_object_texture_scale;
 GLint g_object_type_uniform;

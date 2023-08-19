@@ -31,13 +31,16 @@ uniform int object_type;
 uniform vec4 bbox_min;
 uniform vec4 bbox_max;
 
-// Variáveis para acesso das imagens de textura
+// Mapas de textura provenientes do material
 
-uniform vec3 Kd0; // Pelo que eu testei ele ainda não faz nada
-
+uniform vec3 Kd0;
+uniform vec3 Ka0;
+uniform vec3 Ks0;
+uniform float ns; // Expoente especular
 uniform sampler2D diffMap;
-uniform sampler2D normalMap;
-uniform sampler2D AOMap;
+uniform sampler2D ambientMap;
+uniform sampler2D specularMap;
+
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -96,14 +99,6 @@ void main()
     float U = 0.0;
     float V = 0.0;
 
-    vec3 Kd; // Refletância difusa do objeto
-    // Por enquanto deixei esses valores como os padrões (https://people.sc.fsu.edu/~jburkardt/data/mtl/mtl.html)
-    vec3 Ka = vec3(0.2,0.2,0.2);; // Refletância ambiente do objeto
-    vec3 Ks = vec3(0.8,0.8,0.8);; // Refletância especular do objeto
-
-    float q = 32.0f; // Expoente especular para o modelo de iluminação de Phong
-
-    
     // Aqui usamos o tipo do objeto. Possivelmente podemos ir passando
     // outros atributos para o shader, como por exemplo o tipo de interpolação de iluminação
 
@@ -112,7 +107,6 @@ void main()
     if ( object_type == GENERIC_OBJECT){
         U = texcoords.x;
         V = texcoords.y;
-        Kd = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
     }
     // Meio que um placeholder, mas mapeia textura com coordenadas esféricas
     else if ( object_type == SPHERICAL_OBJECT){
@@ -126,17 +120,17 @@ void main()
         float theta = atan(p_hat[0],p_hat[2]);
         U = (theta + M_PI) / (2 * M_PI);
         V = (phi + M_PI_2) / M_PI;
-
-        Kd = texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
     }
-
-    vec3 final_color;
 
     /*
         MODELOS DE ILUMINAÇÃO
     */
 
-
+    vec3 Kd = Kd0 * texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
+    vec3 Ka = Ka0 * texture(ambientMap, vec2(U,V) * object_texture_scale).rgb;
+    vec3 Ks = Ks0 * texture(specularMap, vec2(U,V) * object_texture_scale).rgb; // Refletância especular do objeto
+    float q = ns; // Expoente especular para o modelo de iluminação de Phong
+    vec3 final_color;
     
     // Espectro da fonte de iluminação
     vec3 I = vec3(1.0,1.0,1.0); 

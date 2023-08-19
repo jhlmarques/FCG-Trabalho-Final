@@ -15,13 +15,16 @@ class Material{
     GLuint numIndices;
 
     glm::vec3 kd;
+    glm::vec3 ka;
+    glm::vec3 ks;
+    float ns;
     Texture diffMap;
+    Texture ambientMap;
+    Texture specularMap;
+    
 
     public:
-    Material(GLuint firstIndex, tinyobj::material_t const& mat) :
-    firstIndex(firstIndex), numIndices(0),
-    kd(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]), diffMap(mat.diffuse_texname)
-    {};
+    Material(GLuint firstIndex, tinyobj::material_t const& mat);
     void addIdx();
     void bindToShader();
     void unbind();

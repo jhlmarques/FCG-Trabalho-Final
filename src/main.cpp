@@ -116,18 +116,19 @@ int main(int argc, char* argv[])
 
     ObjModel model_tile_floor("../../data/plane.obj", "../../data/");
     ComputeNormals(&model_tile_floor);
-    //BuildTrianglesAndAddToVirtualScene(&model_tile_floor);
     GameObject obj_tile(&model_tile_floor, 0);
 
     ObjModel model_bunny("../../data/bunny.obj", "../../data/");
     ComputeNormals(&model_bunny);
-    //BuildTrianglesAndAddToVirtualScene(&model_bunny);
     GameObject obj_bunny(&model_bunny, 0);
 
     ObjModel model_chair("../../data/modern_arm_chair_01_1k.obj", "../../data/");
     ComputeNormals(&model_chair);
-    //BuildTrianglesAndAddToVirtualScene(&model_chair);
     GameObject obj_chair(&model_chair, 0);
+
+    ObjModel model_wooden_crate_9("../../data/wooden_crate_02_4k.obj", "../../data/");
+    ComputeNormals(&model_wooden_crate_9);
+    GameObject obj_crate_9(&model_wooden_crate_9, 0);
 
     float prev_time = (float)glfwGetTime();
     // Note que, no sistema de coordenadas da câmera, os planos near e far
@@ -141,6 +142,7 @@ int main(int argc, char* argv[])
     /*
         SETUP DO LOBBY PRINCIPAL
     */
+
 
     //  Câmera do lobby principal (inicialmente em modo "free")
     // O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
@@ -194,11 +196,11 @@ int main(int argc, char* argv[])
     */
 
     // Instanciação da câmera de lookat puzzle que aponta para a origem 
-    Camera roomLookatCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
-    glm::vec4 roomLookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    Camera firstPuzzleCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+    glm::vec4 firstPuzzleLookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-    roomLookatCamera.lookAt(roomLookatPoint);
-    roomLookatCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
+    firstPuzzleCamera.lookAt(firstPuzzleLookatPoint);
+    firstPuzzleCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
     
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -222,6 +224,8 @@ int main(int argc, char* argv[])
 
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
 
             // Apenas realizamos um movimento se a câmera não está animando
             if(!mainCamera.animate()){
@@ -255,12 +259,10 @@ int main(int argc, char* argv[])
             model =  Matrix_Translate(pos.x, pos.y, pos.z) * Matrix_Rotate_Y(M_PI) * Matrix_Scale(4.0f, 4.0f, 4.0f);
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             obj_chair.draw();
-
-
         /*
         
 
-            PRIMEIRO PUZZLE
+            PRIMEIRO PUZZLE - Usuário precisa encontrar caixa com número 9
         
         
         */
@@ -271,19 +273,21 @@ int main(int argc, char* argv[])
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // Recalcula a posição da câmera de acordo com o clique do mouse do usuário
-            roomLookatCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
+            firstPuzzleCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
 
             glm::mat4 model = Matrix_Identity();
-            model = Matrix_Translate(roomLookatPoint.x, roomLookatPoint.y, roomLookatPoint.z);
+            model = Matrix_Translate(firstPuzzleLookatPoint.x, firstPuzzleLookatPoint.y, firstPuzzleLookatPoint.z);
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
 
-            glm::mat4 const& view = roomLookatCamera.getViewMatrix();
+            glm::mat4 const& view = firstPuzzleCamera.getViewMatrix();
 
             // Enviamos as matrizes "view" para a placa de vídeo
             glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
 
-            obj_chair.draw();
+            obj_crate_9.draw();
         }
+        
+       
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -432,7 +436,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     {
         g_lastNumberPressed = GLFW_KEY_1;
     }
-
+    else if (key == GLFW_KEY_2)
+    {
+        g_lastNumberPressed = GLFW_KEY_2;
+    }
 }
 
 // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
@@ -445,6 +452,20 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
         else if(yoffset < -0.0){
             g_scrolledDirection = SCROLL_DOWN;
         }
+    }
+    else{
+         // Atualizamos a distância da câmera para a origem utilizando a
+        // movimentação da "rodinha", simulando um ZOOM.
+        g_CameraDistance -= 0.1f*yoffset;
+
+        // Uma câmera look-at nunca pode estar exatamente "em cima" do ponto para
+        // onde ela está olhando, pois isto gera problemas de divisão por zero na
+        // definição do sistema de coordenadas da câmera. Isto é, a variável abaixo
+        // nunca pode ser zero. Versões anteriores deste código possuíam este bug,
+        // o qual foi detectado pelo aluno Vinicius Fraga (2017/2).
+        const float verysmallnumber = std::numeric_limits<float>::epsilon();
+        if (g_CameraDistance < verysmallnumber)
+            g_CameraDistance = verysmallnumber;
     }
 }
 

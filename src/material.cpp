@@ -51,7 +51,9 @@ void Material::bindToShader(){
 
 void Material::unbind(){
     diffMap.unbind();
+    ambientMap.unbind();
     specularMap.unbind();
+    bumpMap.unbind();
 }
 
 GLuint Material::getFirstIndex(){

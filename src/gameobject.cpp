@@ -5,9 +5,8 @@
 // Carrega o objeto de índice "shape" de um arquivo .obj carregado
 // É possível que dê problemas para .obj com mais de um shape; cuidado (TO-DO)
 GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
-    textureScale(1.0), type(OBJ_GENERIC)
+    textureScale(1.0), type(OBJ_GENERIC), illumination_model(BLINN_PHONG)
 {
-
     std::vector<float>  model_coefficients;
     std::vector<float>  normal_coefficients;
     std::vector<float>  texture_coefficients;
@@ -198,7 +197,7 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
 
 
 
-void GameObject::draw(){
+void GameObject::draw(glm::vec4 lightPosition, glm::vec4 lightDirection, float lightApertureAngle){
     
     glBindVertexArray(vertex_array_object_id);
 
@@ -208,6 +207,19 @@ void GameObject::draw(){
     glUniform4f(g_bbox_min_uniform, bbox_min.x, bbox_min.y, bbox_min.z, 1.0f);
     glUniform4f(g_bbox_max_uniform, bbox_max.x, bbox_max.y, bbox_max.z, 1.0f);
 
+    // Fonte de luz da sala incidente no objeto. 
+    static GLuint light_position_coefficient = glGetUniformLocation(g_GpuProgramID, "light_position");
+    glUniform4f(light_position_coefficient, lightPosition.x, lightPosition.y, lightPosition.z, 1.0f);
+
+    static GLuint light_direction_coefficient = glGetUniformLocation(g_GpuProgramID, "light_direction");
+    glUniform4f(light_direction_coefficient, lightDirection.x, lightDirection.y, lightDirection.z, 1.0f);
+
+    static GLuint light_aperture_angle_coefficient = glGetUniformLocation(g_GpuProgramID, "light_aperture_angle");
+    glUniform1f(light_aperture_angle_coefficient, lightApertureAngle);
+
+    // Modelo de iluminação do objeto
+    static GLuint illumination_model_coefficient = glGetUniformLocation(g_GpuProgramID, "illumination_model");
+    glUniform1i(illumination_model_coefficient, illumination_model);
 
     // Informações adicionais
     glUniform1f(g_object_texture_scale, textureScale);
@@ -235,3 +247,6 @@ void GameObject::setTextureScale(float scale){
     textureScale = scale;
 }
 
+void GameObject::setIlluminationModel(int illumination_model){
+    this->illumination_model = illumination_model;
+}

@@ -129,6 +129,7 @@ int main(int argc, char* argv[])
     ObjModel model_wooden_crate_9("../../data/wooden_crate_02_4k.obj", "../../data/");
     ComputeNormals(&model_wooden_crate_9);
     GameObject obj_crate_9(&model_wooden_crate_9, 0);
+    
 
     float prev_time = (float)glfwGetTime();
     // Note que, no sistema de coordenadas da câmera, os planos near e far
@@ -191,16 +192,25 @@ int main(int argc, char* argv[])
     mainCamera.setPosition(tileCenter);
     mainCamera.setViewVector(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
+    
+    glm::vec4 mainCameraLightPosition = glm::vec4(TILE_WIDTH,5.0f,0.0f,1.0f);
+    float mainCameraLightApertureAngle = M_PI; // Ilumina toda a sala
+    glm::vec4 mainCameraLightDirection = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f); // Convenção pra representar uma fonte de luz pontual (é descartado no shader)
+
     /*
-        SETUP DO PUZZLE DO COELHO
+        SETUP DO PUZZLE DA CAIXA DE MADEIRA
     */
 
     // Instanciação da câmera de lookat puzzle que aponta para a origem 
-    Camera firstPuzzleCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
-    glm::vec4 firstPuzzleLookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    Camera cratePuzzleCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+    glm::vec4 cratePuzzleLookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-    firstPuzzleCamera.lookAt(firstPuzzleLookatPoint);
-    firstPuzzleCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
+    cratePuzzleCamera.lookAt(cratePuzzleLookatPoint);
+    cratePuzzleCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
+
+    glm::vec4 cratePuzzleLightPosition = cratePuzzleCamera.getPosition();
+    glm::vec4 cratePuzzleLightDirection = cratePuzzleCamera.getViewVec();
+    float cratePuzzleLightApertureAngle = M_PI/8.0f;
     
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -247,7 +257,7 @@ int main(int argc, char* argv[])
                 // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
                 model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
                 glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-                obj_tile.draw();
+                obj_tile.draw(mainCameraLightPosition, mainCameraLightDirection, mainCameraLightApertureAngle);
             }
 
             // DESENHA OBJETOS
@@ -258,7 +268,7 @@ int main(int argc, char* argv[])
             auto pos = tileVector[1].getCenterPos();
             model =  Matrix_Translate(pos.x, pos.y, pos.z) * Matrix_Rotate_Y(M_PI) * Matrix_Scale(4.0f, 4.0f, 4.0f);
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            obj_chair.draw();
+            obj_chair.draw(mainCameraLightPosition, mainCameraLightDirection, mainCameraLightApertureAngle);
         /*
         
 
@@ -266,6 +276,7 @@ int main(int argc, char* argv[])
         
         
         */
+        
         }
         else if (g_lastNumberPressed == GLFW_KEY_1){
 
@@ -273,18 +284,22 @@ int main(int argc, char* argv[])
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // Recalcula a posição da câmera de acordo com o clique do mouse do usuário
-            firstPuzzleCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
+            cratePuzzleCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
 
             glm::mat4 model = Matrix_Identity();
-            model = Matrix_Translate(firstPuzzleLookatPoint.x, firstPuzzleLookatPoint.y, firstPuzzleLookatPoint.z);
+            model = Matrix_Translate(cratePuzzleLookatPoint.x, cratePuzzleLookatPoint.y, cratePuzzleLookatPoint.z) * 
+                    Matrix_Scale(4.0f, 4.0f, 4.0f);
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
 
-            glm::mat4 const& view = firstPuzzleCamera.getViewMatrix();
+            glm::mat4 const& view = cratePuzzleCamera.getViewMatrix();
 
             // Enviamos as matrizes "view" para a placa de vídeo
             glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
 
-            obj_crate_9.draw();
+            // Atualiza a fonte de luz conforme a posição da câmera, a fim de fazer o efeito como se fosse uma lanterna
+            cratePuzzleLightPosition = cratePuzzleCamera.getPosition();
+            cratePuzzleLightDirection = cratePuzzleCamera.getViewVec();
+            obj_crate_9.draw(cratePuzzleLightPosition, cratePuzzleLightDirection, cratePuzzleLightApertureAngle);
         }
         
        
@@ -453,7 +468,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
             g_scrolledDirection = SCROLL_DOWN;
         }
     }
-    else{
+    else if (g_lastNumberPressed == GLFW_KEY_2){
          // Atualizamos a distância da câmera para a origem utilizando a
         // movimentação da "rodinha", simulando um ZOOM.
         g_CameraDistance -= 0.1f*yoffset;

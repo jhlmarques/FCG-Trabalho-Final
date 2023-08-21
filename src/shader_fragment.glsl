@@ -41,6 +41,13 @@ uniform sampler2D diffMap;
 uniform sampler2D ambientMap;
 uniform sampler2D specularMap;
 
+// Posição, direção e abertura da fonte de luz da sala
+uniform vec4 light_position;
+uniform vec4 light_direction;
+uniform float light_aperture_angle;
+
+// Modelo de iluminação do objeto
+uniform int illumination_model;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -49,10 +56,6 @@ out vec4 color;
 #define M_PI   3.14159265358979323846
 #define M_PI_2 1.57079632679489661923
 
-// Fontes de luz 
-#define SPOTLIGHT 0
-#define BULB 1
-#define FLASHLIGHT 2
 // Modelos de iluminação
 #define LAMBERT 0
 #define PHONG 1
@@ -65,10 +68,6 @@ void main()
     // sistema de coordenadas da câmera.
     vec4 origin = vec4(0.0, 0.0, 0.0, 1.0);
     vec4 camera_position = inverse(view) * origin;
-
-     // Placeholder para testes de iluminação
-    int light_src = BULB; 
-    int illumination_model = BLINN_PHONG;
 
     // O fragmento atual é coberto por um ponto que percente à superfície de um
     // dos objetos virtuais da cena. Este ponto, p, possui uma posição no
@@ -84,16 +83,12 @@ void main()
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
 
-    // Fonte de luz em relação a um ponto fixo (como se fosse uma lâmpada).
-    vec4 l_point = vec4(0.0,1.0,0.0,1.0);
-    vec4 l = (light_src == SPOTLIGHT || light_src == BULB) ? l_point - p : v;
-    // Fonte de luz spotlight, também utiliza a fonte de luz em um ponto fixo
+    // Posição da fonte de luz
+    vec4 l = light_position - p;
     
-    float aperture_angle = M_PI/6.0f;
-    vec4 v_direction = vec4(0.0,-1.0,0.0,0.0);
-    
-    float cos_beta = dot(v_direction/length(v_direction), normalize(p - l_point));
-    float cos_alpha = cos(aperture_angle);
+    const float epsilon = 1e-5;    
+    float cos_beta = dot(normalize(light_direction), normalize(p - light_position));
+    float cos_alpha = cos(light_aperture_angle);
 
     // Coordenadas de textura U e V
     float U = 0.0;
@@ -163,7 +158,7 @@ void main()
     // Equação da iluminação de Blinn-Phong
     vec3 blinn_phong_shading = lambert_diffuse_term + ambient_term + blinn_phong_specular_term;
     
-    if (light_src == SPOTLIGHT && cos_beta < cos_alpha){
+    if (cos_beta < cos_alpha){
         color.rgb = ambient_term;
     }
     else{

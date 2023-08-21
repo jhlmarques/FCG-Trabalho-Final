@@ -12,6 +12,11 @@
 #define OBJ_GENERIC 0
 #define OBJ_SPHERICAL 1
 
+// Modelos de iluminação
+#define LAMBERT 0
+#define PHONG 1
+#define BLINN_PHONG 2
+
 
 // Um objeto do jogo. 
 // Adaptado da estrutura "SceneObject" dos laboratórios
@@ -26,6 +31,7 @@ class GameObject{
     GLuint       vertex_array_object_id; // ID do VAO onde estão armazenados os atributos do modelo
     glm::vec3    bbox_min; // Axis-Aligned Bounding Box do objeto
     glm::vec3    bbox_max;    
+    int          illumination_model;
     
     // Materiais do objeto
     std::vector<Material> materials;
@@ -40,9 +46,10 @@ class GameObject{
     GameObject(ObjModel* model, GLuint shapeIdx);
 
     void setTextureScale(float scale);
+    void setIlluminationModel(int illumination_model);
 
     // Desenha o objeto
-    void draw();
+    void draw(glm::vec4 lightPosition, glm::vec4 lightDirection, float lightApertureAngle);
 
 
 };

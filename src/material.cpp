@@ -10,7 +10,8 @@ Material Material::createFromTexture(GLuint firstIndex, GLuint numIndices, Textu
 
 Material::Material(GLuint firstIndex, GLuint numIndices, Texture& tex): 
 firstIndex(firstIndex), numIndices(numIndices),
-kd(1.0f, 1.0f, 1.0f), diffMap(tex), useBumpMap(false)
+kd(1.0f, 1.0f, 1.0f), diffMap(tex), 
+ka(0.0f, 0.0f, 0.0f), ks(0.0f, 0.0f, 0.0f), useBumpMap(false)
 {
 
 }

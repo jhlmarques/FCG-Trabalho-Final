@@ -4,7 +4,7 @@
 #include "globals.h"
 #include "texture.h"
 #include "gameobject.h"
-#include <iostream>
+#include "light_source.h"
 
 #define MAIN_ROOM 0
 #define TILE_FLOOR  1
@@ -41,11 +41,6 @@ int main(int argc, char* argv[])
     // Pedimos para utilizar OpenGL versão 3.3 (ou superior)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
-    #ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    #endif
-
     // Pedimos para utilizar o perfil "core", isto é, utilizaremos somente as
     // funções modernas de OpenGL.
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -124,12 +119,11 @@ int main(int argc, char* argv[])
     ObjModel model_bunny("../../data/bunny.obj", "../../data/");
     GameObject obj_bunny(&model_bunny, 0);
 
-    //ObjModel model_chair("../../data/modern_arm_chair_01_1k.obj", "../../data/");
-    ObjModel model_chair("../../data/marble_bust_01_1k.obj", "../../data/");
-    GameObject obj_chair(&model_chair, 0);
+    //ObjModel model_bust("../../data/modern_arm_bust_01_1k.obj", "../../data/");
+    ObjModel model_bust("../../data/marble_bust_01_1k.obj", "../../data/");
+    GameObject obj_bust(&model_bust, 0);
 
     ObjModel model_wooden_crate_9("../../data/wooden_crate_02_4k.obj", "../../data/");
-    ComputeNormals(&model_wooden_crate_9);
     GameObject obj_crate_9(&model_wooden_crate_9, 0);
     
 
@@ -178,7 +172,7 @@ int main(int argc, char* argv[])
 
     tileVector[1].addObject(&obj_bunny);
     tileVector[2].addObject(&obj_bunny);
-    tileVector[3].addObject(&obj_chair);
+    tileVector[3].addObject(&obj_bust);
 
     Tile* cur_tile = &tileVector[0];
 
@@ -187,7 +181,6 @@ int main(int argc, char* argv[])
     tileCenter.y += CAMERA_HEAD_HEIGHT;
 
     //  Câmera do lobby principal (inicialmente em modo "free")
-    // O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
     Camera mainCamera(tileCenter);
     
     // Iluminação do lobby principal
@@ -270,7 +263,7 @@ int main(int argc, char* argv[])
             auto pos = tileVector[1].getCenterPos();
             model =  Matrix_Translate(pos.x, pos.y, pos.z) * Matrix_Rotate_Y(M_PI) * Matrix_Scale(4.0f, 4.0f, 4.0f);
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            obj_chair.draw(mainCameraLightPosition, mainCameraLightDirection, mainCameraLightApertureAngle);
+            obj_bust.draw(mainCameraLightPosition, mainCameraLightDirection, mainCameraLightApertureAngle);
         /*
         
 
@@ -463,7 +456,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     }
     else if (key == GLFW_KEY_2)
     {
-        g_lastNumberPressed = GLFW_KEY_2;
+        // g_lastNumberPressed = GLFW_KEY_2;
     }
 }
 

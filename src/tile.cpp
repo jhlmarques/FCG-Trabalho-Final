@@ -106,7 +106,7 @@ void Tile::handleMovement(Tile** curTile, Camera& mainCamera){
     else if(g_sPressed){
         // TO-DO: ANIMAÇÃO
         // Volta do puzzle para o centro do quadrado
-        // mainCamera.setPosition(centerPos);
+        // mainCamera.setPositionFree(centerPos);
     }
     else if(g_dPressed){
         // Vira para a direita

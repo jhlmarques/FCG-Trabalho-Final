@@ -10,6 +10,7 @@
 #include <map>
 #include <stack>
 #include <glad/glad.h>
+#include "camera.h"
 
 
 #include "labstructures.h"
@@ -22,10 +23,6 @@ extern float g_ScreenRatio;
 extern bool g_LeftMouseButtonPressed;
 extern bool g_RightMouseButtonPressed;
 extern bool g_MiddleMouseButtonPressed;
-
-extern float g_CameraTheta;
-extern float g_CameraPhi;
-extern float g_CameraDistance;
 
 extern GLuint g_GpuProgramID;
 extern GLint g_model_uniform;
@@ -47,6 +44,7 @@ extern bool g_sPressed;
 extern bool g_dPressed;
 
 extern int g_lastNumberPressed;
+extern Camera* g_currentCamera;
 
 enum ScrollDirection{
     SCROLL_NONE,

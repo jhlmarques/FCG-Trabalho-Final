@@ -1,51 +1,26 @@
 #include "camera.h"
 
-Camera::Camera(float px, float py, float pz, float vx, float vy, float vz, float ux, float uy, float uz) : 
+/* 
+    TO-DO: diferenciar a movimentação da câmera movendo o mouse alterando o vetor de view da câmera free da posição da câmera lookat.
+    Cada uma delas necessita de um conjunto (theta, phi, r) separado. Por enquanto não utilizamos esse tipo de movimentação na câmera livre,
+    mas se quisermos implementar precisaremos diferenciar.
+*/
+Camera::Camera(glm::vec3 cameraStartingPosition) : 
     animationFlags(0), radiansToRotate(0.0f), rotationSign(1), rotationAxis(Y), 
-    destinationPoint(glm::vec4(0, 0, 0, 0))
+    destinationPoint(glm::vec4(0, 0, 0, 0)), up(CAMERA_DEFAULT_UP_VECTOR), view(CAMERA_DEFAULT_VIEW_VECTOR)
 {
-    position  = glm::vec4(px, py, pz, 1.0f);
-    view      = glm::vec4(vx, vy, vz, 0.0f);
-    up        = glm::vec4(ux, uy, uz, 0.0f);
+    position  = glm::vec4(cameraStartingPosition.x, cameraStartingPosition.y, cameraStartingPosition.z, 1.0f);
     
     w = -view / norm(view);
     u = crossproduct(up, w)/norm(crossproduct(up, w));
     v = crossproduct(w, u);
-
 }
 
-void Camera::setPositionSpheric(float phi, float theta, float r){
-    position.x = r*cos(phi)*sin(theta);
-    position.y = r*sin(phi);
-    position.z = r*cos(phi)*cos(theta);
-}
-
-void Camera::setPositionCartesian(float x, float y, float z){
-    position.x = x;
-    position.y = y;
-    position.z = z;
-}
-
-void Camera::setPosition(glm::vec4 position){
+void Camera::setPositionFree(glm::vec4 position){
     this->position = position;
 }
 
-glm::vec4 Camera::getPosition(){
-    return position;
-}
-
-void Camera::lookAt(glm::vec4& point){
-    lookAtPoint = point;
-    view = lookAtPoint - position;
-
-    // Recalcula u, v e w
-    w = -view / norm(view);
-    u = crossproduct(up, w)/norm(crossproduct(up, w));
-    v = crossproduct(w, u);
-
-}
-
-void Camera::setViewVector(glm::vec4 view){
+void Camera::setViewVectorFree(glm::vec4 view){
     this->view = view;
     // Recalcula u, v e w
     w = -view / norm(view);
@@ -53,13 +28,28 @@ void Camera::setViewVector(glm::vec4 view){
     v = crossproduct(w, u);
 }
 
-void Camera::setViewVectorSpheric(float phi, float theta, float r){
-    
-    if(r < std::numeric_limits<float>::epsilon()){
-        r = std::numeric_limits<float>::epsilon();
-    }
+glm::vec4 Camera::getPosition(){
+    return position;
+}
 
-    setPositionSpheric(phi, theta, r);
+void Camera::setLookAtPoint(glm::vec4 point){
+    lookAtPoint = point;
+    // Converte a posição para coordenadas esféricas, para que possamos alterar cada uma delas
+    this->r = sqrt(pow(position.x, 2) + pow(position.y, 2) + pow(position.z, 2));
+    this->theta = atan2(position.x, position.z);
+    this->phi = atan2(position.y, sqrt(pow(position.x, 2) + pow(position.z, 2)));
+    view = lookAtPoint - position;
+    // Recalcula u, v e w
+    w = -view / norm(view);
+    u = crossproduct(up, w)/norm(crossproduct(up, w));
+    v = crossproduct(w, u);
+
+}
+
+void Camera::updateViewVecLookAt(){
+    position.x = r*cos(phi)*sin(theta);
+    position.y = r*sin(phi);
+    position.z = r*cos(phi)*cos(theta);
 
     view = lookAtPoint - position;
 
@@ -71,6 +61,50 @@ void Camera::setViewVectorSpheric(float phi, float theta, float r){
 
 glm::vec4 const& Camera::getLookAtPoint(){
     return lookAtPoint;
+}
+
+void Camera::setCameraTheta(float theta){
+    this->theta = theta;
+}
+
+float Camera::getCameraTheta(){
+    return theta;
+}
+
+void Camera::setCameraPhi(float phi){    
+    // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
+    float phimax = 3.141592f/2; // Por algum motivo não funciona com M_PI_2
+    float phimin = -phimax;
+
+    if (phi > phimax)
+        this->phi = phimax;
+    else if (phi < phimin)
+        this->phi = phimin;
+    else{
+        this->phi = phi;    
+    }
+}
+
+float Camera::getCameraPhi(){
+    return phi;
+}
+
+void Camera::setCameraDistance(float r){
+    // Uma câmera look-at nunca pode estar exatamente "em cima" do ponto para
+    // onde ela está olhando, pois isto gera problemas de divisão por zero na
+    // definição do sistema de coordenadas da câmera. Isto é, a variável abaixo
+    // nunca pode ser zero.
+    const float epsilon = std::numeric_limits<float>::epsilon();
+    if (r < epsilon){
+        this->r = epsilon;
+    }
+    else{
+        this->r = r;
+    }
+}
+
+float Camera::getCameraDistance(){
+    return r;
 }
 
 glm::mat4 Camera::getViewMatrix(){    
@@ -151,7 +185,7 @@ bool Camera::animate(){
         }
 
         // Aplica matriz de rotação a view
-        setViewVector(rotation * view);
+        setViewVectorFree(rotation * view);
     }
 
     return true;

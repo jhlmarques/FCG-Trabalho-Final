@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "texture.h"
 #include "gameobject.h"
+#include <iostream>
 
 #define MAIN_ROOM 0
 #define TILE_FLOOR  1
@@ -18,7 +19,10 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
-
+// Funções para verificar qual é a sala atual
+bool isCurrentRoomLobby();
+bool isCurrentRoomCratePuzzle();
+bool isCurrentRoomChairPuzzle();
 
 int main(int argc, char* argv[])
 {
@@ -144,11 +148,6 @@ int main(int argc, char* argv[])
         SETUP DO LOBBY PRINCIPAL
     */
 
-
-    //  Câmera do lobby principal (inicialmente em modo "free")
-    // O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
-    Camera mainCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
-
     // Vetor estático de todos tiles existentes
     std::vector<Tile> tileVector;
     tileVector.emplace_back(0.0f, 0.0f, 0.0f);
@@ -185,14 +184,15 @@ int main(int argc, char* argv[])
 
     Tile* cur_tile = &tileVector[0];
 
-    // Move câmera para esse ponto
+    // Obtém a posição inicial da câmera 
     auto tileCenter = cur_tile->getCenterPos();
     tileCenter.y += CAMERA_HEAD_HEIGHT;
 
-    mainCamera.setPosition(tileCenter);
-    mainCamera.setViewVector(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
-
+    //  Câmera do lobby principal (inicialmente em modo "free")
+    // O vetor view padrão é calculado por phi=0 theta=0 dist=epsilon, e deve ser atualizado de acordo
+    Camera mainCamera(tileCenter);
     
+    // Iluminação do lobby principal
     glm::vec4 mainCameraLightPosition = glm::vec4(TILE_WIDTH,5.0f,0.0f,1.0f);
     float mainCameraLightApertureAngle = M_PI; // Ilumina toda a sala
     glm::vec4 mainCameraLightDirection = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f); // Convenção pra representar uma fonte de luz pontual (é descartado no shader)
@@ -202,11 +202,9 @@ int main(int argc, char* argv[])
     */
 
     // Instanciação da câmera de lookat puzzle que aponta para a origem 
-    Camera cratePuzzleCamera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+    Camera cratePuzzleCamera(glm::vec3(2.0f, 2.0f, 1.5f));
     glm::vec4 cratePuzzleLookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-    cratePuzzleCamera.lookAt(cratePuzzleLookatPoint);
-    cratePuzzleCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
+    cratePuzzleCamera.setLookAtPoint(cratePuzzleLookatPoint);
 
     glm::vec4 cratePuzzleLightPosition = cratePuzzleCamera.getPosition();
     glm::vec4 cratePuzzleLightDirection = cratePuzzleCamera.getViewVec();
@@ -220,7 +218,15 @@ int main(int argc, char* argv[])
         glm::mat4 projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         glUniformMatrix4fv(g_projection_uniform, 1 , GL_FALSE , glm::value_ptr(projection));
         
-
+        // Define qual a câmera que será utilizada
+        switch (g_lastNumberPressed){
+            case GLFW_KEY_1:
+                g_currentCamera = &cratePuzzleCamera;
+                break;
+            default:
+                g_currentCamera = &mainCamera;
+                break;
+        }
         /*
         
             LOBBY PRINCIPAL
@@ -230,12 +236,10 @@ int main(int argc, char* argv[])
             do seu tile.
         
         */
-        if (g_lastNumberPressed == GLFW_KEY_0 || g_lastNumberPressed == GLFW_KEY_UNKNOWN){
+        if (isCurrentRoomLobby()){
 
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
 
             // Apenas realizamos um movimento se a câmera não está animando
             if(!mainCamera.animate()){
@@ -278,14 +282,12 @@ int main(int argc, char* argv[])
         */
         
         }
-        else if (g_lastNumberPressed == GLFW_KEY_1){
+        else if (isCurrentRoomCratePuzzle()){
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // Recalcula a posição da câmera de acordo com o clique do mouse do usuário
-            cratePuzzleCamera.setViewVectorSpheric(g_CameraPhi, g_CameraTheta, g_CameraDistance);
-
             glm::mat4 model = Matrix_Identity();
             model = Matrix_Translate(cratePuzzleLookatPoint.x, cratePuzzleLookatPoint.y, cratePuzzleLookatPoint.z) * 
                     Matrix_Scale(4.0f, 4.0f, 4.0f);
@@ -302,7 +304,7 @@ int main(int argc, char* argv[])
             obj_crate_9.draw(cratePuzzleLightPosition, cratePuzzleLightDirection, cratePuzzleLightApertureAngle);
         }
         
-       
+
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -330,6 +332,19 @@ int main(int argc, char* argv[])
 // que possamos calcular quanto que o mouse se movimentou entre dois instantes
 // de tempo. Utilizadas no callback CursorPosCallback() abaixo.
 double g_LastCursorPosX, g_LastCursorPosY;
+
+bool isCurrentRoomLobby(){
+    return g_lastNumberPressed == GLFW_KEY_0 || g_lastNumberPressed == GLFW_KEY_UNKNOWN;
+}
+
+bool isCurrentRoomCratePuzzle(){
+    return g_lastNumberPressed == GLFW_KEY_1;
+}
+
+bool isCurrentRoomChairPuzzle(){
+    return g_lastNumberPressed == GLFW_KEY_2;
+}
+
 
 // Função callback chamada sempre que o usuário aperta algum dos botões do mouse
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -360,7 +375,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     // mouse, em COORDENADAS DE TELA (pixels), desde a última chamada à função
     // CursorPosCallback().
 
-    if (!g_LeftMouseButtonPressed)
+    if (!g_LeftMouseButtonPressed || isCurrentRoomLobby())
         return;
 
     float dx = xpos - g_LastCursorPosX;
@@ -372,18 +387,15 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     // escolhido empiricamente, que define a conversão entre coordenadas de TELA
     // para radianos. Este fator controla a "velocidade" de rotação da câmera de
     // acordo com a movimentação do mouse (a "sensitividade" do mouse).
-    g_CameraTheta -= 0.003f*dx;
-    g_CameraPhi += 0.003f*dy;
+    float currentTheta = g_currentCamera->getCameraTheta();
+    float currentPhi = g_currentCamera->getCameraPhi();
 
-    // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
-    float phimax = 3.141592f/2;
-    float phimin = -phimax;
+    currentTheta -= 0.003f*dx;
+    currentPhi += 0.003f*dy;
 
-    if (g_CameraPhi > phimax)
-        g_CameraPhi = phimax;
-
-    if (g_CameraPhi < phimin)
-        g_CameraPhi = phimin;
+    g_currentCamera->setCameraTheta(currentTheta);
+    g_currentCamera->setCameraPhi(currentPhi);
+    g_currentCamera->updateViewVecLookAt();
 
     // Atualizamos as variáveis globais para armazenar a posição atual do
     // mouse como sendo a última posição conhecida do mouse.
@@ -460,7 +472,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if (g_lastNumberPressed == GLFW_KEY_0 || g_lastNumberPressed == GLFW_KEY_UNKNOWN){
+    if (isCurrentRoomLobby()){
         if(yoffset > 0.0){
             g_scrolledDirection = SCROLL_UP;
         }
@@ -468,22 +480,16 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
             g_scrolledDirection = SCROLL_DOWN;
         }
     }
-    else if (g_lastNumberPressed == GLFW_KEY_2){
+    else if (isCurrentRoomChairPuzzle()){
          // Atualizamos a distância da câmera para a origem utilizando a
         // movimentação da "rodinha", simulando um ZOOM.
-        g_CameraDistance -= 0.1f*yoffset;
+        float currentCameraDistance = g_currentCamera->getCameraDistance();
+        currentCameraDistance -= 0.1f*yoffset;
 
-        // Uma câmera look-at nunca pode estar exatamente "em cima" do ponto para
-        // onde ela está olhando, pois isto gera problemas de divisão por zero na
-        // definição do sistema de coordenadas da câmera. Isto é, a variável abaixo
-        // nunca pode ser zero. Versões anteriores deste código possuíam este bug,
-        // o qual foi detectado pelo aluno Vinicius Fraga (2017/2).
-        const float verysmallnumber = std::numeric_limits<float>::epsilon();
-        if (g_CameraDistance < verysmallnumber)
-            g_CameraDistance = verysmallnumber;
+        g_currentCamera->setCameraDistance(currentCameraDistance);
+        g_currentCamera->updateViewVecLookAt();
     }
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
 // vim: set spell spelllang=pt_br :
-

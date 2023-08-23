@@ -20,11 +20,6 @@ bool g_LeftMouseButtonPressed = false;
 bool g_RightMouseButtonPressed = false; // Análogo para botão direito do mouse
 bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mouse
 
-// TO-DO: passar como parâmetros para o construtor da câmera
-float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
-float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
-float g_CameraDistance = 3.5f; // Distância da câmera para a origem
-
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles().
 GLuint g_GpuProgramID = 0;
 // Transformações
@@ -53,8 +48,11 @@ bool g_aPressed = false;
 bool g_sPressed = false;
 bool g_dPressed = false;
 
-// Variáveis que controlam o estado do último número apertado
+// Controla o estado do último número apertado
 int g_lastNumberPressed = GLFW_KEY_UNKNOWN;
+
+// Controla qual a câmera atual (sera modificado pela sala atual)
+Camera* g_currentCamera = NULL;
 
 // Direção (ou ausência de direção) de scroll do mouse
 ScrollDirection g_scrolledDirection;

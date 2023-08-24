@@ -168,32 +168,9 @@ int main(int argc, char* argv[])
                 currentPuzzle = &puzzle_lobby;
                 break;
         }
-        /*
         
-            LOBBY PRINCIPAL
-
-            Uma sala com vários puzzles. O jogador se movimenta entre tiles, áreas
-            análogas aos espaços de um tabuleiro, e pode interagir com objetos que estão dentro
-            do seu tile.
+        currentPuzzle->update();
         
-        */
-        if (isCurrentRoomLobby()){
-            puzzle_lobby.update();
-        /*
-        
-
-            PRIMEIRO PUZZLE - Usuário precisa encontrar caixa com número 9
-        
-        
-        */
-        
-        }
-        else if (isCurrentRoomCratePuzzle()){
-            puzzle_crate.update();
-        }
-        
-
-
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
         // seria possível ver artefatos conhecidos como "screen tearing". A

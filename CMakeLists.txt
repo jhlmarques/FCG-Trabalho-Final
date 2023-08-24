@@ -15,6 +15,8 @@ set(SOURCES
     src/globals.cpp
     src/labfunctions.cpp
     src/labstructures.cpp
+    src/light_source.cpp
+    src/room.cpp
     src/main.cpp
     src/material.cpp
     src/matrices.cpp

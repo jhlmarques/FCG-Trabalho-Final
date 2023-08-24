@@ -1,11 +1,10 @@
 #include "room.h"
 
-Room::Room(Camera camera, LightSource lightSource, glm::vec4 backgroundColor) : 
-    camera(camera), 
-    lightSource(lightSource), 
-    backgroundColor(backgroundColor)
-{
-}
+Room::Room() : 
+    backgroundColor(BLACK_BACKGROUND_COLOR), 
+    camera(glm::vec3(0,0,0)) ,
+    lightSource(glm::vec4(0,0,0,0), glm::vec4 (0,0,0,0), 0.0f)
+    {}
 
 void Room::setBackgroundColor(glm::vec4 backgroundColor){
     this->backgroundColor = backgroundColor;

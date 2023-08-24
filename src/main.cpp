@@ -6,6 +6,7 @@
 #include "gameobject.h"
 #include "light_source.h"
 #include "room.h"
+#include "puzzle.h"
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -135,54 +136,10 @@ int main(int argc, char* argv[])
         SETUP DO LOBBY PRINCIPAL
     */
 
-    // Vetor estático de todos tiles existentes
-    std::vector<Tile> tileVector;
-    tileVector.emplace_back(0.0f, 0.0f, 0.0f);
-    tileVector.emplace_back(0.0f, 0.0f, TILE_WIDTH); // n
-    tileVector.emplace_back(TILE_WIDTH, 0.0f, 0.0f); // w
-    tileVector.emplace_back(0.0f, 0.0f, -TILE_WIDTH);// s
-    tileVector.emplace_back(-TILE_WIDTH, 0.0f, 0.0f); // e
-
-    tileVector.emplace_back(TILE_WIDTH, 0.0f, TILE_WIDTH); // NW
-    tileVector.emplace_back(TILE_WIDTH, 0.0f, -TILE_WIDTH); // SW 
-    tileVector.emplace_back(-TILE_WIDTH, 0.0f, -TILE_WIDTH); // SE
-    tileVector.emplace_back(-TILE_WIDTH, 0.0f, TILE_WIDTH); // NE
-
-    tileVector[0].setNorth(&tileVector[1]);
-    tileVector[0].setWest(&tileVector[2]);
-    tileVector[0].setSouth(&tileVector[3]);
-    tileVector[0].setEast(&tileVector[4]);
-
-    tileVector[1].setWest(&tileVector[5]);
-    tileVector[2].setNorth(&tileVector[5]);
-
-    tileVector[3].setWest(&tileVector[6]);
-    tileVector[2].setSouth(&tileVector[6]);
-
-    tileVector[4].setSouth(&tileVector[7]);
-    tileVector[3].setEast(&tileVector[7]);
-
-    tileVector[1].setEast(&tileVector[8]);
-    tileVector[4].setNorth(&tileVector[8]);
-
-    tileVector[1].addObject(&obj_bunny);
-    tileVector[2].addObject(&obj_bunny);
-    tileVector[3].addObject(&obj_bust);
-
-    Tile* cur_tile = &tileVector[0];
-
-    // Obtém a posição inicial da câmera 
-    auto tileCenter = cur_tile->getCenterPos();
-    tileCenter.y += CAMERA_HEAD_HEIGHT;
-
-    //  Câmera do lobby principal (inicialmente em modo "free")
-    Camera lobbyCamera(tileCenter);
-    // Iluminação do lobby principal
-    glm::vec4 lobbyLightPosition = glm::vec4(TILE_WIDTH,5.0f,0.0f,1.0f);
-    LightSource lobbyLightSource(lobbyLightPosition);
-
-    // Definição da sala principal
-    Room lobbyRoom(lobbyCamera, lobbyLightSource);
+    MainLobby puzzle_lobby;
+    puzzle_lobby.setupRoom();
+    puzzle_lobby.addObject("tile", &obj_tile);
+    puzzle_lobby.addObject("statue", &obj_bust);
 
     /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA
@@ -199,7 +156,11 @@ int main(int argc, char* argv[])
 
     LightSource cratePuzzleLightSource(cratePuzzleLightPosition, cratePuzzleLightDirection, cratePuzzleLightApertureAngle);
 
-    Room cratePuzzleRoom(cratePuzzleCamera, cratePuzzleLightSource, BLACK_BACKGROUND_COLOR);
+    Room cratePuzzleRoom;
+    cratePuzzleRoom.setBackgroundColor(BLACK_BACKGROUND_COLOR);
+    cratePuzzleRoom.setCamera(cratePuzzleCamera);
+    cratePuzzleRoom.setLightSource(cratePuzzleLightSource);
+    
     
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -214,7 +175,7 @@ int main(int argc, char* argv[])
                 g_currentRoom = &cratePuzzleRoom;
                 break;
             default:
-                g_currentRoom = &lobbyRoom;
+               // g_currentRoom = &lobbyRoom;
                 break;
         }
         /*
@@ -227,41 +188,7 @@ int main(int argc, char* argv[])
         
         */
         if (isCurrentRoomLobby()){
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            // Apenas realizamos um movimento se a câmera não está animando
-            if(!lobbyRoom.getCamera().animate()){
-                cur_tile->handleMovement(&cur_tile, lobbyRoom.getCamera());
-            }
-
-            // Transformação da câmera
-            glm::mat4 const& view = lobbyRoom.getCamera().getViewMatrix();
-            glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
-
-
-            glm::mat4 model = Matrix_Identity(); 
-
-            // DESENHA TILES
-            for(auto tile : tileVector){
-                auto coords = tile.getCenterPos();
-                auto scale = Matrix_Scale(TILE_WIDTH/2.0f, 1.0f, TILE_WIDTH/2.0f);
-                
-                // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
-                model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
-                glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-                obj_tile.draw(lobbyRoom.getLightSource());
-            }
-
-            // DESENHA OBJETOS
-            // TO-DO: Usar uma classe que represente um "interativo" - Um modelo 3D junto
-            // de um hitbox, possivelmente com alguma lógica interna
-
-            // Uma cadeira no tile norte
-            auto pos = tileVector[1].getCenterPos();
-            model =  Matrix_Translate(pos.x, pos.y, pos.z) * Matrix_Rotate_Y(M_PI) * Matrix_Scale(4.0f, 4.0f, 4.0f);
-            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            obj_bust.draw(lobbyRoom.getLightSource());
+            puzzle_lobby.update();
         /*
         
 

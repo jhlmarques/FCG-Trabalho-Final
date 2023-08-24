@@ -20,6 +20,7 @@ set(SOURCES
     src/main.cpp
     src/material.cpp
     src/matrices.cpp
+    src/puzzle.cpp
     src/stb_image.cpp
     src/texture.cpp
     src/tile.cpp

@@ -32,7 +32,7 @@ class Room
     Camera& getCamera();
     LightSource& getLightSource();
 
-    Room(Camera camera, LightSource lightSource, glm::vec4 backgroundColor=WHITE_BACKGROUND_COLOR);
+    Room();
 };
 
 #endif

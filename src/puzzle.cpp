@@ -12,6 +12,16 @@ void Puzzle::update(){
 
 }
 
+void Puzzle::handleCursorMovement(float dx, float dy){
+    currentTheta -=0.003f*dx;
+    currentPhi += 0.003f*dy;
+    return;
+}
+
+void Puzzle::handleScroll(double xoffset, double yoffset){
+    return;
+}
+
 void Puzzle::updateCamera(){
     // Transformação da câmera
     glm::mat4 const& view = room.getCamera().getViewMatrix();
@@ -110,4 +120,60 @@ void MainLobby::drawObjects(){
     model =  Matrix_Translate(pos.x, pos.y, pos.z) * Matrix_Rotate_Y(M_PI) * Matrix_Scale(4.0f, 4.0f, 4.0f);
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_statue->draw(room.getLightSource());
+}
+
+void CratePuzzle::updateCamera(){
+    Puzzle::updateCamera();
+    room.getLightSource().setPosition(room.getCamera().getPosition());
+    room.getLightSource().setDirection(room.getCamera().getViewVec());
+}
+
+void CratePuzzle::setupRoom(){
+    // Instanciação da câmera de lookat puzzle que aponta para a origem 
+    Camera camera(glm::vec3(2.0f, 2.0f, 1.5f));
+
+    glm::vec4 lookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    camera.setLookAtPoint(lookatPoint);
+
+    currentTheta = camera.getCameraTheta();
+    currentPhi = camera.getCameraPhi();
+
+    glm::vec4 lightPosition = camera.getPosition();
+    glm::vec4 lightDirection = camera.getViewVec();
+    float lightApertureAngle = M_PI/8.0f;
+
+    LightSource lightSource(lightPosition, lightDirection, lightApertureAngle);
+
+    room.setBackgroundColor(BLACK_BACKGROUND_COLOR);
+    room.setCamera(camera);
+    room.setLightSource(lightSource);
+}
+
+
+void CratePuzzle::handleInputs(){
+    return;
+}
+
+void CratePuzzle::drawObjects(){
+    auto obj_crate_9 = Puzzle::getObject("crate");
+
+    glm::mat4 model = Matrix_Identity(); 
+    model = Matrix_Scale(4.0f, 4.0f, 4.0f);
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_crate_9->draw(room.getLightSource());
+}
+
+void CratePuzzle::handleCursorMovement(float dx, float dy){
+    Puzzle::handleCursorMovement(dx, dy);
+    room.getCamera().setCameraTheta(currentTheta);
+    room.getCamera().setCameraPhi(currentPhi);
+    room.getCamera().updateViewVecLookAt();
+}
+
+void CratePuzzle::handleScroll(double xoffset, double yoffset){
+    float currentCameraDistance = room.getCamera().getCameraDistance();
+    currentCameraDistance -= 0.1f*yoffset;
+
+    room.getCamera().setCameraDistance(currentCameraDistance);
+    room.getCamera().updateViewVecLookAt();
 }

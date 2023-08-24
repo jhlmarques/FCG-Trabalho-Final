@@ -5,8 +5,11 @@
 #include "texture.h"
 #include "gameobject.h"
 #include "light_source.h"
-#include "room.h"
+
 #include "puzzle.h"
+
+// Controla qual o puzzle atual 
+Puzzle* currentPuzzle = nullptr;
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -144,22 +147,9 @@ int main(int argc, char* argv[])
     /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA
     */
-
-    // Instanciação da câmera de lookat puzzle que aponta para a origem 
-    Camera cratePuzzleCamera(glm::vec3(2.0f, 2.0f, 1.5f));
-
-    glm::vec4 cratePuzzleLookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    cratePuzzleCamera.setLookAtPoint(cratePuzzleLookatPoint);
-    glm::vec4 cratePuzzleLightPosition = cratePuzzleCamera.getPosition();
-    glm::vec4 cratePuzzleLightDirection = cratePuzzleCamera.getViewVec();
-    float cratePuzzleLightApertureAngle = M_PI/8.0f;
-
-    LightSource cratePuzzleLightSource(cratePuzzleLightPosition, cratePuzzleLightDirection, cratePuzzleLightApertureAngle);
-
-    Room cratePuzzleRoom;
-    cratePuzzleRoom.setBackgroundColor(BLACK_BACKGROUND_COLOR);
-    cratePuzzleRoom.setCamera(cratePuzzleCamera);
-    cratePuzzleRoom.setLightSource(cratePuzzleLightSource);
+    CratePuzzle puzzle_crate;
+    puzzle_crate.setupRoom();
+    puzzle_crate.addObject("crate", &obj_crate_9);
     
     
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
@@ -172,10 +162,10 @@ int main(int argc, char* argv[])
         // Define qual a câmera que será utilizada
         switch (g_lastNumberPressed){
             case GLFW_KEY_1:
-                g_currentRoom = &cratePuzzleRoom;
+                currentPuzzle = &puzzle_crate;
                 break;
             default:
-               // g_currentRoom = &lobbyRoom;
+                currentPuzzle = &puzzle_lobby;
                 break;
         }
         /*
@@ -199,24 +189,7 @@ int main(int argc, char* argv[])
         
         }
         else if (isCurrentRoomCratePuzzle()){
-
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            // Recalcula a posição da câmera de acordo com o clique do mouse do usuário
-            glm::mat4 model = Matrix_Identity(); 
-            model = Matrix_Scale(4.0f, 4.0f, 4.0f);
-            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-
-            glm::mat4 const& view = cratePuzzleRoom.getCamera().getViewMatrix();
-
-            // Enviamos as matrizes "view" para a placa de vídeo
-            glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
-
-            // Atualiza a fonte de luz conforme a posição da câmera, a fim de fazer o efeito como se fosse uma lanterna
-            cratePuzzleRoom.getLightSource().setPosition(cratePuzzleRoom.getCamera().getPosition());
-            cratePuzzleRoom.getLightSource().setDirection(cratePuzzleRoom.getCamera().getViewVec());
-            obj_crate_9.draw(cratePuzzleRoom.getLightSource());
+            puzzle_crate.update();
         }
         
 
@@ -302,15 +275,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     // escolhido empiricamente, que define a conversão entre coordenadas de TELA
     // para radianos. Este fator controla a "velocidade" de rotação da câmera de
     // acordo com a movimentação do mouse (a "sensitividade" do mouse).
-    float currentTheta = g_currentRoom->getCamera().getCameraTheta();
-    float currentPhi   = g_currentRoom->getCamera().getCameraPhi();
-
-    currentTheta -= 0.003f*dx;
-    currentPhi += 0.003f*dy;
-
-    g_currentRoom->getCamera().setCameraTheta(currentTheta);
-    g_currentRoom->getCamera().setCameraPhi(currentPhi);
-    g_currentRoom->getCamera().updateViewVecLookAt();
+    currentPuzzle->handleCursorMovement(dx, dy);
 
     // Atualizamos as variáveis globais para armazenar a posição atual do
     // mouse como sendo a última posição conhecida do mouse.
@@ -387,23 +352,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if (isCurrentRoomLobby()){
-        if(yoffset > 0.0){
-            g_scrolledDirection = SCROLL_UP;
-        }
-        else if(yoffset < -0.0){
-            g_scrolledDirection = SCROLL_DOWN;
-        }
-    }
-    else if (isCurrentRoomChairPuzzle()){
-         // Atualizamos a distância da câmera para a origem utilizando a
-        // movimentação da "rodinha", simulando um ZOOM.
-        float currentCameraDistance = g_currentRoom->getCamera().getCameraDistance();
-        currentCameraDistance -= 0.1f*yoffset;
 
-        g_currentRoom->getCamera().setCameraDistance(currentCameraDistance);
-        g_currentRoom->getCamera().updateViewVecLookAt();
+    if(yoffset > 0.0){
+        g_scrolledDirection = SCROLL_UP;
     }
+    else if(yoffset < -0.0){
+        g_scrolledDirection = SCROLL_DOWN;
+    }
+
+    currentPuzzle->handleScroll(xoffset, yoffset);
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null

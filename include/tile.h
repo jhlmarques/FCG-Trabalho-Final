@@ -62,7 +62,7 @@ class Tile{
     glm::vec4 getCenterPos();
 
     // Realiza movimento
-    void handleMovement(Tile** curTile, Camera& mainCamera);
+    void handleMovement(Tile** curTile, Camera& lobbyCamera);
 
     // Adiciona um objeto ao tile
     void addObject(GameObject* obj);

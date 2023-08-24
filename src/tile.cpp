@@ -25,9 +25,9 @@ glm::vec4 Tile::getCenterPos(){
 }
 
 // Realiza movimento
-void Tile::handleMovement(Tile** curTile, Camera& mainCamera){
-    static auto rotateLeft = Matrix_Rotate(M_PI_2, mainCamera.getVVec());
-    static auto rotateRight = Matrix_Rotate(-M_PI_2, mainCamera.getVVec());
+void Tile::handleMovement(Tile** curTile, Camera& lobbyCamera){
+    static auto rotateLeft = Matrix_Rotate(M_PI_2, lobbyCamera.getVVec());
+    static auto rotateRight = Matrix_Rotate(-M_PI_2, lobbyCamera.getVVec());
     // Tempo desde o último input processado
     static float lastProcessedInput = (float) glfwGetTime();;
     // Estado atual de scroll (basicamente a inclinação)
@@ -48,10 +48,10 @@ void Tile::handleMovement(Tile** curTile, Camera& mainCamera){
         // Faz algo se houve scroll para uma direção contrária
         if((g_scrolledDirection != SCROLL_NONE) && (g_scrolledDirection != curScrollDirection)){
             if(g_scrolledDirection == SCROLL_UP){
-                mainCamera.setradiansToRotate(M_PI_4, Z);
+                lobbyCamera.setradiansToRotate(M_PI_4, Z);
             }
             else if(g_scrolledDirection == SCROLL_DOWN){
-                mainCamera.setradiansToRotate(-M_PI_4, Z);
+                lobbyCamera.setradiansToRotate(-M_PI_4, Z);
             }
             // Se não estávamos inclinados, agora estamos; senão, estamos olhando reto
             curScrollDirection = (curScrollDirection == SCROLL_NONE) ? g_scrolledDirection : SCROLL_NONE;
@@ -87,14 +87,14 @@ void Tile::handleMovement(Tile** curTile, Camera& mainCamera){
             dst->curFacingDirection = curFacingDirection;
             auto pointToMove = dst->getCenterPos();
             pointToMove.y += CAMERA_HEAD_HEIGHT;
-            mainCamera.setDestinationPoint(pointToMove);
+            lobbyCamera.setDestinationPoint(pointToMove);
         }
 
     }
     else if(g_aPressed){
         // Vira para a esquerda
         // Animação
-        mainCamera.setradiansToRotate(M_PI_2, Y);
+        lobbyCamera.setradiansToRotate(M_PI_2, Y);
 
         curFacingDirection--;
         if(curFacingDirection < 0){
@@ -106,12 +106,12 @@ void Tile::handleMovement(Tile** curTile, Camera& mainCamera){
     else if(g_sPressed){
         // TO-DO: ANIMAÇÃO
         // Volta do puzzle para o centro do quadrado
-        // mainCamera.setPositionFree(centerPos);
+        // lobbyCamera.setPositionFree(centerPos);
     }
     else if(g_dPressed){
         // Vira para a direita
         // Animação
-        mainCamera.setradiansToRotate(-M_PI_2, Y);
+        lobbyCamera.setradiansToRotate(-M_PI_2, Y);
 
         curFacingDirection++;
         if(curFacingDirection > 3){

@@ -8,6 +8,7 @@
 #include "labstructures.h"
 #include "globals.h"
 #include "material.h"
+#include "light_source.h"
 
 #define OBJ_GENERIC 0
 #define OBJ_SPHERICAL 1
@@ -49,7 +50,7 @@ class GameObject{
     void setIlluminationModel(int illumination_model);
 
     // Desenha o objeto
-    void draw(glm::vec4 lightPosition, glm::vec4 lightDirection, float lightApertureAngle);
+    void draw(LightSource& lightSource);
 
 
 };

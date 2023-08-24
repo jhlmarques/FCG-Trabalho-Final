@@ -27,7 +27,7 @@ class Room
     void setBackgroundColor(glm::vec4 backgroundColor);
     void setCamera(Camera camera);
     void setLightSource(LightSource lightSource);
-    glm::vec3 getBackgroundColor();
+    glm::vec4 getBackgroundColor();
     // Retorna a referência da câmera para que possamos alterar seus atributos
     Camera& getCamera();
     LightSource& getLightSource();

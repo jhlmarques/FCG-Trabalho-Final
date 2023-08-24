@@ -202,7 +202,7 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
 
 
 
-void GameObject::draw(glm::vec4 lightPosition, glm::vec4 lightDirection, float lightApertureAngle){
+void GameObject::draw(LightSource& lightSource){
     
     glBindVertexArray(vertex_array_object_id);
 
@@ -214,11 +214,14 @@ void GameObject::draw(glm::vec4 lightPosition, glm::vec4 lightDirection, float l
 
     // Fonte de luz da sala incidente no objeto. 
     static GLuint light_position_coefficient = glGetUniformLocation(g_GpuProgramID, "light_position");
+    glm::vec4 lightPosition = lightSource.getPosition();
     glUniform4f(light_position_coefficient, lightPosition.x, lightPosition.y, lightPosition.z, 1.0f);
 
+    glm::vec4 lightDirection = lightSource.getDirection();
     static GLuint light_direction_coefficient = glGetUniformLocation(g_GpuProgramID, "light_direction");
     glUniform4f(light_direction_coefficient, lightDirection.x, lightDirection.y, lightDirection.z, 1.0f);
 
+    float lightApertureAngle = lightSource.getApertureAngle();
     static GLuint light_aperture_angle_coefficient = glGetUniformLocation(g_GpuProgramID, "light_aperture_angle");
     glUniform1f(light_aperture_angle_coefficient, lightApertureAngle);
 

@@ -19,7 +19,7 @@ void Room::setLightSource(LightSource lightSource){
     this->lightSource = lightSource;
 }
 
-glm::vec3 Room::getBackgroundColor(){
+glm::vec4 Room::getBackgroundColor(){
     return this->backgroundColor;
 }
 

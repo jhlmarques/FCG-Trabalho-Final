@@ -51,8 +51,8 @@ bool g_dPressed = false;
 // Controla o estado do último número apertado
 int g_lastNumberPressed = GLFW_KEY_UNKNOWN;
 
-// Controla qual a câmera atual (sera modificado pela sala atual)
-Camera* g_currentCamera = NULL;
+// Controla qual a câmera atual 
+Room* g_currentRoom = NULL;
 
 // Direção (ou ausência de direção) de scroll do mouse
 ScrollDirection g_scrolledDirection;

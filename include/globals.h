@@ -10,7 +10,7 @@
 #include <map>
 #include <stack>
 #include <glad/glad.h>
-#include "camera.h"
+#include "room.h"
 
 
 #include "labstructures.h"
@@ -44,7 +44,7 @@ extern bool g_sPressed;
 extern bool g_dPressed;
 
 extern int g_lastNumberPressed;
-extern Camera* g_currentCamera;
+extern Room* g_currentRoom;
 
 enum ScrollDirection{
     SCROLL_NONE,

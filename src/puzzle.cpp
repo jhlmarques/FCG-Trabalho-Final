@@ -89,7 +89,7 @@ void MainLobby::playerMove(){
         switch (curFacingDirection)
         {
             case NORTH:
-                if(playerPosition.z == -((ROOM_LENGTH-1)*STEP_SIZE)){
+                if(playerPosition.z == -(ROOM_LENGTH*STEP_SIZE)){
                     return;
                 }
                 playerPosition.z -= STEP_SIZE;
@@ -206,13 +206,13 @@ void MainLobby::updateState(){
 }
 
 void MainLobby::drawObjects(){
-    glm::mat4 model = Matrix_Identity();
+    glm::mat4 model;
     auto obj_tile = Puzzle::getObject("tile");
     auto obj_statue = Puzzle::getObject("statue");
 
     // DESENHA TILES
     auto scale = Matrix_Scale(STEP_SIZE/2.0f, 1.0f, STEP_SIZE/2.0f);
-    for(int i=0; i < ROOM_LENGTH; i++){
+    for(int i=0; i <= ROOM_LENGTH; i++){
         for(int j=0; j < ROOM_WIDTH; j++){
             auto coords = glm::vec3(
                 (-(ROOM_SIDE_WIDTH) + j) * STEP_SIZE,
@@ -225,6 +225,38 @@ void MainLobby::drawObjects(){
         }
         
     }
+
+    // Paredes
+    // Esquerda
+    //model = Matrix_Scale(ROOM_LENGTH*STEP_SIZE, 1.0f, 1.0f);
+    model = Matrix_Translate(-(STEP_SIZE*ROOM_SIDE_WIDTH + STEP_SIZE/2.0f), ROOM_HEIGHT/2.0f, -ROOM_LENGTH*STEP_SIZE/2.0f);
+    model = model * Matrix_Rotate_Z(-M_PI_2);
+    model = model * Matrix_Scale(ROOM_HEIGHT/2.0f, 1.0f, ROOM_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
+    
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_tile->draw(room.getLightSource());
+    // Direita
+    model = Matrix_Translate((STEP_SIZE*ROOM_SIDE_WIDTH + STEP_SIZE/2.0f), ROOM_HEIGHT/2.0f, -ROOM_LENGTH*STEP_SIZE/2.0f);
+    model = model * Matrix_Rotate_Z(M_PI_2);
+    model = model * Matrix_Scale(ROOM_HEIGHT/2.0f, 1.0f, ROOM_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_tile->draw(room.getLightSource());
+
+    // Traseira
+    model = Matrix_Translate(0.0f, ROOM_HEIGHT/2.0f, STEP_SIZE/2.0f);
+    model = model * Matrix_Rotate_X(-M_PI_2);
+    model = model * Matrix_Scale(ROOM_WIDTH*STEP_SIZE/2.0f, 1.0f, ROOM_HEIGHT/2.0f);
+
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_tile->draw(room.getLightSource());
+
+    // Dianteira
+    model = Matrix_Translate(0.0f, ROOM_HEIGHT/2.0f,  -(ROOM_LENGTH*STEP_SIZE + STEP_SIZE/2.0f));
+    model = model * Matrix_Scale(ROOM_WIDTH*STEP_SIZE/2.0f, ROOM_HEIGHT/2.0f, 1.0f);
+    model = model * Matrix_Rotate_X(M_PI_2);
+
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_tile->draw(room.getLightSource());
 
     // DESENHA OBJETOS
     

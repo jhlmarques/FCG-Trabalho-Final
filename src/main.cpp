@@ -148,6 +148,10 @@ int main(int argc, char* argv[])
     puzzle_crate.setupRoom();
     puzzle_crate.addObject("crate", &obj_crate_9);
     
+    // Define se estamos no lobby principal ou num puzzle
+    bool isInLobby = true;
+
+    currentPuzzle = &puzzle_crate;
     
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -156,17 +160,34 @@ int main(int argc, char* argv[])
         glm::mat4 projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         glUniformMatrix4fv(g_projection_uniform, 1 , GL_FALSE , glm::value_ptr(projection));
         
-        // Define qual a câmera que será utilizada
-        switch (g_lastNumberPressed){
-            case GLFW_KEY_1:
-                currentPuzzle = &puzzle_crate;
-                break;
-            default:
-                currentPuzzle = &puzzle_lobby;
-                break;
+        // Saída do puzzle (placeholder)
+        if(!isInLobby && g_sPressed){
+            isInLobby = true;
+            puzzle_lobby.handleExitedPuzzle();
         }
-        
-        currentPuzzle->step();
+
+        if(isInLobby){
+            if(puzzle_lobby.hasEnteredPuzzle()){
+                uint8_t id = puzzle_lobby.getCurrentPuzzleID();
+                isInLobby = false;
+                // Define novo puzzle baseado no ID
+                switch (id){
+                    case 0:
+                        currentPuzzle = &puzzle_crate;
+                        break;
+                    default:
+                        currentPuzzle = &puzzle_crate;
+                        break;
+                }
+
+            }
+            else{
+                puzzle_lobby.step();
+            }
+        }
+        else{
+            currentPuzzle->step();
+        }
         
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -237,7 +258,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     // mouse, em COORDENADAS DE TELA (pixels), desde a última chamada à função
     // CursorPosCallback().
 
-    if (!g_LeftMouseButtonPressed || isCurrentRoomLobby())
+    if (!g_LeftMouseButtonPressed)
         return;
 
     float dx = xpos - g_LastCursorPosX;

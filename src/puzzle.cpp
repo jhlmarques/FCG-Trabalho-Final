@@ -89,7 +89,7 @@ void MainLobby::playerMove(){
         switch (curFacingDirection)
         {
             case NORTH:
-                if(playerPosition.z < -(ROOM_LENGTH*STEP_SIZE)){
+                if(playerPosition.z == -((ROOM_LENGTH-1)*STEP_SIZE)){
                     return;
                 }
                 playerPosition.z -= STEP_SIZE;
@@ -152,6 +152,22 @@ void MainLobby::playerMove(){
     lastProcessedInput = cur_time;    
 }
 
+uint8_t MainLobby::getCurrentPuzzleID(){
+    // IDs começam em zero, no canto esquerdo, e sobem até o fim do canto esquerdo
+    // depois continuam no canto inferior direito e sobem até o fim do canto direito
+    if(playerPosition.x < 0){
+        return -(playerPosition.z / STEP_SIZE);
+    }
+    else if(playerPosition.x > 0){
+        return ROOM_LENGTH -(playerPosition.z / STEP_SIZE);
+    }
+    return 255;
+}
+
+void MainLobby::handleExitedPuzzle(){
+    enteredPuzzle = false;
+}
+
 void MainLobby::setupRoom(){
     playerPosition = glm::vec4(0.0f, CAMERA_HEAD_HEIGHT, 0.0f, 1.0f);
     curFacingDirection = NORTH;
@@ -179,7 +195,6 @@ void MainLobby::updateState(){
         ){
             if(g_wPressed){
                 // TO-DO: ANIMAÇÃO DA CÂMERA
-                printf("ENTRANDO EM PUZZLE\n");
                 enteredPuzzle = true;
                 return;
             }
@@ -200,7 +215,6 @@ void MainLobby::drawObjects(){
     for(int i=0; i < ROOM_LENGTH; i++){
         for(int j=0; j < ROOM_WIDTH; j++){
             auto coords = glm::vec3(
-                // Por exemplo, se a sala tem largura 3
                 (-(ROOM_SIDE_WIDTH) + j) * STEP_SIZE,
                 0.0f,
                 (float) i * -STEP_SIZE);

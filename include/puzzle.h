@@ -77,10 +77,16 @@ public:
     bool hasEnteredPuzzle();
     // Tenta realizar um movimento
     void playerMove();
+    // Retorna o ID do puzzle atual (relativo aos quadrados)
+    uint8_t getCurrentPuzzleID();
+    // Lida com a saída de um puzzle
+    void handleExitedPuzzle();
+
 };
 
-class CratePuzzle : public Puzzle{
-    public:
+class CratePuzzle : public Puzzle
+{
+public:
     void updateCamera();
     void setupRoom();
     void updateState();

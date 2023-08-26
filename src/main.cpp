@@ -121,6 +121,9 @@ int main(int argc, char* argv[])
     ObjModel model_bust("../../data/marble_bust_01_1k.obj", "../../data/");
     GameObject obj_bust(&model_bust, 0);
 
+    ObjModel model_light("../../data/lantern_chandelier_01_1k.obj", "../../data/");
+    GameObject obj_light(&model_light, 0);
+
     ObjModel model_wooden_crate_9("../../data/wooden_crate_02_4k.obj", "../../data/");
     GameObject obj_crate_9(&model_wooden_crate_9, 0);
     
@@ -140,6 +143,7 @@ int main(int argc, char* argv[])
     puzzle_lobby.setupRoom();
     puzzle_lobby.addObject("tile", &obj_tile);
     puzzle_lobby.addObject("statue", &obj_bust);
+    puzzle_lobby.addObject("light", &obj_light);
 
     /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA

@@ -1,0 +1,34 @@
+# Blender 3.6.1 MTL File: 'lantern_chandelier_01_1k.blend'
+# www.blender.org
+
+newmtl lantern_chandelier_01
+Ka 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/lantern_chandelier_01_diff_1k.jpg
+map_Ns textures/lantern_chandelier_01_rough_1k.jpg
+map_refl textures/lantern_chandelier_01_metal_1k.jpg
+map_Bump -bm 1.000000 textures/lantern_chandelier_01_nor_gl_1k.jpg
+
+newmtl lantern_chandelier_01_glass
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 3
+
+newmtl lantern_chandelier_01_lamp
+Ns 694.850952
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.733347 0.553329
+Ks 1.000000 1.000000 1.000000
+Ke 1.000000 0.728266 0.431344
+Ni 1.450000
+d 1.000000
+illum 2

@@ -179,7 +179,7 @@ void MainLobby::setupRoom(){
     room.setCamera(camera);
     
     // Iluminação do lobby principal
-    glm::vec4 lightPosition = glm::vec4(0.0f,12.0f,ROOM_LENGTH / 2.0f,1.0f);
+    glm::vec4 lightPosition = glm::vec4(0.0f, LOBBY_LIGHT_SOURCE_HEIGHT, -(ROOM_LENGTH*STEP_SIZE / 2.0f), 1.0f);
     LightSource lightSource(lightPosition);
     room.setLightSource(lightSource);
 
@@ -209,6 +209,7 @@ void MainLobby::drawObjects(){
     glm::mat4 model;
     auto obj_tile = Puzzle::getObject("tile");
     auto obj_statue = Puzzle::getObject("statue");
+    auto obj_light = Puzzle::getObject("light");
 
     // DESENHA TILES
     auto scale = Matrix_Scale(STEP_SIZE/2.0f, 1.0f, STEP_SIZE/2.0f);
@@ -259,6 +260,20 @@ void MainLobby::drawObjects(){
     obj_tile->draw(room.getLightSource());
 
     // DESENHA OBJETOS
+
+    // Fonte de luz
+    auto coords = room.getLightSource().getPosition();
+    model = Matrix_Translate(coords.x, coords.y + 0.5f, coords.z);
+
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_light->draw(room.getLightSource());
+
+    // Busto
+    coords = room.getLightSource().getPosition();
+    model = Matrix_Translate(coords.x, 0.0f, coords.z);
+
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_statue->draw(room.getLightSource());
     
 }
 

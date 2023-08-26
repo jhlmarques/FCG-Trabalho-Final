@@ -1,10 +1,7 @@
 #include "labfunctions.h"
 #include "camera.h"
-#include "tile.h"
 #include "globals.h"
-#include "texture.h"
 #include "gameobject.h"
-#include "light_source.h"
 
 #include "puzzle.h"
 
@@ -169,7 +166,7 @@ int main(int argc, char* argv[])
                 break;
         }
         
-        currentPuzzle->update();
+        currentPuzzle->step();
         
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário

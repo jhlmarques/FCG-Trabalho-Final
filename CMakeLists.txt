@@ -23,7 +23,6 @@ set(SOURCES
     src/puzzle.cpp
     src/stb_image.cpp
     src/texture.cpp
-    src/tile.cpp
     src/tiny_obj_loader.cpp
 )
 

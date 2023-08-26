@@ -1,13 +1,13 @@
 #include "puzzle.h"
 
 
-void Puzzle::update(){
+void Puzzle::step(){
     glm::vec4 bg = room.getBackgroundColor();
     glClearColor(bg.r, bg.g, bg.b, bg.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     updateCamera();
-    handleInputs();
+    updateState();
     drawObjects();
 
 }
@@ -38,61 +38,156 @@ GameObject* Puzzle::getObject(std::string obj_name){
 }
 
 
-MainLobby::MainLobby(){
-    tileVector.emplace_back(0.0f, 0.0f, 0.0f);
-    tileVector.emplace_back(0.0f, 0.0f, TILE_WIDTH); // n
-    tileVector.emplace_back(TILE_WIDTH, 0.0f, 0.0f); // w
-    tileVector.emplace_back(0.0f, 0.0f, -TILE_WIDTH);// s
-    tileVector.emplace_back(-TILE_WIDTH, 0.0f, 0.0f); // e
+MainLobby::MainLobby() : 
+playerPosition(0.0f, CAMERA_HEAD_HEIGHT, 0.0f, 1.0f), 
+curFacingDirection(NORTH),
+enteredPuzzle(false)
+{
 
-    tileVector.emplace_back(TILE_WIDTH, 0.0f, TILE_WIDTH); // NW
-    tileVector.emplace_back(TILE_WIDTH, 0.0f, -TILE_WIDTH); // SW 
-    tileVector.emplace_back(-TILE_WIDTH, 0.0f, -TILE_WIDTH); // SE
-    tileVector.emplace_back(-TILE_WIDTH, 0.0f, TILE_WIDTH); // NE
+}
 
-    tileVector[0].setNorth(&tileVector[1]);
-    tileVector[0].setWest(&tileVector[2]);
-    tileVector[0].setSouth(&tileVector[3]);
-    tileVector[0].setEast(&tileVector[4]);
+bool MainLobby::hasEnteredPuzzle(){
+    return enteredPuzzle;
+}
 
-    tileVector[1].setWest(&tileVector[5]);
-    tileVector[2].setNorth(&tileVector[5]);
+void MainLobby::playerMove(){
+    static auto rotateLeft = Matrix_Rotate(M_PI_2, room.getCamera().getVVec());
+    static auto rotateRight = Matrix_Rotate(-M_PI_2, room.getCamera().getVVec());
+    // Tempo desde o último input processado
+    static float lastProcessedInput = (float) glfwGetTime();;
+    // Estado atual de scroll (basicamente a inclinação)
+    static ScrollDirection curScrollDirection = SCROLL_NONE;
 
-    tileVector[3].setWest(&tileVector[6]);
-    tileVector[2].setSouth(&tileVector[6]);
 
-    tileVector[4].setSouth(&tileVector[7]);
-    tileVector[3].setEast(&tileVector[7]);
+    float cur_time = (float) glfwGetTime();
+    if((cur_time - lastProcessedInput) < 0.5f){
+        return;
+    }
 
-    tileVector[1].setEast(&tileVector[8]);
-    tileVector[4].setNorth(&tileVector[8]);
+    // Não podemos tratar outros movimentos enquanto estivermos 
+    // com input de scroll novo ou com a câmera inclinada
+    // para cima (por questão de design e facilidade de código)
+    if( (g_scrolledDirection != SCROLL_NONE)  ||
+        (curScrollDirection != SCROLL_NONE))
+        {
+        // Faz algo se houve scroll para uma direção contrária
+        if((g_scrolledDirection != SCROLL_NONE) && (g_scrolledDirection != curScrollDirection)){
+            if(g_scrolledDirection == SCROLL_UP){
+                room.getCamera().setradiansToRotate(M_PI_4, Z);
+            }
+            else if(g_scrolledDirection == SCROLL_DOWN){
+                room.getCamera().setradiansToRotate(-M_PI_4, Z);
+            }
+            // Se não estávamos inclinados, agora estamos; senão, estamos olhando reto
+            curScrollDirection = (curScrollDirection == SCROLL_NONE) ? g_scrolledDirection : SCROLL_NONE;
+        }
+        g_scrolledDirection = SCROLL_NONE; // Reseta scroll
 
-    tileVector[1].addObject(Puzzle::getObject("bunny"));
-    tileVector[2].addObject(Puzzle::getObject("bunny"));
-    tileVector[3].addObject(Puzzle::getObject("statue"));
+    }
+    // Comandos de movimento
+    else if(g_wPressed){
+        switch (curFacingDirection)
+        {
+            case NORTH:
+                if(playerPosition.z < -(ROOM_LENGTH*STEP_SIZE)){
+                    return;
+                }
+                playerPosition.z -= STEP_SIZE;
+                break;
+            case EAST:
+                if(playerPosition.x == (STEP_SIZE*ROOM_SIDE_WIDTH)){
+                    return;
+                }
+                playerPosition.x += STEP_SIZE;
+                break;
+            case SOUTH:
+                if(playerPosition.z == 0){
+                    return;
+                }
+                playerPosition.z += STEP_SIZE;
+                break;
+            case WEST:
+                if(playerPosition.x == -(STEP_SIZE*ROOM_SIDE_WIDTH)){
+                    return;
+                }
+                playerPosition.x -= STEP_SIZE;
+                break;
+        }
 
-    cur_tile = &tileVector[0];
+        // Realiza animação da câmera até a nova posição
+        room.getCamera().setDestinationPoint(playerPosition);
+
+    }
+    else if(g_aPressed){
+        // Vira para a esquerda
+        // Animação
+        room.getCamera().setradiansToRotate(M_PI_2, Y);
+
+        curFacingDirection--;
+        if(curFacingDirection < NORTH){
+            curFacingDirection = WEST;
+        }
+
+    }
+    else if(g_sPressed){
+        // TO-DO: ANIMAÇÃO
+        // Volta do puzzle para o centro do quadrado
+        // lobbyCamera.setPositionFree(centerPos);
+    }
+    else if(g_dPressed){
+        // Vira para a direita
+        // Animação
+        room.getCamera().setradiansToRotate(-M_PI_2, Y);
+
+        curFacingDirection++;
+        if(curFacingDirection > WEST){
+            curFacingDirection = NORTH;
+        }
+
+    }
+    else{
+        return;
+    }
+
+    lastProcessedInput = cur_time;    
 }
 
 void MainLobby::setupRoom(){
-    // Obtém a posição inicial da câmera 
-    auto tileCenter = cur_tile->getCenterPos();
-    tileCenter.y += CAMERA_HEAD_HEIGHT;
+    playerPosition = glm::vec4(0.0f, CAMERA_HEAD_HEIGHT, 0.0f, 1.0f);
+    curFacingDirection = NORTH;
+    enteredPuzzle = false;
 
     //  Câmera do lobby principal (inicialmente em modo "free")
-    room.setCamera(Camera(tileCenter));
+    auto camera = Camera(playerPosition);
+    camera.setLookAtPoint(glm::vec4(0.0f, CAMERA_HEAD_HEIGHT, -1.0f, 1.0f));
+    room.setCamera(camera);
+    
     // Iluminação do lobby principal
-    glm::vec4 lightPosition = glm::vec4(TILE_WIDTH,5.0f,0.0f,1.0f);
+    glm::vec4 lightPosition = glm::vec4(0.0f,12.0f,ROOM_LENGTH / 2.0f,1.0f);
     LightSource lightSource(lightPosition);
     room.setLightSource(lightSource);
 
 }
 
-void MainLobby::handleInputs(){
+void MainLobby::updateState(){
     // Apenas realizamos um movimento se a câmera não está animando
     if(!room.getCamera().animate()){
-        cur_tile->handleMovement(&cur_tile, room.getCamera());
+        // Puzzles sempre estão nas laterais
+        if(
+            ((curFacingDirection == WEST) && (playerPosition.x == -(STEP_SIZE*ROOM_SIDE_WIDTH))) ||
+            ((curFacingDirection == EAST) && (playerPosition.x == (STEP_SIZE*ROOM_SIDE_WIDTH)))
+        ){
+            if(g_wPressed){
+                // TO-DO: ANIMAÇÃO DA CÂMERA
+                printf("ENTRANDO EM PUZZLE\n");
+                enteredPuzzle = true;
+                return;
+            }
+        }
+        // Senão, realizamos movimento
+        playerMove();
     }
+
 }
 
 void MainLobby::drawObjects(){
@@ -101,25 +196,24 @@ void MainLobby::drawObjects(){
     auto obj_statue = Puzzle::getObject("statue");
 
     // DESENHA TILES
-    for(auto tile : tileVector){
-        auto coords = tile.getCenterPos();
-        auto scale = Matrix_Scale(TILE_WIDTH/2.0f, 1.0f, TILE_WIDTH/2.0f);
+    auto scale = Matrix_Scale(STEP_SIZE/2.0f, 1.0f, STEP_SIZE/2.0f);
+    for(int i=0; i < ROOM_LENGTH; i++){
+        for(int j=0; j < ROOM_WIDTH; j++){
+            auto coords = glm::vec3(
+                // Por exemplo, se a sala tem largura 3
+                (-(ROOM_SIDE_WIDTH) + j) * STEP_SIZE,
+                0.0f,
+                (float) i * -STEP_SIZE);
+            // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
+            model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            obj_tile->draw(room.getLightSource());
+        }
         
-        // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
-        model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        obj_tile->draw(room.getLightSource());
     }
 
     // DESENHA OBJETOS
-    // TO-DO: Usar uma classe que represente um "interativo" - Um modelo 3D junto
-    // de um hitbox, possivelmente com alguma lógica interna
-
-    // Uma cadeira no tile norte
-    auto pos = tileVector[1].getCenterPos();
-    model =  Matrix_Translate(pos.x, pos.y, pos.z) * Matrix_Rotate_Y(M_PI) * Matrix_Scale(4.0f, 4.0f, 4.0f);
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_statue->draw(room.getLightSource());
+    
 }
 
 void CratePuzzle::updateCamera(){
@@ -150,7 +244,7 @@ void CratePuzzle::setupRoom(){
 }
 
 
-void CratePuzzle::handleInputs(){
+void CratePuzzle::updateState(){
     return;
 }
 

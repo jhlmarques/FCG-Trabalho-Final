@@ -89,13 +89,13 @@ void MainLobby::playerMove(){
         switch (curFacingDirection)
         {
             case NORTH:
-                if(playerPosition.z == -(ROOM_LENGTH*STEP_SIZE)){
+                if(playerPosition.z == -(LOBBY_LENGTH*STEP_SIZE)){
                     return;
                 }
                 playerPosition.z -= STEP_SIZE;
                 break;
             case EAST:
-                if(playerPosition.x == (STEP_SIZE*ROOM_SIDE_WIDTH)){
+                if(playerPosition.x == (STEP_SIZE*LOBBY_SIDE_WIDTH)){
                     return;
                 }
                 playerPosition.x += STEP_SIZE;
@@ -107,7 +107,7 @@ void MainLobby::playerMove(){
                 playerPosition.z += STEP_SIZE;
                 break;
             case WEST:
-                if(playerPosition.x == -(STEP_SIZE*ROOM_SIDE_WIDTH)){
+                if(playerPosition.x == -(STEP_SIZE*LOBBY_SIDE_WIDTH)){
                     return;
                 }
                 playerPosition.x -= STEP_SIZE;
@@ -159,7 +159,7 @@ uint8_t MainLobby::getCurrentPuzzleID(){
         return -(playerPosition.z / STEP_SIZE);
     }
     else if(playerPosition.x > 0){
-        return ROOM_LENGTH -(playerPosition.z / STEP_SIZE);
+        return LOBBY_LENGTH -(playerPosition.z / STEP_SIZE);
     }
     return 255;
 }
@@ -179,7 +179,7 @@ void MainLobby::setupRoom(){
     room.setCamera(camera);
     
     // Iluminação do lobby principal
-    glm::vec4 lightPosition = glm::vec4(0.0f, LOBBY_LIGHT_SOURCE_HEIGHT, -(ROOM_LENGTH*STEP_SIZE / 2.0f), 1.0f);
+    glm::vec4 lightPosition = glm::vec4(0.0f, LOBBY_LIGHT_SOURCE_HEIGHT, -(LOBBY_LENGTH*STEP_SIZE / 2.0f), 1.0f);
     LightSource lightSource(lightPosition);
     room.setLightSource(lightSource);
 
@@ -190,8 +190,8 @@ void MainLobby::updateState(){
     if(!room.getCamera().animate()){
         // Puzzles sempre estão nas laterais
         if(
-            ((curFacingDirection == WEST) && (playerPosition.x == -(STEP_SIZE*ROOM_SIDE_WIDTH))) ||
-            ((curFacingDirection == EAST) && (playerPosition.x == (STEP_SIZE*ROOM_SIDE_WIDTH)))
+            ((curFacingDirection == WEST) && (playerPosition.x == -(STEP_SIZE*LOBBY_SIDE_WIDTH))) ||
+            ((curFacingDirection == EAST) && (playerPosition.x == (STEP_SIZE*LOBBY_SIDE_WIDTH)))
         ){
             if(g_wPressed){
                 // TO-DO: ANIMAÇÃO DA CÂMERA
@@ -213,10 +213,10 @@ void MainLobby::drawObjects(){
 
     // DESENHA TILES
     auto scale = Matrix_Scale(STEP_SIZE/2.0f, 1.0f, STEP_SIZE/2.0f);
-    for(int i=0; i <= ROOM_LENGTH; i++){
-        for(int j=0; j < ROOM_WIDTH; j++){
+    for(int i=0; i <= LOBBY_LENGTH; i++){
+        for(int j=0; j < LOBBY_WIDTH; j++){
             auto coords = glm::vec3(
-                (-(ROOM_SIDE_WIDTH) + j) * STEP_SIZE,
+                (-(LOBBY_SIDE_WIDTH) + j) * STEP_SIZE,
                 0.0f,
                 (float) i * -STEP_SIZE);
             // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
@@ -229,31 +229,31 @@ void MainLobby::drawObjects(){
 
     // Paredes
     // Esquerda
-    //model = Matrix_Scale(ROOM_LENGTH*STEP_SIZE, 1.0f, 1.0f);
-    model = Matrix_Translate(-(STEP_SIZE*ROOM_SIDE_WIDTH + STEP_SIZE/2.0f), ROOM_HEIGHT/2.0f, -ROOM_LENGTH*STEP_SIZE/2.0f);
+    //model = Matrix_Scale(LOBBY_LENGTH*STEP_SIZE, 1.0f, 1.0f);
+    model = Matrix_Translate(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f);
     model = model * Matrix_Rotate_Z(-M_PI_2);
-    model = model * Matrix_Scale(ROOM_HEIGHT/2.0f, 1.0f, ROOM_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
+    model = model * Matrix_Scale(LOBBY_HEIGHT/2.0f, 1.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
     
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_tile->draw(room.getLightSource());
     // Direita
-    model = Matrix_Translate((STEP_SIZE*ROOM_SIDE_WIDTH + STEP_SIZE/2.0f), ROOM_HEIGHT/2.0f, -ROOM_LENGTH*STEP_SIZE/2.0f);
+    model = Matrix_Translate((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f);
     model = model * Matrix_Rotate_Z(M_PI_2);
-    model = model * Matrix_Scale(ROOM_HEIGHT/2.0f, 1.0f, ROOM_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
+    model = model * Matrix_Scale(LOBBY_HEIGHT/2.0f, 1.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_tile->draw(room.getLightSource());
 
     // Traseira
-    model = Matrix_Translate(0.0f, ROOM_HEIGHT/2.0f, STEP_SIZE/2.0f);
+    model = Matrix_Translate(0.0f, LOBBY_HEIGHT/2.0f, STEP_SIZE/2.0f);
     model = model * Matrix_Rotate_X(-M_PI_2);
-    model = model * Matrix_Scale(ROOM_WIDTH*STEP_SIZE/2.0f, 1.0f, ROOM_HEIGHT/2.0f);
+    model = model * Matrix_Scale(LOBBY_WIDTH*STEP_SIZE/2.0f, 1.0f, LOBBY_HEIGHT/2.0f);
 
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_tile->draw(room.getLightSource());
 
     // Dianteira
-    model = Matrix_Translate(0.0f, ROOM_HEIGHT/2.0f,  -(ROOM_LENGTH*STEP_SIZE + STEP_SIZE/2.0f));
-    model = model * Matrix_Scale(ROOM_WIDTH*STEP_SIZE/2.0f, ROOM_HEIGHT/2.0f, 1.0f);
+    model = Matrix_Translate(0.0f, LOBBY_HEIGHT/2.0f,  -(LOBBY_LENGTH*STEP_SIZE + STEP_SIZE/2.0f));
+    model = model * Matrix_Scale(LOBBY_WIDTH*STEP_SIZE/2.0f, LOBBY_HEIGHT/2.0f, 1.0f);
     model = model * Matrix_Rotate_X(M_PI_2);
 
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -263,7 +263,7 @@ void MainLobby::drawObjects(){
 
     // Fonte de luz
     auto coords = room.getLightSource().getPosition();
-    model = Matrix_Translate(coords.x, coords.y + 0.5f, coords.z);
+    model = Matrix_Translate(coords.x, coords.y - 1.0f, coords.z);
 
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_light->draw(room.getLightSource());

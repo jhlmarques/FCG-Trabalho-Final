@@ -51,12 +51,12 @@ class Puzzle{
 
 #define CAMERA_HEAD_HEIGHT 1.4f //Valor somado a y para representar a altura da cabeça do personagem
 #define STEP_SIZE 3.0f //Valor do deslocamento
-#define ROOM_SIDE_WIDTH 2.0f // Máximo de unidades de deslocamento para o lado
-#define ROOM_WIDTH 5.0f // Máximo de espaços no eixo horizontal (sempre impar, considerando que deve sempre haver um centro, esquerda e direita)
-#define ROOM_LENGTH 4.0f // Máximo de unidades de deslocamento para a frente 
-#define ROOM_HEIGHT 6.0f
+#define LOBBY_SIDE_WIDTH 2.0f // Máximo de unidades de deslocamento para o lado
+#define LOBBY_WIDTH 5.0f // Máximo de espaços no eixo horizontal (sempre impar, considerando que deve sempre haver um centro, esquerda e direita)
+#define LOBBY_LENGTH 4.0f // Máximo de unidades de deslocamento para a frente 
+#define LOBBY_HEIGHT 6.0f
 
-#define LOBBY_LIGHT_SOURCE_HEIGHT (ROOM_HEIGHT - 0.5f)
+#define LOBBY_LIGHT_SOURCE_HEIGHT (LOBBY_HEIGHT)
 
 #define NORTH 0
 #define EAST 1

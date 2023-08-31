@@ -110,8 +110,9 @@ int main(int argc, char* argv[])
 
     // Carregamento de modelos de objetos
 
-    ObjModel model_tile_floor("../../data/plane.obj", "../../data/");
-    GameObject obj_tile(&model_tile_floor, 0);
+    ObjModel model_plane("../../data/plane.obj", "../../data/");
+    GameObject obj_tile(&model_plane, 0);
+    GameObject obj_table(&model_plane, 0);
 
     ObjModel model_bunny("../../data/bunny.obj", "../../data/");
     GameObject obj_bunny(&model_bunny, 0);
@@ -156,6 +157,13 @@ int main(int argc, char* argv[])
     puzzle_lobby.addObject("crateCanvas", &obj_canvas_crate_puzzle);
 
     /*
+        SETUP DO JOGO DE CARTAS
+    */
+    CardGame puzzle_card_game;
+    puzzle_card_game.setupRoom();
+    puzzle_card_game.addObject("table", &obj_table);
+
+    /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA
     */
     CratePuzzle puzzle_crate;
@@ -196,8 +204,10 @@ int main(int argc, char* argv[])
                     case 2:
                         currentPuzzle = &puzzle_crate;
                         break;
-                    default: // to pensando em botar no 6 o quadro dele 
+                    case 6:
                         currentPuzzle = &puzzle_gnome;
+                    default:
+                        currentPuzzle = &puzzle_card_game;
                         break;
                 }
             }

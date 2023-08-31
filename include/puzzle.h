@@ -65,6 +65,8 @@ class Puzzle{
 #define SOUTH 2
 #define WEST 3
 
+#define CARD_PUZZLE 255
+
 class MainLobby : public Puzzle{
     private:
 
@@ -86,6 +88,21 @@ class MainLobby : public Puzzle{
     uint8_t getCurrentPuzzleID();
     // Lida com a saída de um puzzle
     void handleExitedPuzzle();
+
+};
+
+class CardGame : public Puzzle{
+    private:
+    uint8_t currentLevel;
+
+    public:
+    CardGame();
+
+    uint8_t getCurrentLevel();
+    void setupRoom();
+    void updateState();
+    void drawObjects();
+
 
 };
 

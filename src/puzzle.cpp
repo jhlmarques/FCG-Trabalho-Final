@@ -153,6 +153,7 @@ void MainLobby::playerMove(){
 }
 
 uint8_t MainLobby::getCurrentPuzzleID(){
+    
     // IDs começam em zero, no canto esquerdo, e sobem até o fim do canto esquerdo
     // depois continuam no canto inferior direito e sobem até o fim do canto direito
     if(playerPosition.x < 0){
@@ -161,7 +162,9 @@ uint8_t MainLobby::getCurrentPuzzleID(){
     else if(playerPosition.x > 0){
         return LOBBY_LENGTH -(playerPosition.z / STEP_SIZE);
     }
-    return 255;
+
+    // Se não é um dos puzzles laterais, é o jogo de cartas
+    return CARD_PUZZLE;
 }
 
 void MainLobby::handleExitedPuzzle(){
@@ -188,10 +191,16 @@ void MainLobby::setupRoom(){
 void MainLobby::updateState(){
     // Apenas realizamos um movimento se a câmera não está animando
     if(!room.getCamera().animate()){
+        
         // Puzzles sempre estão nas laterais
+        // Jogo de cartas fica ao norte da sala
         if(
-            ((curFacingDirection == WEST) && (playerPosition.x == -(STEP_SIZE*LOBBY_SIDE_WIDTH))) ||
-            ((curFacingDirection == EAST) && (playerPosition.x == (STEP_SIZE*LOBBY_SIDE_WIDTH)))
+            !enteredPuzzle &&
+            (
+                ((curFacingDirection == WEST) && (playerPosition.x == -(STEP_SIZE*LOBBY_SIDE_WIDTH))) ||
+                ((curFacingDirection == EAST) && (playerPosition.x == (STEP_SIZE*LOBBY_SIDE_WIDTH))) ||
+                ((curFacingDirection == NORTH) && (playerPosition.x == 0) && (playerPosition.z == -(STEP_SIZE*LOBBY_LENGTH)))
+            ) 
         ){
             if(g_wPressed){
                 // TO-DO: ANIMAÇÃO DA CÂMERA
@@ -199,6 +208,7 @@ void MainLobby::updateState(){
                 return;
             }
         }
+
         // Senão, realizamos movimento
         playerMove();
     }
@@ -295,6 +305,41 @@ void MainLobby::drawObjects(){
     obj_frame->draw(room.getLightSource()); // Frame do gnomo
     // Falta colocar o canvas quando o puzzle estiver pronto
 }
+
+CardGame::CardGame() : currentLevel(0) {
+
+}
+
+void CardGame::setupRoom(){
+    auto camera = Camera(glm::vec3(0.0f, 0.7f, 0.0f));
+    camera.setLookAtPoint(glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
+    room.setCamera(camera);
+    
+    glm::vec4 lightPosition = glm::vec4(0.0f, 2.0f, -1.0f, 1.0f);
+    LightSource lightSource(lightPosition);
+    room.setLightSource(lightSource);    
+}
+
+void CardGame::updateState(){
+    return;
+}
+
+void CardGame::drawObjects(){
+    glm::mat4 model;
+    auto obj_table = Puzzle::getObject("table");
+
+    model = Matrix_Translate(0.0f, 0.0f, -1.0f);
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_table->draw(room.getLightSource());    
+
+}
+
+
+
+
+
+
+
 
 void CratePuzzle::updateCamera(){
     Puzzle::updateCamera();

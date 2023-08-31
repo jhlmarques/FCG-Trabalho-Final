@@ -127,7 +127,10 @@ int main(int argc, char* argv[])
     GameObject obj_crate_9(&model_wooden_crate_9, 0);
 
     ObjModel model_frame_crate_puzzle("../../data/crate_frame.obj", "../../data/");
-    GameObject obj_frame(&model_frame_crate_puzzle, 0);
+    GameObject obj_frame_crate_puzzle(&model_frame_crate_puzzle, 0);
+    GameObject obj_canvas_crate_puzzle(&model_frame_crate_puzzle, 1);
+    obj_frame_crate_puzzle.setIlluminationModel(LAMBERT);
+    obj_canvas_crate_puzzle.setIlluminationModel(LAMBERT);
     
     // Note que, no sistema de coordenadas da câmera, os planos near e far
     // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
@@ -146,6 +149,8 @@ int main(int argc, char* argv[])
     puzzle_lobby.addObject("tile", &obj_tile);
     puzzle_lobby.addObject("statue", &obj_bust);
     puzzle_lobby.addObject("light", &obj_light);
+    puzzle_lobby.addObject("crateFrame", &obj_frame_crate_puzzle);
+    puzzle_lobby.addObject("crateCanvas", &obj_canvas_crate_puzzle);
 
     /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA

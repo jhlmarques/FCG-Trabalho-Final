@@ -210,6 +210,8 @@ void MainLobby::drawObjects(){
     auto obj_tile = Puzzle::getObject("tile");
     auto obj_statue = Puzzle::getObject("statue");
     auto obj_light = Puzzle::getObject("light");
+    auto obj_crateFrame = Puzzle::getObject("crateFrame");
+    auto obj_crateCanvas = Puzzle::getObject("crateCanvas");
 
     // DESENHA TILES
     auto scale = Matrix_Scale(STEP_SIZE/2.0f, 1.0f, STEP_SIZE/2.0f);
@@ -274,7 +276,15 @@ void MainLobby::drawObjects(){
 
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_statue->draw(room.getLightSource());
-    
+
+    // Quadro do puzzle da caixa
+    model = Matrix_Translate(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f);    
+    model = model * Matrix_Rotate_Y(M_PI_2);
+    model = model * Matrix_Scale(FRAME_SIZE*g_ScreenRatio, FRAME_SIZE, 1.0f);
+
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_crateFrame->draw(room.getLightSource()); // Frame da caixa 
+    obj_crateCanvas->draw(room.getLightSource()); // Canvas da caixa 
 }
 
 void CratePuzzle::updateCamera(){

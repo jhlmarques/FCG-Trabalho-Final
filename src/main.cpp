@@ -117,7 +117,6 @@ int main(int argc, char* argv[])
     ObjModel model_bunny("../../data/bunny.obj", "../../data/");
     GameObject obj_bunny(&model_bunny, 0);
 
-    //ObjModel model_bust("../../data/modern_arm_bust_01_1k.obj", "../../data/");
     ObjModel model_bust("../../data/marble_bust_01_1k.obj", "../../data/");
     GameObject obj_bust(&model_bust, 0);
 
@@ -126,6 +125,9 @@ int main(int argc, char* argv[])
 
     ObjModel model_wooden_crate_9("../../data/wooden_crate_02_4k.obj", "../../data/");
     GameObject obj_crate_9(&model_wooden_crate_9, 0);
+
+    ObjModel model_frame_crate_puzzle("../../data/crate_frame.obj", "../../data/");
+    GameObject obj_frame(&model_frame_crate_puzzle, 0);
     
     // Note que, no sistema de coordenadas da câmera, os planos near e far
     // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.

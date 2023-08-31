@@ -336,9 +336,10 @@ void CratePuzzle::handleCursorMovement(float dx, float dy){
 }
 
 void CratePuzzle::handleScroll(double xoffset, double yoffset){
-    float currentCameraDistance = room.getCamera().getCameraDistance();
-    currentCameraDistance -= 0.1f*yoffset;
+    return; // a príncipio não pode dar zoom nesse puzzle
+    // float currentCameraDistance = room.getCamera().getCameraDistance();
+    // currentCameraDistance -= 0.1f*yoffset;
 
-    room.getCamera().setCameraDistance(currentCameraDistance);
-    room.getCamera().updateViewVecLookAt();
+    // room.getCamera().setCameraDistance(currentCameraDistance);
+    // room.getCamera().updateViewVecLookAt();
 }

@@ -91,18 +91,61 @@ class MainLobby : public Puzzle{
 
 };
 
+class CardGame;
+class Card;
+
+class Card{
+    private:
+    bool markedForSacrifice;
+    uint8_t bloodCost;
+    uint8_t bloodProvided;
+    uint8_t attackPower;
+    uint8_t health;
+    uint8_t sigil;
+
+    glm::vec4 worldPos;
+
+    public:
+    Card(uint8_t health, uint8_t attack, uint8_t cost);
+    void setWorldPos(glm::vec4 worldPos);
+    glm::vec4  getWorldPos();
+    void handleAttackingCard(CardGame &game, Card &attacked);
+    void handleAttackingPlayer(CardGame &game, bool isCPU);
+    void handleAttacked(CardGame& game, Card& attacker);
+    void handleDeath(CardGame& game);
+
+};
+
 class CardGame : public Puzzle{
     private:
     uint8_t currentLevel;
+    int turn;
+    bool playerCanPlay;
+
+    std::vector<Card*> playerHand;
+    std::vector<Card*> cardsInPlay;
+    Card* playerSideCards[4];
+    Card* enemySideCards[4];
+    Card* enemyFutureCards[4];
 
     public:
     CardGame();
 
     uint8_t getCurrentLevel();
+    
     void setupRoom();
     void updateState();
     void drawObjects();
 
+    void handlePlayerTurn();
+    void handleTurnEnded();
+    void handleEnemyTurn();
+    void handleMatchEnd();
+
+    void drawCard();
+    void playCard(Card* card, uint8_t pos);
+    void sacrificeSelectedCards();
+    void reduceHealth(bool playerOrCPU);
 
 };
 

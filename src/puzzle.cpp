@@ -306,7 +306,48 @@ void MainLobby::drawObjects(){
     // Falta colocar o canvas quando o puzzle estiver pronto
 }
 
-CardGame::CardGame() : currentLevel(0) {
+Card::Card(uint8_t health, uint8_t attack, uint8_t cost) : health(health), attackPower(attack), bloodCost(cost){}
+
+void Card::setWorldPos(glm::vec4 worldPos){
+    this->worldPos = worldPos;
+}
+
+glm::vec4  Card::getWorldPos(){
+    return worldPos;
+}
+
+void Card::handleAttackingCard(CardGame& game, Card& attacked){
+    attacked.handleAttacked(game, *this);
+}
+
+void Card::handleAttackingPlayer(CardGame& game, bool isCPU){
+    if(isCPU){
+        game.reduceHealth(true);
+    }
+    else{
+        game.reduceHealth(false);
+    }
+}
+
+void Card::handleAttacked(CardGame& game, Card& attacker){
+    health -= attacker.attackPower;
+    if(health < 0){
+        health = 0;
+        handleDeath(game);
+    }
+}
+
+void Card::handleDeath(CardGame& game){
+    return;
+}
+
+CardGame::CardGame() : 
+currentLevel(0), 
+playerCanPlay(false), 
+playerSideCards{nullptr, nullptr, nullptr, nullptr},
+enemySideCards{nullptr, nullptr, nullptr, nullptr},
+enemyFutureCards{nullptr, nullptr, nullptr, nullptr}
+{
 
 }
 
@@ -321,20 +362,83 @@ void CardGame::setupRoom(){
 }
 
 void CardGame::updateState(){
+    if(g_dPressed){
+        drawCard();
+        g_dPressed = false;
+    }
+    
     return;
 }
 
 void CardGame::drawObjects(){
     glm::mat4 model;
     auto obj_table = Puzzle::getObject("table");
+    auto obj_card = Puzzle::getObject("card");
 
     model = Matrix_Translate(0.0f, 0.0f, -1.0f);
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_table->draw(room.getLightSource());    
+    obj_table->draw(room.getLightSource());
+
+    for(auto card : cardsInPlay){
+        auto pos = card->getWorldPos();
+        model = Matrix_Translate(pos.x, pos.y, pos.z);
+        model *= Matrix_Scale(0.3, 0.4, 1.0);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        obj_card->draw(room.getLightSource());
+    }
+
+    for(auto card : playerHand){
+        auto pos = card->getWorldPos();
+        model = Matrix_Translate(pos.x, pos.y, pos.z);
+        model *= Matrix_Scale(0.15, 0.2, 1.0);
+        model *= Matrix_Rotate_X(1.309); // ~75º
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        obj_card->draw(room.getLightSource());        
+    }    
 
 }
 
+void CardGame::handlePlayerTurn(){
 
+}
+
+void CardGame::handleTurnEnded(){
+
+}
+
+void CardGame::handleEnemyTurn(){
+
+}
+
+void CardGame::handleMatchEnd(){
+
+}
+
+void CardGame::drawCard(){
+    for(auto card : playerHand){
+        auto pos = card->getWorldPos();
+        pos.x -= 0.05;
+        pos.z -= 0.001;
+        card->setWorldPos(pos);
+    }
+    playerHand.emplace_back(new Card(3, 1, 1));
+    auto cameraPos = room.getCamera().getPosition();
+    auto cameraW = room.getCamera().getWVec();
+    auto cameraV = room.getCamera().getVVec();
+    playerHand.back()->setWorldPos((cameraPos + (-cameraV * glm::vec4(0.4, 0.4, 0.4, 1.0))) + (-cameraW * glm::vec4(0.3, 0.3, 0.3, 1.0)));
+
+}
+void CardGame::playCard(Card* card, uint8_t pos){
+
+}
+
+void CardGame::sacrificeSelectedCards(){
+
+}
+
+void CardGame::reduceHealth(bool playerOrCPU){
+
+}
 
 
 

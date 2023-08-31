@@ -113,6 +113,7 @@ int main(int argc, char* argv[])
     ObjModel model_plane("../../data/plane.obj", "../../data/");
     GameObject obj_tile(&model_plane, 0);
     GameObject obj_table(&model_plane, 0);
+    GameObject obj_blank_card(&model_plane, 0);
 
     ObjModel model_bunny("../../data/bunny.obj", "../../data/");
     GameObject obj_bunny(&model_bunny, 0);
@@ -162,6 +163,7 @@ int main(int argc, char* argv[])
     CardGame puzzle_card_game;
     puzzle_card_game.setupRoom();
     puzzle_card_game.addObject("table", &obj_table);
+    puzzle_card_game.addObject("card", &obj_blank_card);
 
     /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA

@@ -5,8 +5,13 @@
 // Carrega o objeto de índice "shape" de um arquivo .obj carregado
 // É possível que dê problemas para .obj com mais de um shape; cuidado (TO-DO)
 GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
-    textureScale(1.0), type(OBJ_GENERIC), illumination_model(BLINN_PHONG)
+    textureScale(1.0), type(OBJ_GENERIC), illumination_model(BLINN_PHONG),
+    up{0.0, 1.0, 0.0, 0.0}, view{0.0, 0.0, 1.0, 0.0}, position{0.0, 0.0, 0.0, 1.0}
 {
+    w = -view / norm(view);
+    u = crossproduct(up, w)/norm(crossproduct(up, w));
+    v = crossproduct(w, u);
+    
     std::vector<float>  model_coefficients;
     std::vector<float>  normal_coefficients;
     std::vector<float>  texture_coefficients;
@@ -257,4 +262,38 @@ void GameObject::setTextureScale(float scale){
 
 void GameObject::setIlluminationModel(int illumination_model){
     this->illumination_model = illumination_model;
+}
+
+
+void GameObject::setPosition(glm::vec4 pos){
+    position = pos;
+}
+
+glm::vec4 GameObject::getView(){
+    return view;
+}
+
+glm::mat4 GameObject::getViewMatrix(){    
+    return Matrix_Camera_View(position, view, up);
+}
+
+void GameObject::setView(glm::vec4 view){
+    this->view = view;
+}
+
+glm::vec4 GameObject::getPosition(){
+    return position;
+}
+
+
+glm::vec4 GameObject::getWVec(){
+    return w;
+}
+
+glm::vec4 GameObject::getVVec(){
+    return v;
+}
+
+glm::vec4 GameObject::getUVec(){
+    return u;
 }

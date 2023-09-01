@@ -201,6 +201,10 @@ void MainLobby::setupRoom(){
 }
 
 void MainLobby::updateState(){
+    static int statueAnimationID = ANIMATION_ID_NONE;
+    static bool statueStatus = false;
+    
+
     // Apenas realizamos um movimento se a câmera não está animando
     if(g_AnimationManager.hasAnimationFinished(cameraAnimationID, false)){
         
@@ -223,6 +227,21 @@ void MainLobby::updateState(){
 
         // Senão, realizamos movimento
         playerMove();
+    }
+
+    if(g_AnimationManager.hasAnimationFinished(statueAnimationID, true)){
+        AnimationData animation;
+        if(statueStatus){
+            //animation.setDestinationPoint(glm::vec4(STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
+            animation.setradiansToRotate(M_2_PI, Y);
+        }
+        else{
+            //animation.setDestinationPoint(glm::vec4(-STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
+            animation.setradiansToRotate(-M_2_PI, Y);
+        }
+        statueStatus = !statueStatus;
+        statueAnimationID = g_AnimationManager.addAnimatedObject(Puzzle::getObject("statue"), animation);
+
     }
 
 }
@@ -294,7 +313,7 @@ void MainLobby::drawObjects(){
 
     // Busto
     coords = room.getLightSource().getPosition();
-    model = Matrix_Translate(coords.x, 0.0f, coords.z);
+    model = obj_statue->getViewMatrix();
 
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_statue->draw(room.getLightSource());

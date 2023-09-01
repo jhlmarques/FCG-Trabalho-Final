@@ -9,6 +9,8 @@
 #include "globals.h"
 #include "material.h"
 #include "light_source.h"
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
 
 #define OBJ_GENERIC 0
 #define OBJ_SPHERICAL 1
@@ -33,7 +35,17 @@ class GameObject{
     glm::vec3    bbox_min; // Axis-Aligned Bounding Box do objeto
     glm::vec3    bbox_max;    
     int          illumination_model;
-    
+
+    // Posição do objeto
+    glm::vec4 position;
+    // Sistema de coordenadas local
+    glm::vec4 w;
+    glm::vec4 v;
+    glm::vec4 u;
+
+    glm::vec4 up;
+    glm::vec4 view;
+
     // Materiais do objeto
     std::vector<Material> materials;
 
@@ -51,6 +63,22 @@ class GameObject{
 
     // Desenha o objeto
     void draw(LightSource& lightSource);
+
+    // Define posição do objeto
+    void setPosition(glm::vec4 pos);
+    // Retorna posição do objeto
+    glm::vec4 getPosition();
+    // Obtém vetor view
+    glm::vec4 getView();
+    // Define vetor view
+    void setView(glm::vec4 view);
+
+    // Retorna matriz de transformação para o view do objeto
+    glm::mat4 getViewMatrix();
+
+    glm::vec4 getWVec();
+    glm::vec4 getVVec();
+    glm::vec4 getUVec();
 
 
 };

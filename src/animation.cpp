@@ -31,10 +31,85 @@ bool AnimationManager::hasAnimationFinished(int animationID, bool isObject=true)
 
 void AnimationManager::animationStep(){
     animateCameras();
+    animateObjects();
 }
 
 void AnimationManager::animateObjects(){
+static float lastAnimationTime = (float) glfwGetTime();
 
+    float current_time = (float) glfwGetTime();
+    float delta_t = current_time - lastAnimationTime;
+    lastAnimationTime = current_time;
+
+    // Itera por pares (chave, valor)
+    for(auto& animationPair : mapAnimatedObjects){
+        AnimationData& data = animationPair.second.first;
+        GameObject* obj = animationPair.second.second;
+
+        // Checa se animação acabou
+        if(data.isFinished()){
+            mapAnimatedObjects.erase(animationPair.first);
+            continue;
+        }
+
+        glm::vec4 position = obj->getPosition();
+
+        // Animações
+        if(data.animationFlags & ANIMATION_MOVING){
+            // Anda em linha reta ao novo ponto
+            glm::vec4 direction = data.destinationPoint - position;
+            float dNorm = norm(direction);
+
+            // Se está perto o suficiente, pula para o ponto
+            if(dNorm < 0.1){
+                position = data.destinationPoint;
+                data.animationFlags ^= ANIMATION_MOVING;
+            }
+            // Senão, move-se
+            else{
+                glm::vec4 nDirection = direction / norm(direction);
+                position = position + (nDirection * delta_t * CAMERA_MOVE_SPEED);
+            }
+
+            // Atualiza posição
+            obj->setPosition(position);
+        }
+
+        if(data.animationFlags & ANIMATION_ROTATING){
+            // Matriz de rotação
+            glm::mat4 rotation;
+            
+            // 90 graus/seg
+            // TO-DO: AJUSTAR VELOCIDADE USANDO ANIMATION DATA
+            auto radiansFromDeltaT = data.rotationSign*glm::radians(CAMERA_ROTATE_SPEED*delta_t);
+            
+            // Talvez tenha uma maneira mais esperta de fazer isso, mas foi o que consegui pensar as
+            // 23:12
+            if(((data.rotationSign > 0) && ((data.radiansToRotate - radiansFromDeltaT) < 0)) || \
+                ((data.rotationSign < 0) && ((radiansFromDeltaT - data.radiansToRotate ) < 0))){
+                // Rotaciona a quantidade exata necessária
+                switch(data.rotationAxis){
+                    case X: rotation = Matrix_Rotate(data.radiansToRotate, obj->getWVec()); break;
+                    case Y: rotation = Matrix_Rotate(data.radiansToRotate, obj->getVVec()); break;
+                    case Z: rotation = Matrix_Rotate(data.radiansToRotate, obj->getUVec()); break;
+                }
+                data.radiansToRotate = 0.0f;
+                data.animationFlags ^= ANIMATION_ROTATING;
+            }
+            else{
+                // Rotaciona conforme delta_t
+                switch(data.rotationAxis){
+                    case X: rotation = Matrix_Rotate(radiansFromDeltaT, obj->getWVec()); break;
+                    case Y: rotation = Matrix_Rotate(radiansFromDeltaT, obj->getVVec()); break;
+                    case Z: rotation = Matrix_Rotate(radiansFromDeltaT, obj->getUVec()); break;
+                }
+                data.radiansToRotate -= radiansFromDeltaT;    
+            }
+
+            // Aplica matriz de rotação a view
+            obj->setView(rotation * obj->getView());
+        }
+    }
 }
 
 void AnimationManager::animateCameras(){
@@ -51,7 +126,6 @@ void AnimationManager::animateCameras(){
 
         // Checa se animação acabou
         if(data.isFinished()){
-            printf("IIIRRRRUULLL\n");
             mapAnimatedCameras.erase(animationPair.first);
             continue;
         }

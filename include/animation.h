@@ -28,7 +28,6 @@ struct AnimationData{
     Axis rotationAxis;
     glm::vec4 destinationPoint;
 
-    public:
     AnimationData();
 
     void setradiansToRotate(float radians, Axis axis);

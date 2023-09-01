@@ -114,8 +114,8 @@ class GnomePuzzle : public Puzzle
     GnomePuzzle();
 
     private: 
+    // Move o gnomo utilizando as setas do teclado
     void moveGnome(glm::mat4& model);
-    void handleCursorMovement(float dx, float dy);
     
     float prev_time;
     glm::vec4 gnome_position;

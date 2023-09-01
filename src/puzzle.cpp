@@ -348,17 +348,10 @@ gnome_position(0.0f, 0.0f, 0.0f, 1.0f)
 }
 
 void GnomePuzzle::setupRoom(){
-    // Instanciação da câmera de lookat puzzle que aponta para a origem 
-    Camera camera(glm::vec3(2.0f, 2.0f, 1.5f));
-
-    glm::vec4 lookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    camera.setLookAtPoint(lookatPoint);
-
-    currentTheta = camera.getCameraTheta();
-    currentPhi = camera.getCameraPhi();
+    // Câmera está olhando em direção ao gnomo e um pouco acima dele (offset no Y)
+    Camera camera(gnome_position + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));    
 
     glm::vec4 lightPosition = camera.getPosition();
-
     LightSource lightSource(lightPosition);
 
     room.setCamera(camera);
@@ -370,17 +363,10 @@ void GnomePuzzle::updateState(){
     return;
 }
 
-void GnomePuzzle::handleCursorMovement(float dx, float dy){
-    Puzzle::handleCursorMovement(dx, dy);
-    room.getCamera().setCameraTheta(currentTheta);
-    room.getCamera().setCameraPhi(currentPhi);
-    room.getCamera().updateViewVecLookAt();
-}
 
 void GnomePuzzle::updateCamera(){
+    room.getCamera().setPositionFree(gnome_position + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));
     Puzzle::updateCamera();
-    room.getLightSource().setPosition(room.getCamera().getPosition());
-    room.getLightSource().setDirection(room.getCamera().getViewVec());
 }
 
 void GnomePuzzle::drawObjects(){
@@ -388,7 +374,11 @@ void GnomePuzzle::drawObjects(){
 
     glm::mat4 model = Matrix_Identity(); 
     moveGnome(model);
-    model = model * Matrix_Scale(4.0f, 4.0f, 4.0f);
+    model = model * Matrix_Rotate_Y(-M_PI_2);
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_gnome->draw(room.getLightSource());
+
+    model = Matrix_Translate(0.25f, 0.0f, 0.0f);
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_gnome->draw(room.getLightSource());
 }
@@ -406,10 +396,10 @@ void GnomePuzzle::moveGnome(glm::mat4& model){
     if (g_downPressed){
         gnome_position.y -= speed*delta_t;
     }
-    if (g_rightPressed){
+    if (g_leftPressed){
         gnome_position.x += speed*delta_t;
     }
-    if (g_leftPressed){
+    if (g_rightPressed){
         gnome_position.x -= speed*delta_t;
     }
     

@@ -128,7 +128,8 @@ int main(int argc, char* argv[])
 
     ObjModel model_frame_crate_puzzle("../../data/crate_frame.obj", "../../data/");
     GameObject obj_frame_crate_puzzle(&model_frame_crate_puzzle, 0);
-    GameObject obj_canvas_crate_puzzle(&model_frame_crate_puzzle, 1);
+    ObjModel model_frame_crate_canvas_puzzle("../../data/crate_frame_canvas.obj", "../../data/");
+    GameObject obj_canvas_crate_puzzle(&model_frame_crate_canvas_puzzle, 0);
     obj_frame_crate_puzzle.setIlluminationModel(LAMBERT);
     obj_canvas_crate_puzzle.setIlluminationModel(LAMBERT);
     

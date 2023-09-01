@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include "gameobject.h"
+#include "animation.h"
 
 class Puzzle;
 
@@ -73,6 +74,9 @@ class MainLobby : public Puzzle{
     glm::vec4 playerPosition; // A posição atual do jogador
     int8_t curFacingDirection;
     bool enteredPuzzle;
+
+    // Animações
+    int cameraAnimationID;
 
     public:
     MainLobby();

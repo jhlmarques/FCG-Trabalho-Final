@@ -17,9 +17,6 @@
 
 // Altura da câmera (deslocamento no eixo y). Simula altura da cabeça
 #define CAMERA_HEAD_HEIGHT 4.0f
-// Constantes para movimentação da câmera
-#define CAMERA_ROTATING 1
-#define CAMERA_MOVING 2
 #define CAMERA_ROTATE_SPEED 180.0f
 #define CAMERA_MOVE_SPEED 10.0f
 // Constantes para inicialização da câmera
@@ -28,12 +25,6 @@
 #define CAMERA_DEFAULT_DISTANCE 3.5f
 #define CAMERA_DEFAULT_UP_VECTOR glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) // Para cima
 #define CAMERA_DEFAULT_VIEW_VECTOR glm::vec4(0.0f, 0.0f, 1.0f, 0.0f) // Para frente
-
-enum cameraAxis{
-    X,
-    Y,
-    Z
-};
 
 class Camera{
 
@@ -52,13 +43,6 @@ class Camera{
     float theta;
     float phi;
     float r;
-
-    // Animação
-    uint8_t animationFlags;
-    float radiansToRotate;
-    int8_t rotationSign;
-    cameraAxis rotationAxis;
-    glm::vec4 destinationPoint;
 
     public:
     
@@ -103,14 +87,6 @@ class Camera{
     void setCameraDistance(float r);
     float getCameraDistance();
     
-    // ANIMAÇÃO DA CÂMERA (podemos ver de colocar em uma classe separada)
-
-    // Retorna verdadeiro se uma animação foi realizada
-    bool animate();
-    // Configura a câmera para rotacionar
-    void setradiansToRotate(float radians, cameraAxis axis);
-    // Define um ponto o qual a câmera deve se movimentar a
-    void setDestinationPoint(glm::vec4 dst);
 };
 
 #endif // __CAMERA_H__

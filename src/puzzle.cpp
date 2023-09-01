@@ -41,7 +41,8 @@ GameObject* Puzzle::getObject(std::string obj_name){
 MainLobby::MainLobby() : 
 playerPosition(0.0f, CAMERA_HEAD_HEIGHT, 0.0f, 1.0f), 
 curFacingDirection(NORTH),
-enteredPuzzle(false)
+enteredPuzzle(false),
+cameraAnimationID(ANIMATION_ID_NONE)
 {
 
 }
@@ -73,10 +74,14 @@ void MainLobby::playerMove(){
         // Faz algo se houve scroll para uma direção contrária
         if((g_scrolledDirection != SCROLL_NONE) && (g_scrolledDirection != curScrollDirection)){
             if(g_scrolledDirection == SCROLL_UP){
-                room.getCamera().setradiansToRotate(M_PI_4, Z);
+                AnimationData animation;
+                animation.setradiansToRotate(M_PI_4, Z);
+                cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
             }
             else if(g_scrolledDirection == SCROLL_DOWN){
-                room.getCamera().setradiansToRotate(-M_PI_4, Z);
+                AnimationData animation;
+                animation.setradiansToRotate(-M_PI_4, Z);
+                cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
             }
             // Se não estávamos inclinados, agora estamos; senão, estamos olhando reto
             curScrollDirection = (curScrollDirection == SCROLL_NONE) ? g_scrolledDirection : SCROLL_NONE;
@@ -115,13 +120,18 @@ void MainLobby::playerMove(){
         }
 
         // Realiza animação da câmera até a nova posição
-        room.getCamera().setDestinationPoint(playerPosition);
+        AnimationData animation;
+        animation.setDestinationPoint(playerPosition);
+        cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
 
     }
     else if(g_aPressed){
         // Vira para a esquerda
         // Animação
-        room.getCamera().setradiansToRotate(M_PI_2, Y);
+        AnimationData animation;
+        animation.setradiansToRotate(M_PI_2, Y);
+        cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
+        
 
         curFacingDirection--;
         if(curFacingDirection < NORTH){
@@ -137,7 +147,9 @@ void MainLobby::playerMove(){
     else if(g_dPressed){
         // Vira para a direita
         // Animação
-        room.getCamera().setradiansToRotate(-M_PI_2, Y);
+        AnimationData animation;
+        animation.setradiansToRotate(-M_PI_2, Y);
+        cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
 
         curFacingDirection++;
         if(curFacingDirection > WEST){
@@ -190,7 +202,7 @@ void MainLobby::setupRoom(){
 
 void MainLobby::updateState(){
     // Apenas realizamos um movimento se a câmera não está animando
-    if(!room.getCamera().animate()){
+    if(g_AnimationManager.hasAnimationFinished(cameraAnimationID, false)){
         
         // Puzzles sempre estão nas laterais
         // Jogo de cartas fica ao norte da sala

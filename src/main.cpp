@@ -234,6 +234,9 @@ int main(int argc, char* argv[])
         // definidas anteriormente usando glfwSet*Callback() serão chamadas
         // pela biblioteca GLFW.
         glfwPollEvents();
+
+        // Realiza animações
+        g_AnimationManager.animationStep();
     }
 
     // Finalizamos o uso dos recursos do sistema operacional

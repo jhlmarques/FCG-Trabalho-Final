@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     puzzle_lobby.addObject("tile", &obj_tile);
     puzzle_lobby.addObject("statue", &obj_bust);
     puzzle_lobby.addObject("light", &obj_light);
-    puzzle_lobby.addObject("crateFrame", &obj_frame_crate_puzzle);
+    puzzle_lobby.addObject("frame", &obj_frame_crate_puzzle);
     puzzle_lobby.addObject("crateCanvas", &obj_canvas_crate_puzzle);
 
     /*

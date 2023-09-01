@@ -210,7 +210,7 @@ void MainLobby::drawObjects(){
     auto obj_tile = Puzzle::getObject("tile");
     auto obj_statue = Puzzle::getObject("statue");
     auto obj_light = Puzzle::getObject("light");
-    auto obj_crateFrame = Puzzle::getObject("crateFrame");
+    auto obj_frame = Puzzle::getObject("frame");
     auto obj_crateCanvas = Puzzle::getObject("crateCanvas");
 
     // DESENHA TILES
@@ -283,8 +283,17 @@ void MainLobby::drawObjects(){
     model = model * Matrix_Scale(FRAME_SIZE*g_ScreenRatio, FRAME_SIZE, 1.0f);
 
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_crateFrame->draw(room.getLightSource()); // Frame da caixa 
+    obj_frame->draw(room.getLightSource()); // Frame da caixa 
     obj_crateCanvas->draw(room.getLightSource()); // Canvas da caixa 
+
+    // Quadro do puzzle do gnomo
+    model = Matrix_Translate((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f);    
+    model = model * Matrix_Rotate_Y(-M_PI_2);
+    model = model * Matrix_Scale(FRAME_SIZE*g_ScreenRatio, FRAME_SIZE, 1.0f);
+
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_frame->draw(room.getLightSource()); // Frame do gnomo
+    // Falta colocar o canvas quando o puzzle estiver pronto
 }
 
 void CratePuzzle::updateCamera(){
@@ -378,7 +387,8 @@ void GnomePuzzle::drawObjects(){
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_gnome->draw(room.getLightSource());
 
-    model = Matrix_Translate(0.25f, 0.0f, 0.0f);
+    // Utilizado para teste de colisão
+    model = Matrix_Translate(-0.5f, 0.0f, 0.0f);
     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
     obj_gnome->draw(room.getLightSource());
 }

@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
                         break;
                     case 6:
                         currentPuzzle = &puzzle_gnome;
+                        break;
                     default:
                         currentPuzzle = &puzzle_card_game;
                         break;

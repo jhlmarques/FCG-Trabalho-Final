@@ -50,15 +50,15 @@ class Puzzle{
 };
 
 #define CAMERA_HEAD_HEIGHT 1.4f //Valor somado a y para representar a altura da cabeça do personagem
+
 #define STEP_SIZE 3.0f //Valor do deslocamento
 #define LOBBY_SIDE_WIDTH 2.0f // Máximo de unidades de deslocamento para o lado
 #define LOBBY_WIDTH 5.0f // Máximo de espaços no eixo horizontal (sempre impar, considerando que deve sempre haver um centro, esquerda e direita)
 #define LOBBY_LENGTH 4.0f // Máximo de unidades de deslocamento para a frente 
 #define LOBBY_HEIGHT 6.0f
 #define FRAME_SIZE 4.5f
-
-
 #define LOBBY_LIGHT_SOURCE_HEIGHT (LOBBY_HEIGHT)
+
 
 #define NORTH 0
 #define EAST 1
@@ -72,7 +72,7 @@ class MainLobby : public Puzzle{
     int8_t curFacingDirection;
     bool enteredPuzzle;
 
-public:
+    public:
     MainLobby();
     void setupRoom();
     void updateState();
@@ -91,7 +91,7 @@ public:
 
 class CratePuzzle : public Puzzle
 {
-public:
+    public:
     void updateCamera();
     void setupRoom();
     void updateState();
@@ -102,3 +102,21 @@ public:
 };
 
 #endif // __PUZZLE_H__
+
+class GnomePuzzle : public Puzzle
+{
+    public:
+    void updateCamera();
+    void setupRoom();   
+    void updateState();
+    void drawObjects();
+
+    GnomePuzzle();
+
+    private: 
+    void moveGnome(glm::mat4& model);
+    void handleCursorMovement(float dx, float dy);
+    
+    float prev_time;
+    glm::vec4 gnome_position;
+};

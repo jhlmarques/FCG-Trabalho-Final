@@ -309,7 +309,6 @@ void CratePuzzle::setupRoom(){
 
     LightSource lightSource(lightPosition, lightDirection, lightApertureAngle);
 
-    room.setBackgroundColor(BLACK_BACKGROUND_COLOR);
     room.setCamera(camera);
     room.setLightSource(lightSource);
 }
@@ -337,9 +336,82 @@ void CratePuzzle::handleCursorMovement(float dx, float dy){
 
 void CratePuzzle::handleScroll(double xoffset, double yoffset){
     return; // a príncipio não pode dar zoom nesse puzzle
-    // float currentCameraDistance = room.getCamera().getCameraDistance();
-    // currentCameraDistance -= 0.1f*yoffset;
+}
 
-    // room.getCamera().setCameraDistance(currentCameraDistance);
-    // room.getCamera().updateViewVecLookAt();
+// GNOMO
+
+GnomePuzzle::GnomePuzzle():
+prev_time((float)glfwGetTime()),
+gnome_position(0.0f, 0.0f, 0.0f, 1.0f)
+{
+
+}
+
+void GnomePuzzle::setupRoom(){
+    // Instanciação da câmera de lookat puzzle que aponta para a origem 
+    Camera camera(glm::vec3(2.0f, 2.0f, 1.5f));
+
+    glm::vec4 lookatPoint = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    camera.setLookAtPoint(lookatPoint);
+
+    currentTheta = camera.getCameraTheta();
+    currentPhi = camera.getCameraPhi();
+
+    glm::vec4 lightPosition = camera.getPosition();
+
+    LightSource lightSource(lightPosition);
+
+    room.setCamera(camera);
+    room.setLightSource(lightSource);
+    room.setBackgroundColor(WHITE_BACKGROUND_COLOR);
+}
+
+void GnomePuzzle::updateState(){
+    return;
+}
+
+void GnomePuzzle::handleCursorMovement(float dx, float dy){
+    Puzzle::handleCursorMovement(dx, dy);
+    room.getCamera().setCameraTheta(currentTheta);
+    room.getCamera().setCameraPhi(currentPhi);
+    room.getCamera().updateViewVecLookAt();
+}
+
+void GnomePuzzle::updateCamera(){
+    Puzzle::updateCamera();
+    room.getLightSource().setPosition(room.getCamera().getPosition());
+    room.getLightSource().setDirection(room.getCamera().getViewVec());
+}
+
+void GnomePuzzle::drawObjects(){
+    auto obj_gnome = Puzzle::getObject("gnome");
+
+    glm::mat4 model = Matrix_Identity(); 
+    moveGnome(model);
+    model = model * Matrix_Scale(4.0f, 4.0f, 4.0f);
+    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+    obj_gnome->draw(room.getLightSource());
+}
+
+void GnomePuzzle::moveGnome(glm::mat4& model){
+    static float speed = 0.5f;
+
+    float current_time = (float)glfwGetTime();
+    float delta_t = current_time - prev_time;
+    prev_time = current_time;
+
+    if (g_upPressed){
+        gnome_position.y += speed*delta_t;
+    }
+    if (g_downPressed){
+        gnome_position.y -= speed*delta_t;
+    }
+    if (g_rightPressed){
+        gnome_position.x += speed*delta_t;
+    }
+    if (g_leftPressed){
+        gnome_position.x -= speed*delta_t;
+    }
+    
+    model = model * Matrix_Translate(gnome_position.x, gnome_position.y, gnome_position.z);
 }

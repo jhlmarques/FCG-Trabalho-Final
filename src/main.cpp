@@ -2,7 +2,6 @@
 #include "camera.h"
 #include "globals.h"
 #include "gameobject.h"
-
 #include "puzzle.h"
 
 // Controla qual o puzzle atual 
@@ -132,6 +131,9 @@ int main(int argc, char* argv[])
     GameObject obj_canvas_crate_puzzle(&model_frame_crate_canvas_puzzle, 0);
     obj_frame_crate_puzzle.setIlluminationModel(LAMBERT);
     obj_canvas_crate_puzzle.setIlluminationModel(LAMBERT);
+
+    ObjModel model_gnome("../../data/garden_gnome_2k.obj", "../../data/");
+    GameObject obj_gnome(&model_gnome, 0);
     
     // Note que, no sistema de coordenadas da câmera, os planos near e far
     // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
@@ -159,6 +161,13 @@ int main(int argc, char* argv[])
     CratePuzzle puzzle_crate;
     puzzle_crate.setupRoom();
     puzzle_crate.addObject("crate", &obj_crate_9);
+
+    /*
+        SETUP DO PUZZLE DO GNOMO
+    */
+    GnomePuzzle puzzle_gnome;
+    puzzle_gnome.setupRoom();
+    puzzle_gnome.addObject("gnome", &obj_gnome);
     
     // Define se estamos no lobby principal ou num puzzle
     bool isInLobby = true;
@@ -184,14 +193,13 @@ int main(int argc, char* argv[])
                 isInLobby = false;
                 // Define novo puzzle baseado no ID
                 switch (id){
-                    case 0:
+                    case 2:
                         currentPuzzle = &puzzle_crate;
                         break;
-                    default:
-                        currentPuzzle = &puzzle_crate;
+                    default: // to pensando em botar no 6 o quadro dele 
+                        currentPuzzle = &puzzle_gnome;
                         break;
                 }
-
             }
             else{
                 puzzle_lobby.step();
@@ -339,6 +347,46 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
             g_dPressed = true;
         else if (action == GLFW_RELEASE)
             g_dPressed = false;
+        else if (action == GLFW_REPEAT)
+            ;
+    }
+
+    if (key == GLFW_KEY_UP)
+    {
+        if (action == GLFW_PRESS)
+            g_upPressed = true;
+        else if (action == GLFW_RELEASE)
+            g_upPressed = false;
+        else if (action == GLFW_REPEAT)
+            ;
+    }
+
+    if (key == GLFW_KEY_DOWN)
+    {
+        if (action == GLFW_PRESS)
+            g_downPressed = true;
+        else if (action == GLFW_RELEASE)
+            g_downPressed = false;
+        else if (action == GLFW_REPEAT)
+            ;
+    }
+
+    if (key == GLFW_KEY_LEFT)
+    {
+        if (action == GLFW_PRESS)
+            g_leftPressed = true;
+        else if (action == GLFW_RELEASE)
+            g_leftPressed = false;
+        else if (action == GLFW_REPEAT)
+            ;
+    }
+
+    if (key == GLFW_KEY_RIGHT)
+    {
+        if (action == GLFW_PRESS)
+            g_rightPressed = true;
+        else if (action == GLFW_RELEASE)
+            g_rightPressed = false;
         else if (action == GLFW_REPEAT)
             ;
     }

@@ -48,6 +48,12 @@ bool g_aPressed = false;
 bool g_sPressed = false;
 bool g_dPressed = false;
 
+// Variáveis que controlam as setas do teclado
+bool g_upPressed = false;
+bool g_downPressed = false;
+bool g_leftPressed = false;
+bool g_rightPressed = false;
+
 // Controla o estado do último número apertado
 int g_lastNumberPressed = GLFW_KEY_UNKNOWN;
 

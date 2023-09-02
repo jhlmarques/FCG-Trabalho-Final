@@ -68,9 +68,22 @@ static float lastAnimationTime = (float) glfwGetTime();
             // Senão, move-se
             else{
                 glm::vec4 nDirection = direction / norm(direction);
-                position = position + (nDirection * delta_t * CAMERA_MOVE_SPEED);
+                position = position + (nDirection * delta_t * data.linearMovementVelocity);
             }
 
+
+            // Atualiza posição
+            obj->setPosition(position);
+        }
+
+        if(data.animationFlags & ANIMATION_BEZIER){
+            if(data.bezierPercentage > 0.99){
+                position = data.bezierPoint4;
+                data.animationFlags ^= ANIMATION_BEZIER;
+            }
+            else{
+                position = data.computeBezierPos(data.bezierPercentage + (delta_t * data.bezierVelocity));
+            }
             // Atualiza posição
             obj->setPosition(position);
         }
@@ -79,9 +92,7 @@ static float lastAnimationTime = (float) glfwGetTime();
             // Matriz de rotação
             glm::mat4 rotation;
             
-            // 90 graus/seg
-            // TO-DO: AJUSTAR VELOCIDADE USANDO ANIMATION DATA
-            auto radiansFromDeltaT = data.rotationSign*glm::radians(12.0*delta_t);
+            auto radiansFromDeltaT = data.rotationSign*glm::radians(data.rotationVelocity*delta_t);
             
             // Talvez tenha uma maneira mais esperta de fazer isso, mas foi o que consegui pensar as
             // 23:12
@@ -123,7 +134,6 @@ void AnimationManager::animateCameras(){
 
         // Checa se animação acabou
         if(data.isFinished()){
-            mapAnimatedCameras.erase(animationPair.first);
             continue;
         }
 
@@ -143,9 +153,21 @@ void AnimationManager::animateCameras(){
             // Senão, move-se
             else{
                 glm::vec4 nDirection = direction / norm(direction);
-                position = position + (nDirection * delta_t * CAMERA_MOVE_SPEED);
+                position = position + (nDirection * delta_t * data.linearMovementVelocity);
             }
 
+            // Atualiza posição
+            camera->setPositionFree(position);
+        }
+
+        if(data.animationFlags & ANIMATION_BEZIER){
+            if(data.bezierPercentage > 0.99){
+                position = data.bezierPoint4;
+                data.animationFlags ^= ANIMATION_BEZIER;
+            }
+            else{
+                position = data.computeBezierPos(data.bezierPercentage + (delta_t * data.bezierVelocity));
+            }
             // Atualiza posição
             camera->setPositionFree(position);
         }
@@ -154,9 +176,7 @@ void AnimationManager::animateCameras(){
             // Matriz de rotação
             glm::mat4 rotation;
             
-            // 90 graus/seg
-            // TO-DO: AJUSTAR VELOCIDADE USANDO ANIMATION DATA
-            auto radiansFromDeltaT = data.rotationSign*glm::radians(CAMERA_ROTATE_SPEED*delta_t);
+            auto radiansFromDeltaT = data.rotationSign*glm::radians(data.rotationVelocity*delta_t);
             
             // Talvez tenha uma maneira mais esperta de fazer isso, mas foi o que consegui pensar as
             // 23:12
@@ -188,6 +208,16 @@ void AnimationManager::animateCameras(){
 
 }
 
+void AnimationManager::removeAnimation(int id, bool isObject){
+    if(isObject){
+        mapAnimatedObjects.erase(id);
+    }
+    else{
+        mapAnimatedCameras.erase(id);
+    }
+
+}
+
 AnimationData::AnimationData() :
     radiansToRotate(0.0),
     rotationSign(0),
@@ -196,18 +226,42 @@ AnimationData::AnimationData() :
     animationFlags(0)
 {}
 
-void AnimationData::setradiansToRotate(float radians, Axis axis){
+void AnimationData::setradiansToRotate(float radians, Axis axis, float velocity){
     radiansToRotate = radians;
     rotationSign = radians > 0 ? 1 : -1;
     rotationAxis = axis;
     animationFlags |= ANIMATION_ROTATING;
+    rotationVelocity = velocity;
 }
 
-void AnimationData::setDestinationPoint(glm::vec4 dst){
+void AnimationData::setDestinationPoint(glm::vec4 dst, float velocity){
     destinationPoint = dst;
     animationFlags |= ANIMATION_MOVING;
+    linearMovementVelocity = velocity;
 }
 
-bool AnimationData::isFinished(){
+void AnimationData::setBezierCurveJump(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float velocity){
+    this->bezierPoint1 = p1;
+    this->bezierPoint2 = p2;
+    this->bezierPoint3 = p3;
+    this->bezierPoint4 = p4;
+    bezierPercentage = 0.0;
+    animationFlags |= ANIMATION_BEZIER;
+    bezierVelocity = velocity;
+}
+
+bool AnimationData::isFinished()
+{
     return (animationFlags == 0);
+}
+
+glm::vec4 AnimationData::computeBezierPos(float percentage){
+    bezierPercentage = percentage;
+    
+    auto c12 = bezierPoint1 + percentage*(bezierPoint2 - bezierPoint1);
+    auto c23 = bezierPoint2 + percentage*(bezierPoint3 - bezierPoint2);
+    auto c34 = bezierPoint3 + percentage*(bezierPoint4 - bezierPoint3);
+    auto c123 = c12 + percentage*(c23 - c12);
+    auto c234 = c23 + percentage*(c34 - c23);
+    return c123 + percentage*(c234 - c123);
 }

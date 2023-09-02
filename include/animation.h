@@ -8,6 +8,7 @@
 // Constantes para movimentação da câmera
 #define ANIMATION_ROTATING 1
 #define ANIMATION_MOVING 2
+#define ANIMATION_BEZIER 4
 
 // ID zero reservado para "nenhuma animação"
 #define ANIMATION_ID_NONE 0
@@ -28,11 +29,28 @@ struct AnimationData{
     Axis rotationAxis;
     glm::vec4 destinationPoint;
 
+    glm::vec4 bezierPoint1;
+    glm::vec4 bezierPoint2;
+    glm::vec4 bezierPoint3;
+    glm::vec4 bezierPoint4;
+
+    float bezierPercentage;
+
+    // Velocidades
+    float linearMovementVelocity;
+    float rotationVelocity;
+    float bezierVelocity;
+
+
     AnimationData();
 
-    void setradiansToRotate(float radians, Axis axis);
-    void setDestinationPoint(glm::vec4 dst);
+    void setradiansToRotate(float radians, Axis axis, float velocity);
+    void setDestinationPoint(glm::vec4 dst, float velocity);
+    // Faz com que o movimento ao ponto seja definido por uma curva de bezier
+    void setBezierCurveJump(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float velocity);
     bool isFinished();
+
+    glm::vec4 computeBezierPos(float percentage);
 
 };
 
@@ -56,6 +74,9 @@ class AnimationManager{
     int addAnimatedCamera(Camera* camera, AnimationData animation);
 
     bool hasAnimationFinished(int animationID, bool isObject);
+
+    // Remove animação
+    void removeAnimation(int id, bool isObject);
 
     // Realiza animações
     void animationStep();

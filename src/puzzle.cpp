@@ -86,12 +86,12 @@ void MainLobby::playerMove(){
         if((g_scrolledDirection != SCROLL_NONE) && (g_scrolledDirection != curScrollDirection)){
             if(g_scrolledDirection == SCROLL_UP){
                 AnimationData animation;
-                animation.setradiansToRotate(M_PI_4, Z);
+                animation.setradiansToRotate(M_PI_4, Z, CAMERA_ROTATE_SPEED);
                 cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
             }
             else if(g_scrolledDirection == SCROLL_DOWN){
                 AnimationData animation;
-                animation.setradiansToRotate(-M_PI_4, Z);
+                animation.setradiansToRotate(-M_PI_4, Z, CAMERA_ROTATE_SPEED);
                 cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
             }
             // Se não estávamos inclinados, agora estamos; senão, estamos olhando reto
@@ -132,7 +132,7 @@ void MainLobby::playerMove(){
 
         // Realiza animação da câmera até a nova posição
         AnimationData animation;
-        animation.setDestinationPoint(playerPosition);
+        animation.setDestinationPoint(playerPosition, 10.0f);
         cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
 
     }
@@ -140,7 +140,7 @@ void MainLobby::playerMove(){
         // Vira para a esquerda
         // Animação
         AnimationData animation;
-        animation.setradiansToRotate(M_PI_2, Y);
+        animation.setradiansToRotate(M_PI_2, Y, CAMERA_ROTATE_SPEED);
         cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
         
 
@@ -159,7 +159,7 @@ void MainLobby::playerMove(){
         // Vira para a direita
         // Animação
         AnimationData animation;
-        animation.setradiansToRotate(-M_PI_2, Y);
+        animation.setradiansToRotate(-M_PI_2, Y, CAMERA_ROTATE_SPEED);
         cameraAnimationID = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
 
         curFacingDirection++;
@@ -309,7 +309,7 @@ void MainLobby::updateState(){
 
     // Apenas realizamos um movimento se a câmera não está animando
     if(g_AnimationManager.hasAnimationFinished(cameraAnimationID, false)){
-        
+        g_AnimationManager.removeAnimation(cameraAnimationID, false);
         // Puzzles sempre estão nas laterais
         // Jogo de cartas fica ao norte da sala
         if(
@@ -331,18 +331,22 @@ void MainLobby::updateState(){
         playerMove();
     }
 
+    // PLACEHOLDER / TESTAGEM
     if(g_AnimationManager.hasAnimationFinished(statueAnimationID, true)){
+        g_AnimationManager.removeAnimation(statueAnimationID, true);
         AnimationData animation;
+        auto bust = objects["bust"];
+        auto pos = bust->getPosition();
         if(statueStatus){
             //animation.setDestinationPoint(glm::vec4(STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
-            animation.setradiansToRotate(M_PI_2, Y);
+            animation.setBezierCurveJump(pos, glm::vec4(-1.0,2.0,0.0,1.0), glm::vec4(-2.0,1.0,0.0,1.0), glm::vec4(-3.0,0.0,0.0,1.0), 2.0f);
         }
         else{
             //animation.setDestinationPoint(glm::vec4(-STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
-            animation.setradiansToRotate(-M_PI_2, Y);
+            animation.setBezierCurveJump(pos, glm::vec4(1.0,2.0,0.0,1.0), glm::vec4(2.0,1.0,0.0,1.0), glm::vec4(3.0,0.0,0.0,1.0), 2.0f);
         }
         statueStatus = !statueStatus;
-        statueAnimationID = g_AnimationManager.addAnimatedObject(objects["bust"], animation);
+        statueAnimationID = g_AnimationManager.addAnimatedObject(bust, animation);
 
     }
 
@@ -441,7 +445,7 @@ void CardGame::drawCard(){
         auto pos = card->getPosition();
         pos.x -= 0.05;
         pos.z -= 0.001;
-        animation.setDestinationPoint(pos);
+        animation.setDestinationPoint(pos, 2.0f);
         g_AnimationManager.addAnimatedObject(card, animation);
     }
     // Cria nova carta e configura

@@ -10,6 +10,7 @@ include_directories(BEFORE SYSTEM ${PROJECT_SOURCE_DIR}/include)
 
 set(SOURCES
     src/animation.cpp
+    src/collisions.cpp
     src/camera.cpp
     src/gameobject.cpp
     src/glad.c

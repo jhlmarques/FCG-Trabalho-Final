@@ -20,8 +20,8 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
     const float minval = std::numeric_limits<float>::min();
     const float maxval = std::numeric_limits<float>::max();
 
-    glm::vec3 bbox_min = glm::vec3(maxval,maxval,maxval);
-    glm::vec3 bbox_max = glm::vec3(minval,minval,minval);
+    bbox_min = glm::vec3(maxval,maxval,maxval);
+    bbox_max = glm::vec3(minval,minval,minval);
 
     ComputeNormals(model);
     
@@ -309,4 +309,12 @@ void GameObject::setEulerAngleZ(float angle){
 
 float GameObject::getEulerAngleZ(){
     return eulerAngleZ;
+}
+
+glm::vec3 GameObject::getBBoxMax(){
+    return bbox_max;
+}
+
+glm::vec3 GameObject::getBBoxMin(){
+    return bbox_min;
 }

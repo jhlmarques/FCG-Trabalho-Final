@@ -7,6 +7,7 @@
 #include <string>
 #include "gameobject.h"
 #include "animation.h"
+#include "collisions.h"
 
 class Puzzle;
 

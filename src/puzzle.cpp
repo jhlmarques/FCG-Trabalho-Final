@@ -579,16 +579,27 @@ void GnomePuzzle::moveGnome(){
     glm::vec4 gnome_position = objects["gnome"]->getPosition();
 
     if (g_upPressed){
-        gnome_position.y += speed*delta_t;
+        glm::vec4 new_gnome_position = gnome_position + (0.0f, speed*delta_t, 0.0f, 0.0f);
+        if (!checkAABBCollision(objects["gnome"], new_gnome_position, objects["gnome_test"], objects["gnome_test"]->getPosition()))
+            gnome_position.y += speed*delta_t;
     }
     if (g_downPressed){
-        gnome_position.y -= speed*delta_t;
+        glm::vec4 new_gnome_position = gnome_position - (0.0f, speed*delta_t, 0.0f, 0.0f);
+        if (!checkAABBCollision(objects["gnome"], new_gnome_position, objects["gnome_test"], objects["gnome_test"]->getPosition()))
+            gnome_position.y -= speed*delta_t;
     }
     if (g_leftPressed){
-        gnome_position.x += speed*delta_t;
+        glm::vec4 new_gnome_position = gnome_position + (speed*delta_t, 0.0f, 0.0f, 0.0f);
+        if (!checkAABBCollision(objects["gnome"], new_gnome_position, objects["gnome_test"], objects["gnome_test"]->getPosition()))
+            gnome_position.x += speed*delta_t;
     }
     if (g_rightPressed){
-        gnome_position.x -= speed*delta_t;
+        glm::vec4 new_gnome_position = gnome_position - (speed*delta_t, 0.0f, 0.0f, 0.0f);
+        if (!checkAABBCollision(objects["gnome"], new_gnome_position, objects["gnome_test"], objects["gnome_test"]->getPosition()))
+            gnome_position.x -= speed*delta_t;
     }
+    
+
     objects["gnome"]->setPosition(gnome_position);
+
 }

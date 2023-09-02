@@ -112,6 +112,12 @@ int main(int argc, char* argv[])
 
     ObjModel model_plane("../../data/plane.obj", "../../data/");
     g_mapModels["plane"] = &model_plane;
+    ObjModel model_parquet("../../data/parquet.obj", "../../data/");
+    g_mapModels["parquet"] = &model_parquet;
+    ObjModel model_stone_wall("../../data/stone_wall.obj", "../../data/");
+    g_mapModels["stone_wall"] = &model_stone_wall;
+    ObjModel model_wood_ceiling("../../data/wood_ceiling.obj", "../../data/");
+    g_mapModels["wood_ceiling"] = &model_wood_ceiling;
     ObjModel model_bunny("../../data/bunny.obj", "../../data/");
     g_mapModels["bunny"] = &model_bunny;
     ObjModel model_bust("../../data/marble_bust_01_1k.obj", "../../data/");

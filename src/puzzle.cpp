@@ -219,7 +219,7 @@ void MainLobby::setupRoom(){
                 0.0f,
                 (float) i * -STEP_SIZE,
                 1.0f);
-            newObj = new GameObject(g_mapModels["plane"], 0);
+            newObj = new GameObject(g_mapModels["parquet"], 0);
             newObj->setPosition(coords);
             newObj->setScale(STEP_SIZE / 2.0, 1.0, STEP_SIZE / 2.0);
             std::string objName = (std::string("tile_") + std::to_string(i*LOBBY_WIDTH+j));
@@ -227,30 +227,45 @@ void MainLobby::setupRoom(){
         }
     }
     // Paredes
-    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj = new GameObject(g_mapModels["stone_wall"], 0);
+    newObj->setTextureScale(4.0);
     newObj->setPosition(glm::vec4(0.0f, LOBBY_HEIGHT/2.0f, -(LOBBY_LENGTH*STEP_SIZE + STEP_SIZE/2.0f), 1.0f));
     newObj->setEulerAngleX(M_PI_2);
     newObj->setScale(LOBBY_WIDTH*STEP_SIZE/2.0f, LOBBY_HEIGHT/2.0f, LOBBY_HEIGHT/2.0f);
     objects["wall_north"] = newObj;
     
-    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj = new GameObject(g_mapModels["stone_wall"], 0);
+    newObj->setTextureScale(4.0);
     newObj->setPosition(glm::vec4((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0f));
+    newObj->setEulerAngleX(M_PI_2);
     newObj->setEulerAngleZ(M_PI_2);
     newObj->setScale(1.0, LOBBY_HEIGHT / 2.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
     objects["wall_east"] = newObj;
     
-    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj = new GameObject(g_mapModels["stone_wall"], 0);
+    newObj->setTextureScale(4.0);
     newObj->setPosition(glm::vec4(0.0f, LOBBY_HEIGHT/2.0f, STEP_SIZE/2.0f, 1.0f));
     newObj->setEulerAngleX(-M_PI_2);
     newObj->setScale(LOBBY_WIDTH*STEP_SIZE/2.0f, LOBBY_HEIGHT/2.0f, LOBBY_HEIGHT/2.0f);
     objects["wall_south"] = newObj;
     
-    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj = new GameObject(g_mapModels["stone_wall"], 0);
+    newObj->setTextureScale(4.0);
     newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0f));
+    newObj->setEulerAngleX(-M_PI_2);
     newObj->setEulerAngleZ(-M_PI_2);
     // newObj->setScale(LOBBY_HEIGHT/2.0f, 1.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
     newObj->setScale(1.0, LOBBY_HEIGHT / 2.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
     objects["wall_west"] = newObj;
+
+    // Teto
+    newObj = new GameObject(g_mapModels["wood_ceiling"], 0);
+    newObj->setScale((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), 1.0f, STEP_SIZE*LOBBY_LENGTH + STEP_SIZE/2.0f);
+    newObj->setEulerAngleZ(M_PI);
+    newObj->setPosition(room.getLightSource().getPosition());
+    newObj->setTextureScale(8.0);
+    objects["ceiling"] = newObj;
+
 
     // Fonte de luz
     newObj = new GameObject(g_mapModels["light"], 0);

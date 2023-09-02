@@ -42,6 +42,8 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "ctime": "cpp",
+        "iterator": "cpp"
     }
 }

@@ -201,7 +201,7 @@ void MainLobby::setupRoom(){
 
     //  Câmera do lobby principal (inicialmente em modo "free")
     auto camera = Camera(playerPosition);
-    camera.setLookAtPoint(glm::vec4(0.0f, CAMERA_HEAD_HEIGHT, -1.0f, 1.0f));
+    camera.setViewVectorFree(glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
     room.setCamera(camera);
     
     // Iluminação do lobby principal

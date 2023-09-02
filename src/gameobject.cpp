@@ -311,10 +311,13 @@ float GameObject::getEulerAngleZ(){
     return eulerAngleZ;
 }
 
-glm::vec3 GameObject::getBBoxMax(){
-    return bbox_max;
+glm::vec3 GameObject::getBBoxMaxWorld(){
+    glm::vec3 position3d = glm::vec3(position.x, position.y, position.z);
+    return bbox_max + position3d;
 }
 
-glm::vec3 GameObject::getBBoxMin(){
-    return bbox_min;
+glm::vec3 GameObject::getBBoxMinWorld(){
+    glm::vec3 position3d = glm::vec3(position.x, position.y, position.z);
+    return bbox_min + position3d;
 }
+

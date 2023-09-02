@@ -93,10 +93,10 @@ class GameObject{
     glm::vec4 getVVec();
     glm::vec4 getUVec();
 
-    // Retorna o bbox max (top left) do objeto
-    glm::vec3 getBBoxMax();
-    // Retorna o bbox min (bottom right) do objeto
-    glm::vec3 getBBoxMin();
+    // Retorna o bbox max (top left) do objeto em relação ao mundo
+    glm::vec3 getBBoxMaxWorld();
+    // Retorna o bbox min (bottom right) do objeto em relação ao mundo
+    glm::vec3 getBBoxMinWorld();
 
 
 };

@@ -171,4 +171,6 @@ class GnomePuzzle : public Puzzle
     // Move o gnomo utilizando as setas do teclado
     void moveGnome();
     float prev_time;
+
+    const glm::vec4 gnome_initial_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 };

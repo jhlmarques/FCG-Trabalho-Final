@@ -1,6 +1,5 @@
 #include "puzzle.h"
 
-
 void Puzzle::step(){
     glm::vec4 bg = room.getBackgroundColor();
     glClearColor(bg.r, bg.g, bg.b, bg.a);
@@ -539,7 +538,7 @@ prev_time((float)glfwGetTime())
 
 void GnomePuzzle::setupRoom(){
     // Câmera está olhando em direção ao gnomo e um pouco acima dele (offset no Y)
-    glm::vec4 gnome_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 gnome_position = glm::vec4(gnome_initial_position);
     Camera camera(gnome_position + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));    
     room.setCamera(camera);
 
@@ -555,12 +554,16 @@ void GnomePuzzle::setupRoom(){
     objects["gnome"] = newObj;
 
     newObj = new GameObject(g_mapModels["gnome"], 0);
-    newObj->setPosition(glm::vec4(-0.5f, 0.0f, 0.0f, 1.0f));
+    newObj->setPosition(glm::vec4(-0.75f, 0.0f, 0.0f, 1.0f));
     objects["gnome_test"] = newObj;
 }
 
 void GnomePuzzle::updateState(){
     moveGnome();
+    if (checkAABBCollision(objects["gnome"], objects["gnome_test"])){
+        // Reseta a posição do gnomo quando há colisão
+        objects["gnome"]->setPosition(gnome_initial_position);
+    }
 }
 
 
@@ -579,27 +582,16 @@ void GnomePuzzle::moveGnome(){
     glm::vec4 gnome_position = objects["gnome"]->getPosition();
 
     if (g_upPressed){
-        glm::vec4 new_gnome_position = gnome_position + (0.0f, speed*delta_t, 0.0f, 0.0f);
-        if (!checkAABBCollision(objects["gnome"], new_gnome_position, objects["gnome_test"], objects["gnome_test"]->getPosition()))
-            gnome_position.y += speed*delta_t;
+        gnome_position.y += speed*delta_t;
     }
     if (g_downPressed){
-        glm::vec4 new_gnome_position = gnome_position - (0.0f, speed*delta_t, 0.0f, 0.0f);
-        if (!checkAABBCollision(objects["gnome"], new_gnome_position, objects["gnome_test"], objects["gnome_test"]->getPosition()))
-            gnome_position.y -= speed*delta_t;
+        gnome_position.y -= speed*delta_t;
     }
     if (g_leftPressed){
-        glm::vec4 new_gnome_position = gnome_position + (speed*delta_t, 0.0f, 0.0f, 0.0f);
-        if (!checkAABBCollision(objects["gnome"], new_gnome_position, objects["gnome_test"], objects["gnome_test"]->getPosition()))
-            gnome_position.x += speed*delta_t;
+        gnome_position.x += speed*delta_t;
     }
     if (g_rightPressed){
-        glm::vec4 new_gnome_position = gnome_position - (speed*delta_t, 0.0f, 0.0f, 0.0f);
-        if (!checkAABBCollision(objects["gnome"], new_gnome_position, objects["gnome_test"], objects["gnome_test"]->getPosition()))
-            gnome_position.x -= speed*delta_t;
+        gnome_position.x -= speed*delta_t;
     }
-    
-
     objects["gnome"]->setPosition(gnome_position);
-
 }

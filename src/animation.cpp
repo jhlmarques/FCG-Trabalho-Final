@@ -48,7 +48,6 @@ static float lastAnimationTime = (float) glfwGetTime();
 
         // Checa se animação acabou
         if(data.isFinished()){
-            mapAnimatedObjects.erase(animationPair.first);
             continue;
         }
 

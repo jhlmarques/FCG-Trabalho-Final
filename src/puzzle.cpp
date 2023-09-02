@@ -541,14 +541,15 @@ void CratePuzzle::handleScroll(double xoffset, double yoffset){
 // GNOMO
 
 GnomePuzzle::GnomePuzzle():
-prev_time((float)glfwGetTime()),
-gnome_position(0.0f, 0.0f, 0.0f, 1.0f)
+prev_time((float)glfwGetTime())
 {
 
 }
 
 void GnomePuzzle::setupRoom(){
     // Câmera está olhando em direção ao gnomo e um pouco acima dele (offset no Y)
+    glm::vec4 gnome_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
     Camera camera(gnome_position + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));    
 
     glm::vec4 lightPosition = camera.getPosition();
@@ -557,15 +558,24 @@ void GnomePuzzle::setupRoom(){
     room.setCamera(camera);
     room.setLightSource(lightSource);
     room.setBackgroundColor(WHITE_BACKGROUND_COLOR);
+
+    auto newObj = new GameObject(g_mapModels["gnome"], 0);
+    newObj->setPosition(gnome_position);
+    newObj->setEulerAngleY(-M_PI_2);
+    objects["gnome"] = newObj;
+
+    newObj = new GameObject(g_mapModels["gnome"], 0);
+    newObj->setPosition(glm::vec4(-0.5f, 0.0f, 0.0f, 1.0f));
+    objects["gnome_test"] = newObj;
 }
 
 void GnomePuzzle::updateState(){
-    return;
+    moveGnome();
 }
 
 
 void GnomePuzzle::updateCamera(){
-    room.getCamera().setPositionFree(gnome_position + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));
+    room.getCamera().setPositionFree(objects["gnome"]->getPosition() + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));
     Puzzle::updateCamera();
 }
 
@@ -584,12 +594,14 @@ void GnomePuzzle::updateCamera(){
 //     obj_gnome->draw(room.getLightSource());
 // }
 
-void GnomePuzzle::moveGnome(glm::mat4& model){
+void GnomePuzzle::moveGnome(){
     static float speed = 0.5f;
 
     float current_time = (float)glfwGetTime();
     float delta_t = current_time - prev_time;
     prev_time = current_time;
+
+    glm::vec4 gnome_position = objects["gnome"]->getPosition();
 
     if (g_upPressed){
         gnome_position.y += speed*delta_t;
@@ -603,6 +615,5 @@ void GnomePuzzle::moveGnome(glm::mat4& model){
     if (g_rightPressed){
         gnome_position.x -= speed*delta_t;
     }
-    
-    model = model * Matrix_Translate(gnome_position.x, gnome_position.y, gnome_position.z);
+    objects["gnome"]->setPosition(gnome_position);
 }

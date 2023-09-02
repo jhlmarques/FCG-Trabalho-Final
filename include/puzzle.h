@@ -11,16 +11,15 @@
 class Puzzle;
 
 class Puzzle{
-
     private:
-    std::map<std::string, GameObject*> objects;
-
 
     protected:
     Room room;
 
     float currentTheta = 0.0f;
     float currentPhi = 0.0f;
+
+    std::map<std::string, GameObject*> objects;
 
     // Atualiza câmera
     virtual void updateCamera();
@@ -29,23 +28,18 @@ class Puzzle{
     // Lida com inputs
     virtual void updateState() = 0;
     // Desenha objetos do puzzle
-    virtual void drawObjects() = 0;
+    void drawObjects();
 
     public:
 
     void step(); // Realiza atualizações e retorna puzzle 
-
-    // Adiciona objeto
-    void addObject(std::string name, GameObject* obj);
-
-    // Obtém objeto
-    GameObject* getObject(std::string obj_name);
 
     // Movimento do cursor
     virtual void handleCursorMovement(float dx, float dy);
 
     // Scroll
     virtual void handleScroll(double xoffset, double yoffset);
+
 
 
 };
@@ -82,7 +76,6 @@ class MainLobby : public Puzzle{
     MainLobby();
     void setupRoom();
     void updateState();
-    void drawObjects();
 
     // Verdadeiro se entra
     bool hasEnteredPuzzle();
@@ -98,7 +91,7 @@ class MainLobby : public Puzzle{
 class CardGame;
 class Card;
 
-class Card{
+class Card : public GameObject{
     private:
     bool markedForSacrifice;
     uint8_t bloodCost;
@@ -107,16 +100,15 @@ class Card{
     uint8_t health;
     uint8_t sigil;
 
-    glm::vec4 worldPos;
+    static int numCards;
 
     public:
-    Card(uint8_t health, uint8_t attack, uint8_t cost);
-    void setWorldPos(glm::vec4 worldPos);
-    glm::vec4  getWorldPos();
+    Card(ObjModel* model, GLuint shapeIdx, uint8_t health, uint8_t attack, uint8_t cost);
     void handleAttackingCard(CardGame &game, Card &attacked);
     void handleAttackingPlayer(CardGame &game, bool isCPU);
     void handleAttacked(CardGame& game, Card& attacker);
     void handleDeath(CardGame& game);
+    std::string getObjName();
 
 };
 
@@ -139,7 +131,6 @@ class CardGame : public Puzzle{
     
     void setupRoom();
     void updateState();
-    void drawObjects();
 
     void handlePlayerTurn();
     void handleTurnEnded();
@@ -159,7 +150,6 @@ class CratePuzzle : public Puzzle
     void updateCamera();
     void setupRoom();
     void updateState();
-    void drawObjects();
 
     void handleCursorMovement(float dx, float dy);
     void handleScroll(double xoffset, double yoffset);
@@ -173,7 +163,6 @@ class GnomePuzzle : public Puzzle
     void updateCamera();
     void setupRoom();   
     void updateState();
-    void drawObjects();
 
     GnomePuzzle();
 

@@ -28,14 +28,25 @@ void Puzzle::updateCamera(){
     glUniformMatrix4fv(g_view_uniform, 1 , GL_FALSE , glm::value_ptr(view));
 }
 
-void Puzzle::addObject(std::string name, GameObject* obj){
-    objects[name] = obj;
+void Puzzle::drawObjects(){
+    glm::mat4 model;
+    for(auto& it : objects){
+        const auto obj = it.second;
+        const auto pos = obj->getPosition();
+        model = Matrix_Translate(pos.x, pos.y, pos.z) * obj->getScaleMatrix() * obj->getRotationMatrix();
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        obj->draw(room.getLightSource());
+    }
 }
 
+// void Puzzle::addObject(std::string name, GameObject* obj){
+//     objects[name] = obj;
+// }
 
-GameObject* Puzzle::getObject(std::string obj_name){
-    return objects[obj_name];
-}
+
+// GameObject* Puzzle::getObject(std::string obj_name){
+//     return objects[obj_name];
+// }
 
 
 MainLobby::MainLobby() : 
@@ -198,6 +209,82 @@ void MainLobby::setupRoom(){
     LightSource lightSource(lightPosition);
     room.setLightSource(lightSource);
 
+    // Objetos
+    GameObject* newObj;
+    // Tiles
+    for(int i=0; i <= LOBBY_LENGTH; i++){
+        for(int j=0; j < LOBBY_WIDTH; j++){
+            auto coords = glm::vec4(
+                (-(LOBBY_SIDE_WIDTH) + j) * STEP_SIZE,
+                0.0f,
+                (float) i * -STEP_SIZE,
+                1.0f);
+            newObj = new GameObject(g_mapModels["plane"], 0);
+            newObj->setPosition(coords);
+            newObj->setScale(STEP_SIZE / 2.0, 1.0, STEP_SIZE / 2.0);
+            std::string objName = (std::string("tile_") + std::to_string(i*LOBBY_WIDTH+j));
+            objects[objName] = newObj;
+        }
+    }
+    // Paredes
+    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4(0.0f, LOBBY_HEIGHT/2.0f, -(LOBBY_LENGTH*STEP_SIZE + STEP_SIZE/2.0f), 1.0f));
+    newObj->setEulerAngleX(M_PI_2);
+    newObj->setScale(LOBBY_WIDTH*STEP_SIZE/2.0f, LOBBY_HEIGHT/2.0f, LOBBY_HEIGHT/2.0f);
+    objects["wall_north"] = newObj;
+    
+    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0f));
+    newObj->setEulerAngleZ(M_PI_2);
+    newObj->setScale(1.0, LOBBY_HEIGHT / 2.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
+    objects["wall_east"] = newObj;
+    
+    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4(0.0f, LOBBY_HEIGHT/2.0f, STEP_SIZE/2.0f, 1.0f));
+    newObj->setEulerAngleX(-M_PI_2);
+    newObj->setScale(LOBBY_WIDTH*STEP_SIZE/2.0f, LOBBY_HEIGHT/2.0f, LOBBY_HEIGHT/2.0f);
+    objects["wall_south"] = newObj;
+    
+    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0f));
+    newObj->setEulerAngleZ(-M_PI_2);
+    // newObj->setScale(LOBBY_HEIGHT/2.0f, 1.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
+    newObj->setScale(1.0, LOBBY_HEIGHT / 2.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
+    objects["wall_west"] = newObj;
+
+    // Fonte de luz
+    newObj = new GameObject(g_mapModels["light"], 0);
+    newObj->setPosition(room.getLightSource().getPosition());
+    objects["light"] = newObj;
+
+    // Busto
+    newObj = new GameObject(g_mapModels["bust"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.0, -STEP_SIZE, 1.0));
+    objects["bust"] = newObj;
+
+    // Quadro do puzzle da caixa
+    newObj = new GameObject(g_mapModels["frame"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
+    newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
+    newObj->setEulerAngleY(M_PI_2);
+    newObj->setIlluminationModel(LAMBERT);
+    objects["frame_crate"] = newObj;
+
+    newObj = new GameObject(g_mapModels["frame_crate_canvas"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
+    newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
+    newObj->setEulerAngleY(M_PI_2);
+    newObj->setIlluminationModel(LAMBERT);
+    objects["frame_crate_canvas"] = newObj;
+
+    // // Quadro do puzzle do gnomo
+    newObj = new GameObject(g_mapModels["frame"], 0);
+    newObj->setPosition(glm::vec4((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
+    newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
+    newObj->setEulerAngleY(-M_PI_2);
+    newObj->setIlluminationModel(LAMBERT);
+    objects["frame_gnome"] = newObj;
+
 }
 
 void MainLobby::updateState(){
@@ -233,118 +320,25 @@ void MainLobby::updateState(){
         AnimationData animation;
         if(statueStatus){
             //animation.setDestinationPoint(glm::vec4(STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
-            animation.setradiansToRotate(M_2_PI, Y);
+            animation.setradiansToRotate(M_PI_2, Y);
         }
         else{
             //animation.setDestinationPoint(glm::vec4(-STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
-            animation.setradiansToRotate(-M_2_PI, Y);
+            animation.setradiansToRotate(-M_PI_2, Y);
         }
         statueStatus = !statueStatus;
-        statueAnimationID = g_AnimationManager.addAnimatedObject(Puzzle::getObject("statue"), animation);
+        statueAnimationID = g_AnimationManager.addAnimatedObject(objects["bust"], animation);
 
     }
 
 }
 
-void MainLobby::drawObjects(){
-    glm::mat4 model;
-    auto obj_tile = Puzzle::getObject("tile");
-    auto obj_statue = Puzzle::getObject("statue");
-    auto obj_light = Puzzle::getObject("light");
-    auto obj_frame = Puzzle::getObject("frame");
-    auto obj_crateCanvas = Puzzle::getObject("crateCanvas");
+int Card::numCards = 0;
 
-    // DESENHA TILES
-    auto scale = Matrix_Scale(STEP_SIZE/2.0f, 1.0f, STEP_SIZE/2.0f);
-    for(int i=0; i <= LOBBY_LENGTH; i++){
-        for(int j=0; j < LOBBY_WIDTH; j++){
-            auto coords = glm::vec3(
-                (-(LOBBY_SIDE_WIDTH) + j) * STEP_SIZE,
-                0.0f,
-                (float) i * -STEP_SIZE);
-            // Escala para o tamanho do tile para cobrir espaçamento entre tiles e deslocamento para o centro do tile
-            model = Matrix_Translate(coords.x, coords.y, coords.z) * scale;
-            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            obj_tile->draw(room.getLightSource());
-        }
-        
-    }
-
-    // Paredes
-    // Esquerda
-    //model = Matrix_Scale(LOBBY_LENGTH*STEP_SIZE, 1.0f, 1.0f);
-    model = Matrix_Translate(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f);
-    model = model * Matrix_Rotate_Z(-M_PI_2);
-    model = model * Matrix_Scale(LOBBY_HEIGHT/2.0f, 1.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
-    
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_tile->draw(room.getLightSource());
-    // Direita
-    model = Matrix_Translate((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f);
-    model = model * Matrix_Rotate_Z(M_PI_2);
-    model = model * Matrix_Scale(LOBBY_HEIGHT/2.0f, 1.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_tile->draw(room.getLightSource());
-
-    // Traseira
-    model = Matrix_Translate(0.0f, LOBBY_HEIGHT/2.0f, STEP_SIZE/2.0f);
-    model = model * Matrix_Rotate_X(-M_PI_2);
-    model = model * Matrix_Scale(LOBBY_WIDTH*STEP_SIZE/2.0f, 1.0f, LOBBY_HEIGHT/2.0f);
-
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_tile->draw(room.getLightSource());
-
-    // Dianteira
-    model = Matrix_Translate(0.0f, LOBBY_HEIGHT/2.0f,  -(LOBBY_LENGTH*STEP_SIZE + STEP_SIZE/2.0f));
-    model = model * Matrix_Scale(LOBBY_WIDTH*STEP_SIZE/2.0f, LOBBY_HEIGHT/2.0f, 1.0f);
-    model = model * Matrix_Rotate_X(M_PI_2);
-
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_tile->draw(room.getLightSource());
-
-    // DESENHA OBJETOS
-
-    // Fonte de luz
-    auto coords = room.getLightSource().getPosition();
-    model = Matrix_Translate(coords.x, coords.y - 1.0f, coords.z);
-
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_light->draw(room.getLightSource());
-
-    // Busto
-    coords = room.getLightSource().getPosition();
-    model = obj_statue->getViewMatrix();
-
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_statue->draw(room.getLightSource());
-
-    // Quadro do puzzle da caixa
-    model = Matrix_Translate(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f);    
-    model = model * Matrix_Rotate_Y(M_PI_2);
-    model = model * Matrix_Scale(FRAME_SIZE*g_ScreenRatio, FRAME_SIZE, 1.0f);
-
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_frame->draw(room.getLightSource()); // Frame da caixa 
-    obj_crateCanvas->draw(room.getLightSource()); // Canvas da caixa 
-
-    // Quadro do puzzle do gnomo
-    model = Matrix_Translate((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f);    
-    model = model * Matrix_Rotate_Y(-M_PI_2);
-    model = model * Matrix_Scale(FRAME_SIZE*g_ScreenRatio, FRAME_SIZE, 1.0f);
-
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_frame->draw(room.getLightSource()); // Frame do gnomo
-    // Falta colocar o canvas quando o puzzle estiver pronto
-}
-
-Card::Card(uint8_t health, uint8_t attack, uint8_t cost) : health(health), attackPower(attack), bloodCost(cost){}
-
-void Card::setWorldPos(glm::vec4 worldPos){
-    this->worldPos = worldPos;
-}
-
-glm::vec4  Card::getWorldPos(){
-    return worldPos;
+Card::Card(ObjModel* model, GLuint shapeIdx ,uint8_t health, uint8_t attack, uint8_t cost) : 
+GameObject(model, shapeIdx), health(health), attackPower(attack), bloodCost(cost)
+{
+    numCards++;
 }
 
 void Card::handleAttackingCard(CardGame& game, Card& attacked){
@@ -372,6 +366,10 @@ void Card::handleDeath(CardGame& game){
     return;
 }
 
+std::string Card::getObjName(){
+    return std::string("card_") + std::to_string(numCards-1);
+}
+
 CardGame::CardGame() : 
 currentLevel(0), 
 playerCanPlay(false), 
@@ -390,6 +388,11 @@ void CardGame::setupRoom(){
     glm::vec4 lightPosition = glm::vec4(0.0f, 2.0f, -1.0f, 1.0f);
     LightSource lightSource(lightPosition);
     room.setLightSource(lightSource);    
+
+    auto newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
+    objects["table"] = newObj;
+
 }
 
 void CardGame::updateState(){
@@ -399,34 +402,6 @@ void CardGame::updateState(){
     }
     
     return;
-}
-
-void CardGame::drawObjects(){
-    glm::mat4 model;
-    auto obj_table = Puzzle::getObject("table");
-    auto obj_card = Puzzle::getObject("card");
-
-    model = Matrix_Translate(0.0f, 0.0f, -1.0f);
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_table->draw(room.getLightSource());
-
-    for(auto card : cardsInPlay){
-        auto pos = card->getWorldPos();
-        model = Matrix_Translate(pos.x, pos.y, pos.z);
-        model *= Matrix_Scale(0.3, 0.4, 1.0);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        obj_card->draw(room.getLightSource());
-    }
-
-    for(auto card : playerHand){
-        auto pos = card->getWorldPos();
-        model = Matrix_Translate(pos.x, pos.y, pos.z);
-        model *= Matrix_Scale(0.15, 0.2, 1.0);
-        model *= Matrix_Rotate_X(1.309); // ~75º
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        obj_card->draw(room.getLightSource());        
-    }    
-
 }
 
 void CardGame::handlePlayerTurn(){
@@ -447,16 +422,28 @@ void CardGame::handleMatchEnd(){
 
 void CardGame::drawCard(){
     for(auto card : playerHand){
-        auto pos = card->getWorldPos();
+        AnimationData animation;
+        auto pos = card->getPosition();
         pos.x -= 0.05;
         pos.z -= 0.001;
-        card->setWorldPos(pos);
+        animation.setDestinationPoint(pos);
+        g_AnimationManager.addAnimatedObject(card, animation);
     }
-    playerHand.emplace_back(new Card(3, 1, 1));
+    // Cria nova carta e configura
+    auto newCard = new Card(g_mapModels["plane"],0, 3, 1, 1);
+    newCard->setScale(0.15, 0.2, 1.0);
+    newCard->setEulerAngleX(1.309);
+    
+    // Posiciona a carta na frente da câmera
     auto cameraPos = room.getCamera().getPosition();
     auto cameraW = room.getCamera().getWVec();
     auto cameraV = room.getCamera().getVVec();
-    playerHand.back()->setWorldPos((cameraPos + (-cameraV * glm::vec4(0.4, 0.4, 0.4, 1.0))) + (-cameraW * glm::vec4(0.3, 0.3, 0.3, 1.0)));
+    newCard->setPosition((cameraPos + (-cameraV * glm::vec4(0.4, 0.4, 0.4, 1.0))) + (-cameraW * glm::vec4(0.3, 0.3, 0.3, 1.0)));
+
+    playerHand.push_back(newCard);
+    auto objName = newCard->getObjName();
+    objects[objName] = newCard;
+
 
 }
 void CardGame::playCard(Card* card, uint8_t pos){
@@ -500,6 +487,11 @@ void CratePuzzle::setupRoom(){
 
     room.setCamera(camera);
     room.setLightSource(lightSource);
+
+    auto newObj = new GameObject(g_mapModels["wooden_crate"], 0);
+    newObj->setScale(4.0f, 4.0f, 4.0f);
+    objects["crate"] = newObj;
+
 }
 
 
@@ -507,14 +499,14 @@ void CratePuzzle::updateState(){
     return;
 }
 
-void CratePuzzle::drawObjects(){
-    auto obj_crate_9 = Puzzle::getObject("crate");
+// void CratePuzzle::drawObjects(){
+//     auto obj_crate_9 = Puzzle::getObject("crate");
 
-    glm::mat4 model = Matrix_Identity(); 
-    model = Matrix_Scale(4.0f, 4.0f, 4.0f);
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_crate_9->draw(room.getLightSource());
-}
+//     glm::mat4 model = Matrix_Identity(); 
+//     model = Matrix_Scale(4.0f, 4.0f, 4.0f);
+//     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+//     obj_crate_9->draw(room.getLightSource());
+// }
 
 void CratePuzzle::handleCursorMovement(float dx, float dy){
     Puzzle::handleCursorMovement(dx, dy);
@@ -558,20 +550,20 @@ void GnomePuzzle::updateCamera(){
     Puzzle::updateCamera();
 }
 
-void GnomePuzzle::drawObjects(){
-    auto obj_gnome = Puzzle::getObject("gnome");
+// void GnomePuzzle::drawObjects(){
+//     auto obj_gnome = Puzzle::getObject("gnome");
 
-    glm::mat4 model = Matrix_Identity(); 
-    moveGnome(model);
-    model = model * Matrix_Rotate_Y(-M_PI_2);
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_gnome->draw(room.getLightSource());
+//     glm::mat4 model = Matrix_Identity(); 
+//     moveGnome(model);
+//     model = model * Matrix_Rotate_Y(-M_PI_2);
+//     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+//     obj_gnome->draw(room.getLightSource());
 
-    // Utilizado para teste de colisão
-    model = Matrix_Translate(-0.5f, 0.0f, 0.0f);
-    glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-    obj_gnome->draw(room.getLightSource());
-}
+//     // Utilizado para teste de colisão
+//     model = Matrix_Translate(-0.5f, 0.0f, 0.0f);
+//     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+//     obj_gnome->draw(room.getLightSource());
+// }
 
 void GnomePuzzle::moveGnome(glm::mat4& model){
     static float speed = 0.5f;

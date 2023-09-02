@@ -36,15 +36,18 @@ class GameObject{
     glm::vec3    bbox_max;    
     int          illumination_model;
 
+    // Escala do objeto
+    glm::mat4 scaleMatrix;
+    // Rotação do objeto
+    glm::mat4 rotationMatrix;
+
     // Posição do objeto
     glm::vec4 position;
-    // Sistema de coordenadas local
-    glm::vec4 w;
-    glm::vec4 v;
-    glm::vec4 u;
+    // Ângulos de euler
+    float eulerAngleX;
+    float eulerAngleY;
+    float eulerAngleZ;
 
-    glm::vec4 up;
-    glm::vec4 view;
 
     // Materiais do objeto
     std::vector<Material> materials;
@@ -72,9 +75,19 @@ class GameObject{
     glm::vec4 getView();
     // Define vetor view
     void setView(glm::vec4 view);
+    // Define a escala
+    void setScale(float x, float y, float z);
+    // Retorna matriz de escala
+    glm::mat4 getScaleMatrix();
+    // Retorna matriz de rotação baseado nos ângulo de euler
+    glm::mat4 getRotationMatrix();
 
-    // Retorna matriz de transformação para o view do objeto
-    glm::mat4 getViewMatrix();
+    void setEulerAngleX(float angle);
+    float getEulerAngleX();
+    void setEulerAngleY(float angle);
+    float getEulerAngleY();
+    void setEulerAngleZ(float angle);
+    float getEulerAngleZ();
 
     glm::vec4 getWVec();
     glm::vec4 getVVec();

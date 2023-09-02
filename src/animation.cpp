@@ -81,7 +81,7 @@ static float lastAnimationTime = (float) glfwGetTime();
             
             // 90 graus/seg
             // TO-DO: AJUSTAR VELOCIDADE USANDO ANIMATION DATA
-            auto radiansFromDeltaT = data.rotationSign*glm::radians(CAMERA_ROTATE_SPEED*delta_t);
+            auto radiansFromDeltaT = data.rotationSign*glm::radians(12.0*delta_t);
             
             // Talvez tenha uma maneira mais esperta de fazer isso, mas foi o que consegui pensar as
             // 23:12
@@ -89,9 +89,9 @@ static float lastAnimationTime = (float) glfwGetTime();
                 ((data.rotationSign < 0) && ((radiansFromDeltaT - data.radiansToRotate ) < 0))){
                 // Rotaciona a quantidade exata necessária
                 switch(data.rotationAxis){
-                    case X: rotation = Matrix_Rotate(data.radiansToRotate, obj->getWVec()); break;
-                    case Y: rotation = Matrix_Rotate(data.radiansToRotate, obj->getVVec()); break;
-                    case Z: rotation = Matrix_Rotate(data.radiansToRotate, obj->getUVec()); break;
+                    case X: obj->setEulerAngleX(obj->getEulerAngleX() + data.radiansToRotate); break;
+                    case Y: obj->setEulerAngleY(obj->getEulerAngleY() + data.radiansToRotate); break;
+                    case Z: obj->setEulerAngleZ(obj->getEulerAngleZ() + data.radiansToRotate); break;
                 }
                 data.radiansToRotate = 0.0f;
                 data.animationFlags ^= ANIMATION_ROTATING;
@@ -99,15 +99,12 @@ static float lastAnimationTime = (float) glfwGetTime();
             else{
                 // Rotaciona conforme delta_t
                 switch(data.rotationAxis){
-                    case X: rotation = Matrix_Rotate(radiansFromDeltaT, obj->getWVec()); break;
-                    case Y: rotation = Matrix_Rotate(radiansFromDeltaT, obj->getVVec()); break;
-                    case Z: rotation = Matrix_Rotate(radiansFromDeltaT, obj->getUVec()); break;
+                    case X: obj->setEulerAngleX(obj->getEulerAngleX() + radiansFromDeltaT); break;
+                    case Y: obj->setEulerAngleY(obj->getEulerAngleY() + radiansFromDeltaT); break;
+                    case Z: obj->setEulerAngleZ(obj->getEulerAngleZ() + radiansFromDeltaT); break;
                 }
                 data.radiansToRotate -= radiansFromDeltaT;    
             }
-
-            // Aplica matriz de rotação a view
-            obj->setView(rotation * obj->getView());
         }
     }
 }

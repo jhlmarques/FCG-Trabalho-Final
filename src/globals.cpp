@@ -63,3 +63,6 @@ ScrollDirection g_scrolledDirection;
 // Estado atual da movimentação da câmera
 uint8_t g_movingCamera = 0;
 
+// Mapa com todos modelos carregados
+std::map<std::string, ObjModel*> g_mapModels;
+

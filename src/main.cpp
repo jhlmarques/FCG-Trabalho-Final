@@ -111,32 +111,23 @@ int main(int argc, char* argv[])
     // Carregamento de modelos de objetos
 
     ObjModel model_plane("../../data/plane.obj", "../../data/");
-    GameObject obj_tile(&model_plane, 0);
-    GameObject obj_table(&model_plane, 0);
-    GameObject obj_blank_card(&model_plane, 0);
-
+    g_mapModels["plane"] = &model_plane;
     ObjModel model_bunny("../../data/bunny.obj", "../../data/");
-    GameObject obj_bunny(&model_bunny, 0);
-
+    g_mapModels["bunny"] = &model_bunny;
     ObjModel model_bust("../../data/marble_bust_01_1k.obj", "../../data/");
-    GameObject obj_bust(&model_bust, 0);
-
+    g_mapModels["bust"] = &model_bust;
     ObjModel model_light("../../data/lantern_chandelier_01_1k.obj", "../../data/");
-    GameObject obj_light(&model_light, 0);
-
+    g_mapModels["light"] = &model_light;
     ObjModel model_wooden_crate_9("../../data/wooden_crate_02_4k.obj", "../../data/");
-    GameObject obj_crate_9(&model_wooden_crate_9, 0);
-
+    g_mapModels["wooden_crate"] = &model_wooden_crate_9;
     ObjModel model_frame_crate_puzzle("../../data/crate_frame.obj", "../../data/");
-    GameObject obj_frame_crate_puzzle(&model_frame_crate_puzzle, 0);
+    g_mapModels["frame"] = &model_frame_crate_puzzle;
     ObjModel model_frame_crate_canvas_puzzle("../../data/crate_frame_canvas.obj", "../../data/");
-    GameObject obj_canvas_crate_puzzle(&model_frame_crate_canvas_puzzle, 0);
-    obj_frame_crate_puzzle.setIlluminationModel(LAMBERT);
-    obj_canvas_crate_puzzle.setIlluminationModel(LAMBERT);
-
+    g_mapModels["frame_crate_canvas"] = &model_frame_crate_canvas_puzzle;
     ObjModel model_gnome("../../data/garden_gnome_2k.obj", "../../data/");
-    GameObject obj_gnome(&model_gnome, 0);
+    g_mapModels["gnome"] = &model_gnome;
     
+
     // Note que, no sistema de coordenadas da câmera, os planos near e far
     // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
     float nearplane = -0.1f;  // Posição do "near plane"
@@ -151,33 +142,23 @@ int main(int argc, char* argv[])
 
     MainLobby puzzle_lobby;
     puzzle_lobby.setupRoom();
-    puzzle_lobby.addObject("tile", &obj_tile);
-    puzzle_lobby.addObject("statue", &obj_bust);
-    puzzle_lobby.addObject("light", &obj_light);
-    puzzle_lobby.addObject("frame", &obj_frame_crate_puzzle);
-    puzzle_lobby.addObject("crateCanvas", &obj_canvas_crate_puzzle);
-
     /*
         SETUP DO JOGO DE CARTAS
     */
     CardGame puzzle_card_game;
     puzzle_card_game.setupRoom();
-    puzzle_card_game.addObject("table", &obj_table);
-    puzzle_card_game.addObject("card", &obj_blank_card);
 
     /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA
     */
     CratePuzzle puzzle_crate;
     puzzle_crate.setupRoom();
-    puzzle_crate.addObject("crate", &obj_crate_9);
 
     /*
         SETUP DO PUZZLE DO GNOMO
     */
     GnomePuzzle puzzle_gnome;
     puzzle_gnome.setupRoom();
-    puzzle_gnome.addObject("gnome", &obj_gnome);
     
     // Define se estamos no lobby principal ou num puzzle
     bool isInLobby = true;

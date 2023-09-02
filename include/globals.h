@@ -56,4 +56,6 @@ enum ScrollDirection{
 
 extern ScrollDirection g_scrolledDirection;
 
+extern std::map<std::string, ObjModel*> g_mapModels;
+
 #endif // __GLOBALS_H__

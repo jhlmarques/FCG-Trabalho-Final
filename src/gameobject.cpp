@@ -6,11 +6,10 @@
 // É possível que dê problemas para .obj com mais de um shape; cuidado (TO-DO)
 GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
     textureScale(1.0), type(OBJ_GENERIC), illumination_model(BLINN_PHONG),
-    up{0.0, 1.0, 0.0, 0.0}, view{0.0, 0.0, 1.0, 0.0}, position{0.0, 0.0, 0.0, 1.0}
+    position{0.0, 0.0, 0.0, 1.0},
+    scaleMatrix(Matrix_Identity()), rotationMatrix(Matrix_Identity()),
+    eulerAngleX(0.0), eulerAngleY(0.0), eulerAngleZ(0.0)
 {
-    w = -view / norm(view);
-    u = crossproduct(up, w)/norm(crossproduct(up, w));
-    v = crossproduct(w, u);
     
     std::vector<float>  model_coefficients;
     std::vector<float>  normal_coefficients;
@@ -269,31 +268,45 @@ void GameObject::setPosition(glm::vec4 pos){
     position = pos;
 }
 
-glm::vec4 GameObject::getView(){
-    return view;
-}
-
-glm::mat4 GameObject::getViewMatrix(){    
-    return Matrix_Camera_View(position, view, up);
-}
-
-void GameObject::setView(glm::vec4 view){
-    this->view = view;
-}
-
 glm::vec4 GameObject::getPosition(){
     return position;
 }
 
-
-glm::vec4 GameObject::getWVec(){
-    return w;
+void GameObject::setScale(float x, float y, float z){
+    this->scaleMatrix = Matrix_Scale(x, y, z);
 }
 
-glm::vec4 GameObject::getVVec(){
-    return v;
+glm::mat4 GameObject::getScaleMatrix(){
+    return scaleMatrix;
 }
 
-glm::vec4 GameObject::getUVec(){
-    return u;
+glm::mat4 GameObject::getRotationMatrix(){
+    return rotationMatrix;
+}
+
+void GameObject::setEulerAngleX(float angle){
+    eulerAngleX = angle;
+    rotationMatrix = Matrix_Rotate_X(eulerAngleX) * Matrix_Rotate_Y(eulerAngleY) * Matrix_Rotate_Z(eulerAngleZ);
+}
+
+float GameObject::getEulerAngleX(){
+    return eulerAngleX;
+}
+
+void GameObject::setEulerAngleY(float angle){
+    eulerAngleY = angle;
+    rotationMatrix = Matrix_Rotate_X(eulerAngleX) * Matrix_Rotate_Y(eulerAngleY) * Matrix_Rotate_Z(eulerAngleZ);
+}
+
+float GameObject::getEulerAngleY(){
+    return eulerAngleY;
+}
+
+void GameObject::setEulerAngleZ(float angle){
+    eulerAngleZ = angle;
+    rotationMatrix = Matrix_Rotate_X(eulerAngleX) * Matrix_Rotate_Y(eulerAngleY) * Matrix_Rotate_Z(eulerAngleZ);
+}
+
+float GameObject::getEulerAngleZ(){
+    return eulerAngleZ;
 }

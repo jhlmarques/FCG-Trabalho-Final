@@ -518,15 +518,6 @@ void CratePuzzle::updateState(){
     return;
 }
 
-// void CratePuzzle::drawObjects(){
-//     auto obj_crate_9 = Puzzle::getObject("crate");
-
-//     glm::mat4 model = Matrix_Identity(); 
-//     model = Matrix_Scale(4.0f, 4.0f, 4.0f);
-//     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-//     obj_crate_9->draw(room.getLightSource());
-// }
-
 void CratePuzzle::handleCursorMovement(float dx, float dy){
     Puzzle::handleCursorMovement(dx, dy);
     room.getCamera().setCameraTheta(currentTheta);
@@ -549,14 +540,13 @@ prev_time((float)glfwGetTime())
 void GnomePuzzle::setupRoom(){
     // Câmera está olhando em direção ao gnomo e um pouco acima dele (offset no Y)
     glm::vec4 gnome_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
     Camera camera(gnome_position + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));    
+    room.setCamera(camera);
 
     glm::vec4 lightPosition = camera.getPosition();
-    LightSource lightSource(lightPosition);
-
-    room.setCamera(camera);
+    LightSource lightSource(lightPosition);    
     room.setLightSource(lightSource);
+
     room.setBackgroundColor(WHITE_BACKGROUND_COLOR);
 
     auto newObj = new GameObject(g_mapModels["gnome"], 0);
@@ -578,21 +568,6 @@ void GnomePuzzle::updateCamera(){
     room.getCamera().setPositionFree(objects["gnome"]->getPosition() + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));
     Puzzle::updateCamera();
 }
-
-// void GnomePuzzle::drawObjects(){
-//     auto obj_gnome = Puzzle::getObject("gnome");
-
-//     glm::mat4 model = Matrix_Identity(); 
-//     moveGnome(model);
-//     model = model * Matrix_Rotate_Y(-M_PI_2);
-//     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-//     obj_gnome->draw(room.getLightSource());
-
-//     // Utilizado para teste de colisão
-//     model = Matrix_Translate(-0.5f, 0.0f, 0.0f);
-//     glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-//     obj_gnome->draw(room.getLightSource());
-// }
 
 void GnomePuzzle::moveGnome(){
     static float speed = 0.5f;

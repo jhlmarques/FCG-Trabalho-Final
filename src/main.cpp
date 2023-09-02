@@ -148,11 +148,6 @@ int main(int argc, char* argv[])
 
     MainLobby puzzle_lobby;
     puzzle_lobby.setupRoom();
-    /*
-        SETUP DO JOGO DE CARTAS
-    */
-    CardGame puzzle_card_game;
-    puzzle_card_game.setupRoom();
 
     /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA
@@ -166,6 +161,12 @@ int main(int argc, char* argv[])
     GnomePuzzle puzzle_gnome;
     puzzle_gnome.setupRoom();
     
+    /*
+        SETUP DO PUZZLE DAS BOLAS
+    */
+   FallingBallsPuzzle puzzle_balls;
+   puzzle_balls.setupRoom();
+
     // Define se estamos no lobby principal ou num puzzle
     bool isInLobby = true;
 
@@ -196,8 +197,11 @@ int main(int argc, char* argv[])
                     case 6:
                         currentPuzzle = &puzzle_gnome;
                         break;
+                    case 4:
+                        currentPuzzle = &puzzle_balls;
+                        break;
                     default:
-                        currentPuzzle = &puzzle_card_game;
+                        currentPuzzle = &puzzle_lobby;
                         break;
                 }
             }

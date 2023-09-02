@@ -185,8 +185,7 @@ uint8_t MainLobby::getCurrentPuzzleID(){
         return LOBBY_LENGTH -(playerPosition.z / STEP_SIZE);
     }
 
-    // Se não é um dos puzzles laterais, é o jogo de cartas
-    return CARD_PUZZLE;
+    return 0;
 }
 
 void MainLobby::handleExitedPuzzle(){
@@ -352,136 +351,6 @@ void MainLobby::updateState(){
 
 }
 
-int Card::numCards = 0;
-
-Card::Card(ObjModel* model, GLuint shapeIdx ,uint8_t health, uint8_t attack, uint8_t cost) : 
-GameObject(model, shapeIdx), health(health), attackPower(attack), bloodCost(cost)
-{
-    numCards++;
-}
-
-void Card::handleAttackingCard(CardGame& game, Card& attacked){
-    attacked.handleAttacked(game, *this);
-}
-
-void Card::handleAttackingPlayer(CardGame& game, bool isCPU){
-    if(isCPU){
-        game.reduceHealth(true);
-    }
-    else{
-        game.reduceHealth(false);
-    }
-}
-
-void Card::handleAttacked(CardGame& game, Card& attacker){
-    health -= attacker.attackPower;
-    if(health < 0){
-        health = 0;
-        handleDeath(game);
-    }
-}
-
-void Card::handleDeath(CardGame& game){
-    return;
-}
-
-std::string Card::getObjName(){
-    return std::string("card_") + std::to_string(numCards-1);
-}
-
-CardGame::CardGame() : 
-currentLevel(0), 
-playerCanPlay(false), 
-playerSideCards{nullptr, nullptr, nullptr, nullptr},
-enemySideCards{nullptr, nullptr, nullptr, nullptr},
-enemyFutureCards{nullptr, nullptr, nullptr, nullptr}
-{
-
-}
-
-void CardGame::setupRoom(){
-    auto camera = Camera(glm::vec3(0.0f, 0.7f, 0.0f));
-    camera.setLookAtPoint(glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
-    room.setCamera(camera);
-    
-    glm::vec4 lightPosition = glm::vec4(0.0f, 2.0f, -1.0f, 1.0f);
-    LightSource lightSource(lightPosition);
-    room.setLightSource(lightSource);    
-
-    auto newObj = new GameObject(g_mapModels["plane"], 0);
-    newObj->setPosition(glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
-    objects["table"] = newObj;
-
-}
-
-void CardGame::updateState(){
-    if(g_dPressed){
-        drawCard();
-        g_dPressed = false;
-    }
-    
-    return;
-}
-
-void CardGame::handlePlayerTurn(){
-
-}
-
-void CardGame::handleTurnEnded(){
-
-}
-
-void CardGame::handleEnemyTurn(){
-
-}
-
-void CardGame::handleMatchEnd(){
-
-}
-
-void CardGame::drawCard(){
-    for(auto card : playerHand){
-        AnimationData animation;
-        auto pos = card->getPosition();
-        pos.x -= 0.05;
-        pos.z -= 0.001;
-        animation.setDestinationPoint(pos, 2.0f);
-        g_AnimationManager.addAnimatedObject(card, animation);
-    }
-    // Cria nova carta e configura
-    auto newCard = new Card(g_mapModels["plane"],0, 3, 1, 1);
-    newCard->setScale(0.15, 0.2, 1.0);
-    newCard->setEulerAngleX(1.309);
-    
-    // Posiciona a carta na frente da câmera
-    auto cameraPos = room.getCamera().getPosition();
-    auto cameraW = room.getCamera().getWVec();
-    auto cameraV = room.getCamera().getVVec();
-    newCard->setPosition((cameraPos + (-cameraV * glm::vec4(0.4, 0.4, 0.4, 1.0))) + (-cameraW * glm::vec4(0.3, 0.3, 0.3, 1.0)));
-
-    playerHand.push_back(newCard);
-    auto objName = newCard->getObjName();
-    objects[objName] = newCard;
-
-
-}
-void CardGame::playCard(Card* card, uint8_t pos){
-
-}
-
-void CardGame::sacrificeSelectedCards(){
-
-}
-
-void CardGame::reduceHealth(bool playerOrCPU){
-
-}
-
-
-
-
-
-
 void CratePuzzle::updateCamera(){
     Puzzle::updateCamera();
     room.getLightSource().setPosition(room.getCamera().getPosition());
@@ -605,4 +474,78 @@ void GnomePuzzle::moveGnome(){
         gnome_position.x -= speed*delta_t;
     }
     objects["gnome"]->setPosition(gnome_position);
+
+}
+
+void FallingBallsPuzzle::setupRoom(){
+    round = 0;
+    curPos = 0;
+    movementAnimationID = ANIMATION_ID_NONE;
+    
+    auto camera = Camera(glm::vec4(2.0f, 3.0f, 2.0f, 1.0f));
+    camera.setLookAtPoint(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    room.setCamera(camera);
+    
+    glm::vec4 lightPosition = glm::vec4(0.0f, 3.0f, 0.0f, 1.0f);
+    LightSource lightSource(lightPosition);
+    room.setLightSource(lightSource);
+
+    auto newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4(-1.0, 0.0, 1.0, 1.0));
+    objects["tile1"] = newObj;
+
+    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4(1.0, 0.0, 1.0, 1.0));
+    objects["tile2"] = newObj;
+
+    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4(1.0, 0.0, -1.0, 1.0));
+    objects["tile3"] = newObj;
+
+    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj->setPosition(glm::vec4(-1.0, 0.0, -1.0, 1.0));
+    objects["tile4"] = newObj;
+
+    newObj = new GameObject(g_mapModels["bust"], 0);
+    newObj->setPosition(glm::vec4(-1.0, 0.0, 1.0, 1.0));
+    objects["player"] = newObj;
+    
+}
+
+void FallingBallsPuzzle::updateState(){
+    
+    if(g_AnimationManager.hasAnimationFinished(movementAnimationID, true)){
+        if(g_wPressed){
+            auto player = objects["player"];
+            AnimationData animation;
+            glm::vec4 start = player->getPosition();
+            glm::vec4 end;
+            switch(curPos){
+                case 0:
+                    end = objects["tile2"]->getPosition();
+                    break;
+                case 1:
+                    end = objects["tile3"]->getPosition();
+                    break;
+                case 2:
+                    end = objects["tile4"]->getPosition();
+                    break;
+                case 3:
+                    end = objects["tile1"]->getPosition();
+                    break;
+            }
+            curPos = (curPos == 3) ? 0 : ++curPos;
+
+            auto distance = end - start;
+            auto disloc = glm::vec4(distance.x/2, 0.0, distance.z/2, 0.0f);
+            auto p2 = start + disloc;
+            p2.y = start.y + 0.4;
+            auto p3 = end - disloc;
+            p3.y = start.y + 0.2;
+            animation.setBezierCurveJump(start, p2, p3, end, 3.0);
+
+            movementAnimationID = g_AnimationManager.addAnimatedObject(player, animation);
+        }
+    }
+
 }

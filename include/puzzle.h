@@ -61,7 +61,7 @@ class Puzzle{
 #define SOUTH 2
 #define WEST 3
 
-#define CARD_PUZZLE 255
+
 
 class MainLobby : public Puzzle{
     private:
@@ -86,62 +86,6 @@ class MainLobby : public Puzzle{
     uint8_t getCurrentPuzzleID();
     // Lida com a saída de um puzzle
     void handleExitedPuzzle();
-
-};
-
-class CardGame;
-class Card;
-
-class Card : public GameObject{
-    private:
-    bool markedForSacrifice;
-    uint8_t bloodCost;
-    uint8_t bloodProvided;
-    uint8_t attackPower;
-    uint8_t health;
-    uint8_t sigil;
-
-    static int numCards;
-
-    public:
-    Card(ObjModel* model, GLuint shapeIdx, uint8_t health, uint8_t attack, uint8_t cost);
-    void handleAttackingCard(CardGame &game, Card &attacked);
-    void handleAttackingPlayer(CardGame &game, bool isCPU);
-    void handleAttacked(CardGame& game, Card& attacker);
-    void handleDeath(CardGame& game);
-    std::string getObjName();
-
-};
-
-class CardGame : public Puzzle{
-    private:
-    uint8_t currentLevel;
-    int turn;
-    bool playerCanPlay;
-
-    std::vector<Card*> playerHand;
-    std::vector<Card*> cardsInPlay;
-    Card* playerSideCards[4];
-    Card* enemySideCards[4];
-    Card* enemyFutureCards[4];
-
-    public:
-    CardGame();
-
-    uint8_t getCurrentLevel();
-    
-    void setupRoom();
-    void updateState();
-
-    void handlePlayerTurn();
-    void handleTurnEnded();
-    void handleEnemyTurn();
-    void handleMatchEnd();
-
-    void drawCard();
-    void playCard(Card* card, uint8_t pos);
-    void sacrificeSelectedCards();
-    void reduceHealth(bool playerOrCPU);
 
 };
 
@@ -173,4 +117,33 @@ class GnomePuzzle : public Puzzle
     float prev_time;
 
     const glm::vec4 gnome_initial_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+};
+
+class FallingBallsPuzzle : public Puzzle{
+
+    private:
+    // O personagem controlado
+    GameObject* player;
+    // Espaços para se movimentar
+    GameObject* tile1;
+    GameObject* tile2;
+    GameObject* tile3;
+    GameObject* tile4;
+    GameObject* marker;
+    // Posição atual
+    uint8_t curPos;
+    
+    // Round atual
+    int round;
+
+    // ID da animação de moviment
+    int movementAnimationID;
+    
+    public:
+    void setupRoom();
+    void updateState();
+    // Movimenta jogador (em círculo)
+    void movePlayer();
+
+
 };

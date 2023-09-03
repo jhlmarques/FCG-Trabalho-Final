@@ -431,7 +431,8 @@ void CratePuzzle::handleScroll(double xoffset, double yoffset){
 // GNOMO
 
 GnomePuzzle::GnomePuzzle():
-prev_time((float)glfwGetTime())
+prev_time((float)glfwGetTime()),
+actual_num_gnomes(0)
 {
 
 }
@@ -463,9 +464,8 @@ void GnomePuzzle::setupRoom(){
     objects["gnome"] = newObj;
     
     int possible_num_gnomes = 0;
-    int actual_num_gnomes = 0;
     // Itera enquanto não nasceu todos gnomos ou não acabou a sala 
-    while (actual_num_gnomes < max_gnomes && collision_gnome_offset*(possible_num_gnomes+1) < floor_size/2.0f - collision_gnome_offset){
+    while (actual_num_gnomes < max_gnomes && std::abs(collision_gnome_offset)*(possible_num_gnomes+1) < floor_size/2.0f - collision_gnome_offset){
         // 75% de chance de nascer um gnomo
         if (std::rand() % 4 != 0){
             newObj = new GameObject(g_mapModels["gnome"], 0);
@@ -483,10 +483,8 @@ void GnomePuzzle::setupRoom(){
 
 void GnomePuzzle::updateState(){
     moveGnome();
-    if (checkPlaneToPlaneCollision(objects["gnome"], objects["gnome_1"])){
-        // Reseta a posição do gnomo quando há colisão
-        objects["gnome"]->setPosition(gnome_initial_position);
-    }
+    checkColisions();
+    
 }
 
 
@@ -505,9 +503,11 @@ void GnomePuzzle::moveGnome(){
     if(g_AnimationManager.hasAnimationFinished(gnomeJumpAnimationID, true)){
         if (g_leftPressed){
             gnome_position.x += speed*delta_t;
+            objects["gnome"]->setPosition(gnome_position);
         }
         if (g_rightPressed){
             gnome_position.x -= speed*delta_t;
+            objects["gnome"]->setPosition(gnome_position);
         }
         if (g_upPressed){
             AnimationData animation;
@@ -527,10 +527,21 @@ void GnomePuzzle::moveGnome(){
             animation.setBezierCurveJump(start, p2, p3, end, speed);
             gnomeJumpAnimationID = g_AnimationManager.addAnimatedObject(objects["gnome"], animation);
         }
-        objects["gnome"]->setPosition(gnome_position);
     }
     
 
+}
+
+void GnomePuzzle::checkColisions(){
+    for (int i = 0; i < actual_num_gnomes; i++){
+        std::string objName = (std::string("gnome_") + std::to_string(i));
+        if (checkPlaneToPlaneCollision(objects["gnome"], objects[objName])){
+            // Reseta a posição do gnomo quando há colisão
+            objects["gnome"]->setPosition(gnome_initial_position);
+            g_AnimationManager.removeAnimation(gnomeJumpAnimationID, true);
+            break;
+        }
+    }
 }
 
 void BallPuzzle::setupRoom(){

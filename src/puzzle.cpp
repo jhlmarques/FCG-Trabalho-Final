@@ -557,7 +557,8 @@ void GnomePuzzle::checkColisions(){
 
 void GnomePuzzle::showNumber(){
     AnimationData animationCanvas;
-    glm::vec4 number_canvas_end_position = objects["gnome"]->getPosition() + number_canvas_offset_from_gnome;
+    glm::vec4 number_canvas_end_position = number_canvas_offset_from_gnome;
+    number_canvas_end_position.x += objects["gnome"]->getPosition().x;
     animationCanvas.setDestinationPoint(number_canvas_end_position, canvas_drop_velocity);
     numberCanvasAnimationID = g_AnimationManager.addAnimatedObject(objects["number_canvas"], animationCanvas);
 

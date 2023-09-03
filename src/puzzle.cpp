@@ -206,6 +206,7 @@ void MainLobby::setupRoom(){
     // Iluminação do lobby principal
     glm::vec4 lightPosition = glm::vec4(0.0f, LOBBY_LIGHT_SOURCE_HEIGHT, -(LOBBY_LENGTH*STEP_SIZE / 2.0f), 1.0f);
     LightSource lightSource(lightPosition);
+    
     room.setLightSource(lightSource);
 
     // Objetos
@@ -260,16 +261,18 @@ void MainLobby::setupRoom(){
 
     // Teto
     newObj = new GameObject(g_mapModels["wood_ceiling"], 0);
-    newObj->setScale((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), 1.0f, STEP_SIZE*LOBBY_LENGTH + STEP_SIZE/2.0f);
+    // Adicionei um offset (0.2) porque havia vãos pretos nos lados do teto
+    newObj->setScale((STEP_SIZE*(LOBBY_SIDE_WIDTH + 0.2) + STEP_SIZE/2.0f), 1.0f, STEP_SIZE*LOBBY_LENGTH + STEP_SIZE/2.0f);
     newObj->setEulerAngleZ(M_PI);
-    newObj->setPosition(room.getLightSource().getPosition());
+    // 0.25 de offset no Y para que a fonte de luz fique um pouco abaixo do teto e do chandelier 
+    newObj->setPosition(room.getLightSource().getPosition() + glm::vec4(0.0f, 0.25f, 0.0f, 0.0f));
     newObj->setTextureScale(8.0);
     objects["ceiling"] = newObj;
 
 
     // Fonte de luz
     newObj = new GameObject(g_mapModels["light"], 0);
-    newObj->setPosition(room.getLightSource().getPosition());
+    newObj->setPosition(room.getLightSource().getPosition() + glm::vec4(0.0f, 0.25f, 0.0f, 0.0f));
     objects["light"] = newObj;
 
     // Busto

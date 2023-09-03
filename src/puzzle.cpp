@@ -549,6 +549,10 @@ void GnomePuzzle::setupRoom(){
 
     room.setBackgroundColor(WHITE_BACKGROUND_COLOR);
 
+    // Chão
+
+
+    // Gnomo principal que será movido
     auto newObj = new GameObject(g_mapModels["gnome"], 0);
     newObj->setPosition(gnome_position);
     newObj->setEulerAngleY(-M_PI_2);
@@ -566,7 +570,7 @@ void GnomePuzzle::setupRoom(){
 
 void GnomePuzzle::updateState(){
     moveGnome();
-    if (checkAABBCollision(objects["gnome"], objects["gnome_test"])){
+    if (checkPlaneToPlaneCollision(objects["gnome"], objects["gnome_test"])){
         // Reseta a posição do gnomo quando há colisão
         objects["gnome"]->setPosition(gnome_initial_position);
     }

@@ -7,6 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // Colisão entre AABBs
-bool checkAABBCollision(GameObject* obj1, GameObject* obj2);
+bool checkPlaneToPlaneCollision(GameObject* obj1, GameObject* obj2);
 
 #endif

@@ -58,4 +58,6 @@ extern std::map<std::string, ObjModel*> g_mapModels;
 
 extern bool g_lockOpened;
 
+extern bool g_puzzlesCompleted;
+
 #endif // __GLOBALS_H__

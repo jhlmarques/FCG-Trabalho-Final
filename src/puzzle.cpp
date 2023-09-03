@@ -196,6 +196,22 @@ void MainLobby::handleExitedPuzzle(){
     enteredPuzzle = false;
 }
 
+void MainLobby::handlePuzzlesCompleted(){
+    enteredPuzzle = false;
+
+    // Animação descendo para o lobby
+    AnimationData animation;
+    auto& camera = room.getCamera();
+    auto pos = camera.getPosition();
+    animation.setDestinationPoint(pos, 0.5f);
+    animation.setradiansToRotate(M_PI, Y, 30.0f);
+    camera.setPositionFree(glm::vec4(pos.x, 10.0f, pos.z, 1.0f));
+    cameraAnimationID = g_AnimationManager.addAnimatedCamera(&camera, animation);
+
+    // Arruma direção
+    curFacingDirection = SOUTH;
+}
+
 void MainLobby::setupRoom(){
     playerPosition = glm::vec4(0.0f, CAMERA_HEAD_HEIGHT, 0.0f, 1.0f);
     curFacingDirection = NORTH;
@@ -319,9 +335,11 @@ void MainLobby::updateState(){
     // Apenas realizamos um movimento se a câmera não está animando
     if(g_AnimationManager.hasAnimationFinished(cameraAnimationID, false)){
         g_AnimationManager.removeAnimation(cameraAnimationID, false);
+        
         // Puzzles sempre estão nas laterais
         // Jogo de cartas fica ao norte da sala
         if(
+            !g_puzzlesCompleted && // Checa se estamos no modo "fim de jogo". Nesse caso não podemos entrar em puzzles
             !enteredPuzzle &&
             (
                 ((curFacingDirection == WEST) && (playerPosition.x == -(STEP_SIZE*LOBBY_SIDE_WIDTH))) ||
@@ -652,7 +670,28 @@ void LockPuzzle::updateState(){
     static uint8_t curSelectedRing = 0;
     static int animationPrevSel = ANIMATION_ID_NONE;
     static int animationSel = ANIMATION_ID_NONE;
+    static int animationLockOpened = ANIMATION_ID_NONE;
+    static bool startedLockAnimation = false;
     static float lastProcessedInput = (float) glfwGetTime();;
+
+    // Checa se cadeado foi aberto; se sim, faz animação especial
+    if(g_lockOpened){
+        if(!startedLockAnimation){
+            AnimationData animation;
+            animation.setDestinationPoint(glm::vec4(0.0f, 5.0f, 0.0f, 1.0f), 0.5);
+            animationLockOpened = g_AnimationManager.addAnimatedCamera(&room.getCamera(), animation);
+            startedLockAnimation = true;
+        }
+        else{
+            // Ao fim da animação, indicamos que queremos realizar a animação final
+            if(g_AnimationManager.hasAnimationFinished(animationLockOpened, false)){
+                g_puzzlesCompleted = true;
+            }
+            return;
+        }
+    }
+
+
 
     float cur_time = (float) glfwGetTime();
     if((cur_time - lastProcessedInput) < 0.25f){

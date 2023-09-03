@@ -188,19 +188,28 @@ int main(int argc, char* argv[])
     bool isInLobby = true;
 
     currentPuzzle = &puzzle_crate;
-    
+
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
         // Somente utilizamos a matriz de projeção em perspectiva
         glm::mat4 projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         glUniformMatrix4fv(g_projection_uniform, 1 , GL_FALSE , glm::value_ptr(projection));
-        
+
         // Saída do puzzle (placeholder)
-        if(!isInLobby && g_sPressed){
-            isInLobby = true;
-            puzzle_lobby.handleExitedPuzzle();
+        // Não funciona quando cadeado for aberto (cutscene especial)
+        if(!isInLobby){
+            if(g_sPressed && !g_lockOpened){
+                isInLobby = true;
+                puzzle_lobby.handleExitedPuzzle();
+            }
+            
+            if(g_puzzlesCompleted){
+                isInLobby = true;
+                puzzle_lobby.handlePuzzlesCompleted();
+            }
         }
+
 
         if(isInLobby){
             if(puzzle_lobby.hasEnteredPuzzle()){

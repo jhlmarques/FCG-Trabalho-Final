@@ -67,3 +67,5 @@ std::map<std::string, ObjModel*> g_mapModels;
 // Define se o cadeado foi aberto
 bool g_lockOpened = false;
 
+// Define se os puzzles estão completos
+bool g_puzzlesCompleted = false;

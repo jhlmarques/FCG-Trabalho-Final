@@ -90,12 +90,14 @@ class MainLobby : public Puzzle{
     uint8_t getCurrentPuzzleID();
     // Lida com a saída de um puzzle
     void handleExitedPuzzle();
+    // Lida com os puzzles estarem completos
+    void handlePuzzlesCompleted();
 
 };
 
 #define LOCK_PUZZLE_RING_ANSWER1 9 
-#define LOCK_PUZZLE_RING_ANSWER2 8
-#define LOCK_PUZZLE_RING_ANSWER3 4
+#define LOCK_PUZZLE_RING_ANSWER2 4
+#define LOCK_PUZZLE_RING_ANSWER3 1
 class LockPuzzle : public Puzzle{
     private:
     uint8_t lock_ring_val1;

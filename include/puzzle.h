@@ -36,6 +36,7 @@ class Puzzle{
     void drawObjects();
 
     public:
+    ~Puzzle();
 
     void step(); // Realiza atualizações e retorna puzzle 
 

@@ -1,6 +1,13 @@
 #include "puzzle.h"
 
-void Puzzle::step(){
+Puzzle::~Puzzle(){
+    for(auto pair : objects){
+        delete pair.second;
+    }
+}
+
+void Puzzle::step()
+{
     glm::vec4 bg = room.getBackgroundColor();
     glClearColor(bg.r, bg.g, bg.b, bg.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -8,7 +15,6 @@ void Puzzle::step(){
     updateCamera();
     updateState();
     drawObjects();
-
 }
 
 void Puzzle::handleCursorMovement(float dx, float dy){
@@ -588,7 +594,8 @@ void GnomePuzzle::showNumber(){
     already_ended = true;
 }
 
-void BallPuzzle::setupRoom(){
+void BallPuzzle::setupRoom()
+{
     round = 0;
     curPos = 0;
     playerMovementAnimationID = ANIMATION_ID_NONE;
@@ -636,7 +643,6 @@ void BallPuzzle::setupRoom(){
     newObj->setScale(0.5,0.5,0.5);
     objects["ball_puzzle"] = newObj;
     ball_puzzle = newObj;
-    
 }
 
 void BallPuzzle::updateState(){

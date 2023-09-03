@@ -477,10 +477,10 @@ void GnomePuzzle::moveGnome(){
 
 }
 
-void FallingBallsPuzzle::setupRoom(){
+void BallPuzzle::setupRoom(){
     round = 0;
     curPos = 0;
-    movementAnimationID = ANIMATION_ID_NONE;
+    playerMovementAnimationID = ANIMATION_ID_NONE;
     
     auto camera = Camera(glm::vec4(2.0f, 3.0f, 2.0f, 1.0f));
     camera.setLookAtPoint(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -508,15 +508,67 @@ void FallingBallsPuzzle::setupRoom(){
 
     newObj = new GameObject(g_mapModels["bust"], 0);
     newObj->setPosition(glm::vec4(-1.0, 0.0, 1.0, 1.0));
+    newObj->setEulerAngleY(M_PI_2);
     objects["player"] = newObj;
+    player = newObj;
+
+    newObj = new GameObject(g_mapModels["ball"], 0);
+    newObj->setPosition(glm::vec4(-200.0, 0.0, 0.0, 1.0));
+    newObj->setScale(0.5,0.5,0.5);
+    objects["ball"] = newObj;
+    ball = newObj;
+
+    newObj = new GameObject(g_mapModels["ball_puzzle"], 0);
+    newObj->setPosition(glm::vec4(-200.0, 0.0, 0.0, 1.0));
+    newObj->setScale(0.5,0.5,0.5);
+    objects["ball_puzzle"] = newObj;
+    ball_puzzle = newObj;
     
 }
 
-void FallingBallsPuzzle::updateState(){
-    
-    if(g_AnimationManager.hasAnimationFinished(movementAnimationID, true)){
+void BallPuzzle::updateState(){
+    static float lastBallLaunched = (float) glfwGetTime();
+    static bool ballLaunched = false;
+    float cur_time = (float) glfwGetTime();
+
+    if((cur_time - lastBallLaunched) > 10.0f){
+        // Lança bola
+        ballLaunched = true;
+        AnimationData animation;
+        GameObject* ballToLaunch;
+        // Chance de ser a bola com a resposta do puzzle
+        if(std::rand() % 10){
+            ballToLaunch = ball;
+        }
+        else{
+            ballToLaunch = ball_puzzle;
+        }
+
+        switch(std::rand() % 4){
+            case 0:
+                ballToLaunch->setPosition(glm::vec4(-10.0, 1.0,-1.0, 1.0));
+                animation.setDestinationPoint(glm::vec4(10.0, 0.0,-1.0, 1.0), 2.5);
+                break;
+            case 1:
+                ballToLaunch->setPosition(glm::vec4(-10.0, 1.0, 1.0, 1.0));
+                animation.setDestinationPoint(glm::vec4(10.0, 0.0,1.0, 1.0), 2.5);
+                break;
+            case 2:
+                ballToLaunch->setPosition(glm::vec4(-1.0, 1.0,-10.0, 1.0));
+                animation.setDestinationPoint(glm::vec4(-1.0, 0.0, 10.0, 1.0), 2.5);
+                break;
+            case 3:
+                ballToLaunch->setPosition(glm::vec4(1.0, 1.0,-10.0, 1.0));
+                animation.setDestinationPoint(glm::vec4(-1.0, 0.0, 10.0, 1.0), 2.5);
+                break;
+        }
+        ballMovementAnimationID = g_AnimationManager.addAnimatedObject(ballToLaunch, animation);
+        
+        lastBallLaunched = cur_time;
+    }
+
+    if(g_AnimationManager.hasAnimationFinished(playerMovementAnimationID, true)){
         if(g_wPressed){
-            auto player = objects["player"];
             AnimationData animation;
             glm::vec4 start = player->getPosition();
             glm::vec4 end;
@@ -543,8 +595,9 @@ void FallingBallsPuzzle::updateState(){
             auto p3 = end - disloc;
             p3.y = start.y + 0.2;
             animation.setBezierCurveJump(start, p2, p3, end, 3.0);
+            animation.setradiansToRotate(M_PI_2, Y, 360.0);
 
-            movementAnimationID = g_AnimationManager.addAnimatedObject(player, animation);
+            playerMovementAnimationID = g_AnimationManager.addAnimatedObject(player, animation);
         }
     }
 

@@ -132,7 +132,10 @@ int main(int argc, char* argv[])
     g_mapModels["frame_crate_canvas"] = &model_frame_crate_canvas_puzzle;
     ObjModel model_gnome("../../data/garden_gnome_2k.obj", "../../data/");
     g_mapModels["gnome"] = &model_gnome;
-    
+    ObjModel model_ball("../../data/ball.obj", "../../data/");
+    g_mapModels["ball"] = &model_ball;
+    ObjModel model_ball_puzzle("../../data/ball_puzzle.obj", "../../data/");
+    g_mapModels["ball_puzzle"] = &model_ball_puzzle;
 
     // Note que, no sistema de coordenadas da câmera, os planos near e far
     // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
@@ -164,7 +167,7 @@ int main(int argc, char* argv[])
     /*
         SETUP DO PUZZLE DAS BOLAS
     */
-   FallingBallsPuzzle puzzle_balls;
+   BallPuzzle puzzle_balls;
    puzzle_balls.setupRoom();
 
     // Define se estamos no lobby principal ou num puzzle

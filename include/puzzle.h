@@ -8,6 +8,7 @@
 #include "gameobject.h"
 #include "animation.h"
 #include "collisions.h"
+#include <random>
 
 class Puzzle;
 
@@ -119,25 +120,23 @@ class GnomePuzzle : public Puzzle
     const glm::vec4 gnome_initial_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 };
 
-class FallingBallsPuzzle : public Puzzle{
+class BallPuzzle : public Puzzle{
 
     private:
-    // O personagem controlado
+    // Objetos relevantes a colisão
     GameObject* player;
-    // Espaços para se movimentar
-    GameObject* tile1;
-    GameObject* tile2;
-    GameObject* tile3;
-    GameObject* tile4;
-    GameObject* marker;
+    GameObject* ball;
+    GameObject* ball_puzzle; // A bola com a resposta
+
     // Posição atual
     uint8_t curPos;
     
     // Round atual
     int round;
 
-    // ID da animação de moviment
-    int movementAnimationID;
+    // IDs de animações
+    int ballMovementAnimationID;
+    int playerMovementAnimationID;
     
     public:
     void setupRoom();

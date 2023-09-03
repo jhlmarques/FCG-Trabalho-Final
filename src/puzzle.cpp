@@ -184,8 +184,12 @@ uint8_t MainLobby::getCurrentPuzzleID(){
     else if(playerPosition.x > 0){
         return LOBBY_LENGTH -(playerPosition.z / STEP_SIZE);
     }
+    // Saída
+    else if(playerPosition.z == -LOBBY_LENGTH*STEP_SIZE){
+        return PUZZLE_ID_LOCK;
+    }
 
-    return 0;
+    return PUZZLE_ID_NONE;
 }
 
 void MainLobby::handleExitedPuzzle(){
@@ -299,6 +303,12 @@ void MainLobby::setupRoom(){
     newObj->setEulerAngleY(-M_PI_2);
     objects["frame_gnome"] = newObj;
 
+    // Porta de saída
+    newObj = new GameObject(g_mapModels["door"], 0);
+    newObj->setPosition(glm::vec4(0.0 , 0.0, -LOBBY_LENGTH*STEP_SIZE - (STEP_SIZE/2) +0.01, 1.0));
+    newObj->setEulerAngleY(-M_PI_2);
+    objects["door"] = newObj;
+
 }
 
 void MainLobby::updateState(){
@@ -330,26 +340,28 @@ void MainLobby::updateState(){
         playerMove();
     }
 
-    // PLACEHOLDER / TESTAGEM
-    if(g_AnimationManager.hasAnimationFinished(statueAnimationID, true)){
-        g_AnimationManager.removeAnimation(statueAnimationID, true);
-        AnimationData animation;
-        auto bust = objects["bust"];
-        auto pos = bust->getPosition();
-        if(statueStatus){
-            //animation.setDestinationPoint(glm::vec4(STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
-            animation.setBezierCurveJump(pos, glm::vec4(-1.0,2.0,0.0,1.0), glm::vec4(-2.0,1.0,0.0,1.0), glm::vec4(-3.0,0.0,0.0,1.0), 2.0f);
-        }
-        else{
-            //animation.setDestinationPoint(glm::vec4(-STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
-            animation.setBezierCurveJump(pos, glm::vec4(1.0,2.0,0.0,1.0), glm::vec4(2.0,1.0,0.0,1.0), glm::vec4(3.0,0.0,0.0,1.0), 2.0f);
-        }
-        statueStatus = !statueStatus;
-        statueAnimationID = g_AnimationManager.addAnimatedObject(bust, animation);
+    // // PLACEHOLDER / TESTAGEM
+    // if(g_AnimationManager.hasAnimationFinished(statueAnimationID, true)){
+    //     g_AnimationManager.removeAnimation(statueAnimationID, true);
+    //     AnimationData animation;
+    //     auto bust = objects["bust"];
+    //     auto pos = bust->getPosition();
+    //     if(statueStatus){
+    //         //animation.setDestinationPoint(glm::vec4(STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
+    //         animation.setBezierCurveJump(pos, glm::vec4(-1.0,2.0,0.0,1.0), glm::vec4(-2.0,1.0,0.0,1.0), glm::vec4(-3.0,0.0,0.0,1.0), 2.0f);
+    //     }
+    //     else{
+    //         //animation.setDestinationPoint(glm::vec4(-STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
+    //         animation.setBezierCurveJump(pos, glm::vec4(1.0,2.0,0.0,1.0), glm::vec4(2.0,1.0,0.0,1.0), glm::vec4(3.0,0.0,0.0,1.0), 2.0f);
+    //     }
+    //     statueStatus = !statueStatus;
+    //     statueAnimationID = g_AnimationManager.addAnimatedObject(bust, animation);
 
-    }
+    // }
 
 }
+
+
 
 void CratePuzzle::updateCamera(){
     Puzzle::updateCamera();
@@ -600,5 +612,177 @@ void BallPuzzle::updateState(){
             playerMovementAnimationID = g_AnimationManager.addAnimatedObject(player, animation);
         }
     }
+
+}
+
+void LockPuzzle::setupRoom(){
+    lock_ring_val1 = 0;
+    lock_ring_val2 = 0;
+    lock_ring_val3 = 0;
+    
+    auto camera = Camera(glm::vec4(0.0f, 0.5f, 0.0f, 1.0f));
+    camera.setLookAtPoint(glm::vec4(0.0f, 0.5f, -1.0f, 1.0f));
+    room.setCamera(camera);
+    
+    glm::vec4 lightPosition = glm::vec4(0.0f, 3.0f, 0.0f, 1.0f);
+    LightSource lightSource(lightPosition);
+    room.setLightSource(lightSource);
+
+    // Começa "saltado", pois é o primeiro input 
+    auto newObj = new GameObject(g_mapModels["lock_ring"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.75, -3.2, 1.0));
+    objects["lock_ring1"] = newObj;
+
+    newObj = new GameObject(g_mapModels["lock_ring"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.5, -3.5, 1.0));
+    objects["lock_ring2"] = newObj;
+
+    newObj = new GameObject(g_mapModels["lock_ring"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.25, -3.5, 1.0));
+    objects["lock_ring3"] = newObj;
+
+    newObj = new GameObject(g_mapModels["lock_body"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.5, -3.5, 1.0));
+    objects["lock_body"] = newObj;
+
+
+}
+
+void LockPuzzle::updateState(){
+    static uint8_t curSelectedRing = 0;
+    static int animationPrevSel = ANIMATION_ID_NONE;
+    static int animationSel = ANIMATION_ID_NONE;
+    static float lastProcessedInput = (float) glfwGetTime();;
+
+    float cur_time = (float) glfwGetTime();
+    if((cur_time - lastProcessedInput) < 0.25f){
+        return;
+    }
+
+    if( !g_AnimationManager.hasAnimationFinished(animationPrevSel, true) ||
+        !g_AnimationManager.hasAnimationFinished(animationSel, true)
+    ){
+        return;
+    }
+
+    if(g_downPressed){
+        AnimationData anim1, anim2;
+        glm::vec4 pos_prev_selected;
+        glm::vec4 pos_selected;
+        GameObject* prev_selected;
+        GameObject* selected;
+        switch(curSelectedRing){
+            case 0:
+                prev_selected = objects["lock_ring1"];
+                selected = objects["lock_ring2"];
+                curSelectedRing = 1;
+                break;
+            case 1:
+                prev_selected = objects["lock_ring2"];
+                selected = objects["lock_ring3"];
+                curSelectedRing = 2;
+                break;
+            case 2:
+                prev_selected = objects["lock_ring3"];
+                selected = objects["lock_ring1"];
+                curSelectedRing = 0;
+                break;
+        }
+
+        pos_prev_selected = prev_selected->getPosition();
+        pos_prev_selected.z = -3.5;
+        pos_selected = selected->getPosition();
+        pos_selected.z = -3.2;
+        anim1.setDestinationPoint(pos_prev_selected, 3.0f);
+        anim2.setDestinationPoint(pos_selected, 3.0f);
+        animationPrevSel = g_AnimationManager.addAnimatedObject(prev_selected, anim1);
+        animationSel = g_AnimationManager.addAnimatedObject(selected, anim2);
+    }
+    else if(g_upPressed){
+        AnimationData anim1, anim2;
+        glm::vec4 pos_prev_selected;
+        glm::vec4 pos_selected;
+        GameObject* prev_selected;
+        GameObject* selected;
+        switch(curSelectedRing){
+            case 0:
+                prev_selected = objects["lock_ring1"];
+                selected = objects["lock_ring3"];
+                curSelectedRing = 2;
+                break;
+            case 1:
+                prev_selected = objects["lock_ring2"];
+                selected = objects["lock_ring1"];
+                curSelectedRing = 0;
+                break;
+            case 2:
+                prev_selected = objects["lock_ring3"];
+                selected = objects["lock_ring2"];
+                curSelectedRing = 1;
+                break;
+        }
+
+        pos_prev_selected = prev_selected->getPosition();
+        pos_prev_selected.z = -3.5;
+        pos_selected = selected->getPosition();
+        pos_selected.z = -3.2;
+        anim1.setDestinationPoint(pos_prev_selected, 3.0f);
+        anim2.setDestinationPoint(pos_selected, 3.0f);
+        animationPrevSel = g_AnimationManager.addAnimatedObject(prev_selected, anim1);
+        animationSel = g_AnimationManager.addAnimatedObject(selected, anim2);
+    }
+    else if(g_rightPressed){
+        AnimationData animation;
+        GameObject* selected;
+        switch(curSelectedRing){
+            case 0:
+                selected = objects["lock_ring1"];
+                lock_ring_val1 = (lock_ring_val1 == 0) ? 9 : --lock_ring_val1;
+                break;
+            case 1:
+                selected = objects["lock_ring2"];
+                lock_ring_val2 = (lock_ring_val2 == 0) ? 9 : --lock_ring_val2;
+                break;
+            case 2:
+                selected = objects["lock_ring3"];
+                lock_ring_val3 = (lock_ring_val3 == 0) ? 9 : --lock_ring_val3;
+                break;
+        }
+        animation.setradiansToRotate(glm::radians(36.0f), Y, 102.0f);
+        animationSel = g_AnimationManager.addAnimatedObject(selected, animation);        
+    }
+    else if(g_leftPressed){
+        AnimationData animation;
+        GameObject* selected;
+        switch(curSelectedRing){
+            case 0:
+                selected = objects["lock_ring1"];
+                lock_ring_val1 = (lock_ring_val1 == 9) ? 0 : ++lock_ring_val1;
+                break;
+            case 1:
+                selected = objects["lock_ring2"];
+                lock_ring_val2 = (lock_ring_val2 == 9) ? 0 : ++lock_ring_val2;
+                break;
+            case 2:
+                selected = objects["lock_ring3"];
+                lock_ring_val3 = (lock_ring_val3 == 9) ? 0 : ++lock_ring_val3;
+                break;
+        }
+        animation.setradiansToRotate(glm::radians(-36.0f), Y, 102.0f);
+        animationSel = g_AnimationManager.addAnimatedObject(selected, animation);        
+    }
+    else{
+        return;
+    }
+
+    // Checa se combinação é a certa
+    if( (lock_ring_val1 == LOCK_PUZZLE_RING_ANSWER1) &&
+        (lock_ring_val2 == LOCK_PUZZLE_RING_ANSWER2) &&
+        (lock_ring_val3 == LOCK_PUZZLE_RING_ANSWER3)
+    ){
+        g_lockOpened = true;
+    }
+
+    lastProcessedInput = cur_time;
 
 }

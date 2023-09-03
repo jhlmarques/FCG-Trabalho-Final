@@ -10,6 +10,9 @@
 #include "collisions.h"
 #include <random>
 
+#define PUZZLE_ID_LOCK 254
+#define PUZZLE_ID_NONE 255
+
 class Puzzle;
 
 class Puzzle{
@@ -89,6 +92,21 @@ class MainLobby : public Puzzle{
     void handleExitedPuzzle();
 
 };
+
+#define LOCK_PUZZLE_RING_ANSWER1 9 
+#define LOCK_PUZZLE_RING_ANSWER2 8
+#define LOCK_PUZZLE_RING_ANSWER3 4
+class LockPuzzle : public Puzzle{
+    private:
+    uint8_t lock_ring_val1;
+    uint8_t lock_ring_val2;
+    uint8_t lock_ring_val3;
+    
+    public:
+    void setupRoom();
+    void updateState();    
+};
+
 
 class CratePuzzle : public Puzzle
 {

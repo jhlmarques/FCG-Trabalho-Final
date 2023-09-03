@@ -56,4 +56,6 @@ extern ScrollDirection g_scrolledDirection;
 
 extern std::map<std::string, ObjModel*> g_mapModels;
 
+extern bool g_lockOpened;
+
 #endif // __GLOBALS_H__

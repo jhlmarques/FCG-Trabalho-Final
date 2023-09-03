@@ -64,3 +64,6 @@ uint8_t g_movingCamera = 0;
 // Mapa com todos modelos carregados
 std::map<std::string, ObjModel*> g_mapModels;
 
+// Define se o cadeado foi aberto
+bool g_lockOpened = false;
+

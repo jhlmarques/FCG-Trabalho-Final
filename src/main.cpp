@@ -138,6 +138,12 @@ int main(int argc, char* argv[])
     g_mapModels["ball_puzzle"] = &model_ball_puzzle;
     ObjModel model_platform("../../data/platform.obj", "../../data/");
     g_mapModels["platform"] = &model_platform;
+    ObjModel model_lock_ring("../../data/lock_ring.obj", "../../data/");
+    g_mapModels["lock_ring"] = &model_lock_ring;
+    ObjModel model_lock_body("../../data/lock_body.obj", "../../data/");
+    g_mapModels["lock_body"] = &model_lock_body;
+    ObjModel model_door("../../data/door.obj", "../../data/");
+    g_mapModels["door"] = &model_door;
 
     // Note que, no sistema de coordenadas da câmera, os planos near e far
     // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
@@ -153,6 +159,12 @@ int main(int argc, char* argv[])
 
     MainLobby puzzle_lobby;
     puzzle_lobby.setupRoom();
+
+    /*
+        SETUP DO PUZZLE DO CADEADO (SAÍDA)
+    */
+    LockPuzzle puzzle_lock;
+    puzzle_lock.setupRoom();
 
     /*
         SETUP DO PUZZLE DA CAIXA DE MADEIRA
@@ -205,8 +217,13 @@ int main(int argc, char* argv[])
                     case 4:
                         currentPuzzle = &puzzle_balls;
                         break;
+                    case PUZZLE_ID_LOCK:
+                        currentPuzzle = &puzzle_lock;
+                        break;
                     default:
                         currentPuzzle = &puzzle_lobby;
+                        puzzle_lobby.handleExitedPuzzle();
+                        isInLobby = true;
                         break;
                 }
             }

@@ -121,26 +121,27 @@ class CratePuzzle : public Puzzle
     void handleScroll(double xoffset, double yoffset);
 };
 
-#define GNOME_PUZZLE_FLOOR_SIZE 20.0f
-#define COLLISION_GNOME_SIZE 0.5f
-#define COLLISION_GNOME_OFFSET -1.5f
-#define MAX_GNOMES 10
-
 class GnomePuzzle : public Puzzle
 {
+    private: 
+    // Move o gnomo utilizando as setas do teclado
+    void moveGnome();
+    float prev_time;
+    int gnomeJumpAnimationID;
+
+    // Constantes da classe
+    const glm::vec4 gnome_initial_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    const float floor_size = 20.0f;
+    const float collision_gnome_size = 0.5f;
+    const float collision_gnome_offset = -1.5f;
+    const int max_gnomes = 10;
+
     public:
     void updateCamera();
     void setupRoom();   
     void updateState();
 
     GnomePuzzle();
-
-    private: 
-    // Move o gnomo utilizando as setas do teclado
-    void moveGnome();
-    float prev_time;
-
-    const glm::vec4 gnome_initial_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 };
 
 class BallPuzzle : public Puzzle{

@@ -312,7 +312,7 @@ void MainLobby::setupRoom(){
     newObj->setEulerAngleY(M_PI_2);
     objects["frame_crate_canvas"] = newObj;
 
-    // // Quadro do puzzle do gnomo
+    // Quadro do puzzle do gnomo
     newObj = new GameObject(g_mapModels["frame"], 0);
     newObj->setPosition(glm::vec4((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
     newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
@@ -450,7 +450,7 @@ void GnomePuzzle::setupRoom(){
 
     // Chão
     auto newObj = new GameObject(g_mapModels["parquet"], 0);
-    newObj->setScale(GNOME_PUZZLE_FLOOR_SIZE, 1.0f, 1.0f);
+    newObj->setScale(floor_size, 1.0f, 1.0f);
     objects["floor"] = newObj;
 
     // Gnomo principal que será movido
@@ -463,14 +463,14 @@ void GnomePuzzle::setupRoom(){
     int possible_num_gnomes = 0;
     int actual_num_gnomes = 0;
     // Itera enquanto não nasceu todos gnomos ou não acabou a sala 
-    while (actual_num_gnomes < MAX_GNOMES && COLLISION_GNOME_OFFSET*possible_num_gnomes < GNOME_PUZZLE_FLOOR_SIZE/2.0f - COLLISION_GNOME_OFFSET){
+    while (actual_num_gnomes < max_gnomes && collision_gnome_offset*possible_num_gnomes < floor_size/2.0f - collision_gnome_offset){
         // 75% de chance de nascer um gnomo
         if (std::rand() % 4 != 0){
             newObj = new GameObject(g_mapModels["gnome"], 0);
             newObj->setEulerAngleY(M_PI);
             newObj->setIlluminationModel(BLINN_PHONG);
-            newObj->setScale(COLLISION_GNOME_SIZE, COLLISION_GNOME_SIZE, COLLISION_GNOME_SIZE); 
-            newObj->setPosition(glm::vec4(COLLISION_GNOME_OFFSET*(possible_num_gnomes+1), 0.0f, 0.0f, 1.0f));
+            newObj->setScale(collision_gnome_size, collision_gnome_size, collision_gnome_size); 
+            newObj->setPosition(glm::vec4(collision_gnome_offset*(possible_num_gnomes+1), 0.0f, 0.0f, 1.0f));
             std::string objName = (std::string("gnome_") + std::to_string(actual_num_gnomes));
             objects[objName] = newObj;
             actual_num_gnomes++;

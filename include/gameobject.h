@@ -48,6 +48,9 @@ class GameObject{
     float eulerAngleY;
     float eulerAngleZ;
 
+    // interpolação
+    bool usePhongInterp;
+
 
     // Materiais do objeto
     std::vector<Material> materials;
@@ -97,6 +100,9 @@ class GameObject{
     glm::vec3 getBBoxMaxWorld();
     // Retorna o bbox min (bottom right) do objeto em relação ao mundo
     glm::vec3 getBBoxMinWorld();
+
+    // Configura a intepolação usada para o objeto (gouraud ou phong)
+    void setIllumInterpolation(bool phong);
 
 
 };

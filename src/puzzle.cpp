@@ -292,10 +292,6 @@ void MainLobby::setupRoom(){
     newObj->setPosition(room.getLightSource().getPosition() + glm::vec4(0.0f, 0.25f, 0.0f, 0.0f));
     objects["light"] = newObj;
 
-    // Busto
-    newObj = new GameObject(g_mapModels["bust"], 0);
-    newObj->setPosition(glm::vec4(0.0, 0.0, -STEP_SIZE, 1.0));
-    objects["bust"] = newObj;
 
     // Quadro do puzzle da bola
     newObj = new GameObject(g_mapModels["frame"], 0);
@@ -478,6 +474,8 @@ void GnomePuzzle::setupRoom(){
     newObj->setPosition(gnome_initial_position);
     newObj->setEulerAngleY(-M_PI_2);
     newObj->setIlluminationModel(BLINN_PHONG);
+    // Usa gouraud
+    newObj->setIllumInterpolation(false);
     objects["gnome"] = newObj;
     
     int possible_num_gnomes = 0;
@@ -490,6 +488,8 @@ void GnomePuzzle::setupRoom(){
             newObj->setIlluminationModel(BLINN_PHONG);
             newObj->setScale(collision_gnome_size, collision_gnome_size, collision_gnome_size); 
             newObj->setPosition(glm::vec4(collision_gnome_offset*(possible_num_gnomes+1), 0.0f, 0.0f, 1.0f));
+            // Usa gouraud
+            newObj->setIllumInterpolation(false);
             std::string objName = (std::string("gnome_") + std::to_string(actual_num_gnomes));
             objects[objName] = newObj;
             actual_num_gnomes++;
@@ -620,6 +620,8 @@ void BallPuzzle::setupRoom(){
     newObj = new GameObject(g_mapModels["bust"], 0);
     newObj->setPosition(glm::vec4(-1.0, 0.0, 1.0, 1.0));
     newObj->setEulerAngleY(M_PI_2);
+    // Usa gouraud
+    newObj->setIllumInterpolation(false);
     objects["player"] = newObj;
     player = newObj;
 

@@ -8,7 +8,8 @@ GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
     textureScale(1.0), type(OBJ_GENERIC), illumination_model(LAMBERT),
     position{0.0, 0.0, 0.0, 1.0},
     scaleMatrix(Matrix_Identity()), rotationMatrix(Matrix_Identity()),
-    eulerAngleX(0.0), eulerAngleY(0.0), eulerAngleZ(0.0)
+    eulerAngleX(0.0), eulerAngleY(0.0), eulerAngleZ(0.0),
+    usePhongInterp(true)
 {
     
     std::vector<float>  model_coefficients;
@@ -236,7 +237,11 @@ void GameObject::draw(LightSource& lightSource){
     // Informações adicionais
     glUniform1f(g_object_texture_scale, textureScale);
     glUniform1i(g_object_type_uniform, type);
-    
+
+    // Modelo de interpolação
+    static GLuint interp_Gouraud_uniform = glGetUniformLocation(g_GpuProgramID, "interp_Gouraud");
+    glUniform1i(illumination_model_coefficient, !usePhongInterp);
+
 
     // Materiais
     for(auto mat : materials){
@@ -324,3 +329,6 @@ glm::vec3 GameObject::getBBoxMinWorld(){
     return bbox_min + position3d;
 }
 
+void GameObject::setIllumInterpolation(bool phong){
+    usePhongInterp = phong;
+}

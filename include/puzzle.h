@@ -121,7 +121,10 @@ class CratePuzzle : public Puzzle
     void handleScroll(double xoffset, double yoffset);
 };
 
-#endif // __PUZZLE_H__
+#define GNOME_PUZZLE_FLOOR_SIZE 20.0f
+#define COLLISION_GNOME_SIZE 0.5f
+#define COLLISION_GNOME_OFFSET -1.5f
+#define MAX_GNOMES 10
 
 class GnomePuzzle : public Puzzle
 {
@@ -166,3 +169,5 @@ class BallPuzzle : public Puzzle{
 
 
 };
+
+#endif // __PUZZLE_H__

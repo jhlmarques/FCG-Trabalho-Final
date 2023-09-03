@@ -449,27 +449,39 @@ void GnomePuzzle::setupRoom(){
     room.setBackgroundColor(WHITE_BACKGROUND_COLOR);
 
     // Chão
-
+    auto newObj = new GameObject(g_mapModels["parquet"], 0);
+    newObj->setScale(GNOME_PUZZLE_FLOOR_SIZE, 1.0f, 1.0f);
+    objects["floor"] = newObj;
 
     // Gnomo principal que será movido
-    auto newObj = new GameObject(g_mapModels["gnome"], 0);
+    newObj = new GameObject(g_mapModels["gnome"], 0);
     newObj->setPosition(gnome_position);
     newObj->setEulerAngleY(-M_PI_2);
     newObj->setIlluminationModel(BLINN_PHONG);
     objects["gnome"] = newObj;
     
-
-    newObj = new GameObject(g_mapModels["gnome"], 0);
-    newObj->setEulerAngleY(M_PI);
-    newObj->setIlluminationModel(BLINN_PHONG);
-    newObj->setScale(0.5f, 0.5f, 0.5f); // Escala menor para o teste de colisão
-    newObj->setPosition(glm::vec4(-0.75f, 0.0f, 0.0f, 1.0f));
-    objects["gnome_test"] = newObj;
+    int possible_num_gnomes = 0;
+    int actual_num_gnomes = 0;
+    // Itera enquanto não nasceu todos gnomos ou não acabou a sala 
+    while (actual_num_gnomes < MAX_GNOMES && COLLISION_GNOME_OFFSET*possible_num_gnomes < GNOME_PUZZLE_FLOOR_SIZE/2.0f - COLLISION_GNOME_OFFSET){
+        // 75% de chance de nascer um gnomo
+        if (std::rand() % 4 != 0){
+            newObj = new GameObject(g_mapModels["gnome"], 0);
+            newObj->setEulerAngleY(M_PI);
+            newObj->setIlluminationModel(BLINN_PHONG);
+            newObj->setScale(COLLISION_GNOME_SIZE, COLLISION_GNOME_SIZE, COLLISION_GNOME_SIZE); 
+            newObj->setPosition(glm::vec4(COLLISION_GNOME_OFFSET*(possible_num_gnomes+1), 0.0f, 0.0f, 1.0f));
+            std::string objName = (std::string("gnome_") + std::to_string(actual_num_gnomes));
+            objects[objName] = newObj;
+            actual_num_gnomes++;
+        }
+        possible_num_gnomes++;
+    }
 }
 
 void GnomePuzzle::updateState(){
     moveGnome();
-    if (checkPlaneToPlaneCollision(objects["gnome"], objects["gnome_test"])){
+    if (checkPlaneToPlaneCollision(objects["gnome"], objects["gnome_1"])){
         // Reseta a posição do gnomo quando há colisão
         objects["gnome"]->setPosition(gnome_initial_position);
     }

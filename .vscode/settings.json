@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.glsl": "cpp",
         "array": "cpp",
         "atomic": "cpp",
         "*.tcc": "cpp",
@@ -44,6 +45,14 @@
         "typeinfo": "cpp",
         "functional": "cpp",
         "ctime": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "iomanip": "cpp",
+        "iostream": "cpp",
+        "numbers": "cpp"
     }
 }

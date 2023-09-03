@@ -225,13 +225,13 @@ int main(int argc, char* argv[])
                 // Define novo puzzle baseado no ID
                 switch (id){
                     case 0:
-                        currentPuzzle = &puzzle_gnome;
-                        break;
-                    case 2:
                         currentPuzzle = &puzzle_crate;
                         break;
-                    case 4:
+                    case 2:
                         currentPuzzle = &puzzle_balls;
+                        break;
+                    case 4:
+                        currentPuzzle = &puzzle_gnome;
                         break;
                     case PUZZLE_ID_LOCK:
                         currentPuzzle = &puzzle_lock;

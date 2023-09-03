@@ -297,53 +297,53 @@ void MainLobby::setupRoom(){
     newObj->setPosition(glm::vec4(0.0, 0.0, -STEP_SIZE, 1.0));
     objects["bust"] = newObj;
 
-    // Quadro do puzzle da caixa
+    // Quadro do puzzle da bola
     newObj = new GameObject(g_mapModels["frame"], 0);
     newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
     newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
     newObj->setEulerAngleY(M_PI_2);
-    objects["frame_crate"] = newObj;
+    objects["frame_balls"] = newObj;
     
+    // Canvas do quadro do puzzle da bola
+    newObj = new GameObject(g_mapModels["frame_ball_canvas"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
+    newObj->setEulerAngleY(M_PI_2);
+    objects["frame_ball_canvas"] = newObj;
+
+    // Quadro do puzzle da caixa
+    newObj = new GameObject(g_mapModels["frame"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f + 2*STEP_SIZE - FRAME_LATERAL_OFFSET, 1.0));
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
+    newObj->setEulerAngleY(M_PI_2);
+    objects["frame_crate"] = newObj;
+
     // Canvas do quadro do puzzle da caixa
     newObj = new GameObject(g_mapModels["frame_crate_canvas"], 0);
-    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f + 2*STEP_SIZE - FRAME_LATERAL_OFFSET, 1.0));
     newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
     newObj->setEulerAngleY(M_PI_2);
     objects["frame_crate_canvas"] = newObj;
 
     // Quadro do puzzle do gnomo
     newObj = new GameObject(g_mapModels["frame"], 0);
-    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f + 2*STEP_SIZE - FRAME_LATERAL_OFFSET, 1.0));
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f - 2*STEP_SIZE + FRAME_LATERAL_OFFSET, 1.0));
     newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
     newObj->setEulerAngleY(M_PI_2);
     objects["frame_gnome"] = newObj;
+
+    // Canvas do quadro do puzzle do gnomo
+    newObj = new GameObject(g_mapModels["frame_gnome_canvas"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f - 2*STEP_SIZE + FRAME_LATERAL_OFFSET, 1.0));
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
+    newObj->setEulerAngleY(M_PI_2);
+    objects["frame_gnome_canvas"] = newObj;
 
     // Porta de saída
     newObj = new GameObject(g_mapModels["door"], 0);
     newObj->setPosition(glm::vec4(0.0 , 0.0, -LOBBY_LENGTH*STEP_SIZE - (STEP_SIZE/2) +0.01, 1.0));
     newObj->setEulerAngleY(-M_PI_2);
     objects["door"] = newObj;
-
-    // Canvas do quadro do puzzle do gnomo
-    newObj = new GameObject(g_mapModels["frame_gnome_canvas"], 0);
-    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f + 2*STEP_SIZE - FRAME_LATERAL_OFFSET, 1.0));
-    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
-    newObj->setEulerAngleY(M_PI_2);
-    objects["frame_gnome_canvas"] = newObj;
-
-    // Quadro do puzzle da bola
-    newObj = new GameObject(g_mapModels["frame"], 0);
-    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f - 2*STEP_SIZE + FRAME_LATERAL_OFFSET, 1.0));
-    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
-    newObj->setEulerAngleY(M_PI_2);
-    objects["frame_ball"] = newObj;
-
-    // Canvas do quadro do puzzle da bola
-    newObj = new GameObject(g_mapModels["frame_ball_canvas"], 0);
-    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f - 2*STEP_SIZE + FRAME_LATERAL_OFFSET, 1.0));
-    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
-    newObj->setEulerAngleY(M_PI_2);
-    objects["frame_ball_canvas"] = newObj;
 
 }
 

@@ -130,7 +130,7 @@ void main()
     vec3 final_color;
     
     // Espectro da fonte de iluminação
-    vec3 I = vec3(0.2,0.2,0.2); 
+    vec3 I = vec3(1.0,1.0,1.0); 
     
     // ILUMINAÇÃO DE LAMBERT (DIFUSA)
     // Termo difuso de Lambert

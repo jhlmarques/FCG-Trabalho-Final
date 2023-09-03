@@ -130,6 +130,10 @@ int main(int argc, char* argv[])
     g_mapModels["frame"] = &model_frame_crate_puzzle;
     ObjModel model_frame_crate_canvas_puzzle("../../data/crate_frame_canvas.obj", "../../data/");
     g_mapModels["frame_crate_canvas"] = &model_frame_crate_canvas_puzzle;
+    ObjModel model_frame_gnome_canvas_puzzle("../../data/gnome_frame_canvas.obj", "../../data/");
+    g_mapModels["frame_gnome_canvas"] = &model_frame_gnome_canvas_puzzle;
+    ObjModel model_frame_ball_canvas_puzzle("../../data/ball_frame_canvas.obj", "../../data/");
+    g_mapModels["frame_ball_canvas"] = &model_frame_ball_canvas_puzzle;
     ObjModel model_gnome("../../data/garden_gnome_2k.obj", "../../data/");
     g_mapModels["gnome"] = &model_gnome;
     ObjModel model_ball("../../data/ball.obj", "../../data/");
@@ -220,11 +224,11 @@ int main(int argc, char* argv[])
                 isInLobby = false;
                 // Define novo puzzle baseado no ID
                 switch (id){
+                    case 0:
+                        currentPuzzle = &puzzle_gnome;
+                        break;
                     case 2:
                         currentPuzzle = &puzzle_crate;
-                        break;
-                    case 6:
-                        currentPuzzle = &puzzle_gnome;
                         break;
                     case 4:
                         currentPuzzle = &puzzle_balls;

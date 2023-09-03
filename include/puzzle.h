@@ -56,7 +56,8 @@ class Puzzle{
 #define LOBBY_WIDTH 5.0f // Máximo de espaços no eixo horizontal (sempre impar, considerando que deve sempre haver um centro, esquerda e direita)
 #define LOBBY_LENGTH 4.0f // Máximo de unidades de deslocamento para a frente 
 #define LOBBY_HEIGHT 6.0f
-#define FRAME_SIZE 4.5f
+#define FRAME_SIZE 1.5f
+#define FRAME_LATERAL_OFFSET 0.2f
 #define LOBBY_LIGHT_SOURCE_HEIGHT (LOBBY_HEIGHT)
 
 

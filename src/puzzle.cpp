@@ -241,7 +241,6 @@ void MainLobby::setupRoom(){
             newObj = new GameObject(g_mapModels["parquet"], 0);
             newObj->setPosition(coords);
             newObj->setScale(STEP_SIZE / 2.0, 1.0, STEP_SIZE / 2.0);
-            newObj->setIlluminationModel(BLINN_PHONG);
             std::string objName = (std::string("tile_") + std::to_string(i*LOBBY_WIDTH+j));
             objects[objName] = newObj;
         }
@@ -274,7 +273,6 @@ void MainLobby::setupRoom(){
     newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f), LOBBY_HEIGHT/2.0f, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0f));
     newObj->setEulerAngleX(-M_PI_2);
     newObj->setEulerAngleZ(-M_PI_2);
-    // newObj->setScale(LOBBY_HEIGHT/2.0f, 1.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
     newObj->setScale(1.0, LOBBY_HEIGHT / 2.0f, LOBBY_LENGTH*STEP_SIZE/2.0f + STEP_SIZE/2.0f);
     objects["wall_west"] = newObj;
 
@@ -302,21 +300,22 @@ void MainLobby::setupRoom(){
     // Quadro do puzzle da caixa
     newObj = new GameObject(g_mapModels["frame"], 0);
     newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
-    newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
     newObj->setEulerAngleY(M_PI_2);
     objects["frame_crate"] = newObj;
-
+    
+    // Canvas do quadro do puzzle da caixa
     newObj = new GameObject(g_mapModels["frame_crate_canvas"], 0);
     newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
-    newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
     newObj->setEulerAngleY(M_PI_2);
     objects["frame_crate_canvas"] = newObj;
 
     // Quadro do puzzle do gnomo
     newObj = new GameObject(g_mapModels["frame"], 0);
-    newObj->setPosition(glm::vec4((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
-    newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
-    newObj->setEulerAngleY(-M_PI_2);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f + 2*STEP_SIZE - FRAME_LATERAL_OFFSET, 1.0));
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
+    newObj->setEulerAngleY(M_PI_2);
     objects["frame_gnome"] = newObj;
 
     // Porta de saída
@@ -324,6 +323,27 @@ void MainLobby::setupRoom(){
     newObj->setPosition(glm::vec4(0.0 , 0.0, -LOBBY_LENGTH*STEP_SIZE - (STEP_SIZE/2) +0.01, 1.0));
     newObj->setEulerAngleY(-M_PI_2);
     objects["door"] = newObj;
+
+    // Canvas do quadro do puzzle do gnomo
+    newObj = new GameObject(g_mapModels["frame_gnome_canvas"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f + 2*STEP_SIZE - FRAME_LATERAL_OFFSET, 1.0));
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
+    newObj->setEulerAngleY(M_PI_2);
+    objects["frame_gnome_canvas"] = newObj;
+
+    // Quadro do puzzle da bola
+    newObj = new GameObject(g_mapModels["frame"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f - 2*STEP_SIZE + FRAME_LATERAL_OFFSET, 1.0));
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
+    newObj->setEulerAngleY(M_PI_2);
+    objects["frame_ball"] = newObj;
+
+    // Canvas do quadro do puzzle da bola
+    newObj = new GameObject(g_mapModels["frame_ball_canvas"], 0);
+    newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f - 2*STEP_SIZE + FRAME_LATERAL_OFFSET, 1.0));
+    newObj->setScale(1.0f, STEP_SIZE*FRAME_SIZE, STEP_SIZE*FRAME_SIZE*1.3f);
+    newObj->setEulerAngleY(M_PI_2);
+    objects["frame_ball_canvas"] = newObj;
 
 }
 

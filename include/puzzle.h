@@ -135,6 +135,10 @@ class GnomePuzzle : public Puzzle
     const float collision_gnome_size = 0.5f;
     const float collision_gnome_offset = -1.5f;
     const int max_gnomes = 10;
+    const float speed = 0.5f;
+    const float jump_height = collision_gnome_size + 0.25f;
+    const float jump_distance = -collision_gnome_offset;
+    const float control_point_disloc = jump_distance/2.0f;
 
     public:
     void updateCamera();

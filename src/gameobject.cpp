@@ -274,6 +274,9 @@ glm::vec4 GameObject::getPosition(){
 
 void GameObject::setScale(float x, float y, float z){
     this->scaleMatrix = Matrix_Scale(x, y, z);
+    // Ajusta bbox para ficar de acordo com o scaling
+    this->bbox_max *= glm::vec3(x, y, z);
+    this->bbox_min *= glm::vec3(x, y, z);
 }
 
 glm::mat4 GameObject::getScaleMatrix(){

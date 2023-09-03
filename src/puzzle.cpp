@@ -552,9 +552,14 @@ void GnomePuzzle::setupRoom(){
     auto newObj = new GameObject(g_mapModels["gnome"], 0);
     newObj->setPosition(gnome_position);
     newObj->setEulerAngleY(-M_PI_2);
+    newObj->setIlluminationModel(BLINN_PHONG);
     objects["gnome"] = newObj;
+    
 
     newObj = new GameObject(g_mapModels["gnome"], 0);
+    newObj->setEulerAngleY(M_PI);
+    newObj->setIlluminationModel(BLINN_PHONG);
+    newObj->setScale(0.5f, 0.5f, 0.5f); // Escala menor para o teste de colisão
     newObj->setPosition(glm::vec4(-0.75f, 0.0f, 0.0f, 1.0f));
     objects["gnome_test"] = newObj;
 }
@@ -571,6 +576,7 @@ void GnomePuzzle::updateState(){
 void GnomePuzzle::updateCamera(){
     room.getCamera().setPositionFree(objects["gnome"]->getPosition() + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));
     Puzzle::updateCamera();
+    room.getLightSource().setPosition(room.getCamera().getPosition());
 }
 
 void GnomePuzzle::moveGnome(){

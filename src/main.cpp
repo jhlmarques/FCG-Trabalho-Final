@@ -136,6 +136,8 @@ int main(int argc, char* argv[])
     g_mapModels["ball"] = &model_ball;
     ObjModel model_ball_puzzle("../../data/ball_puzzle.obj", "../../data/");
     g_mapModels["ball_puzzle"] = &model_ball_puzzle;
+    ObjModel model_platform("../../data/platform.obj", "../../data/");
+    g_mapModels["platform"] = &model_platform;
 
     // Note que, no sistema de coordenadas da câmera, os planos near e far
     // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.

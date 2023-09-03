@@ -490,19 +490,19 @@ void BallPuzzle::setupRoom(){
     LightSource lightSource(lightPosition);
     room.setLightSource(lightSource);
 
-    auto newObj = new GameObject(g_mapModels["plane"], 0);
+    auto newObj = new GameObject(g_mapModels["platform"], 0);
     newObj->setPosition(glm::vec4(-1.0, 0.0, 1.0, 1.0));
     objects["tile1"] = newObj;
 
-    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj = new GameObject(g_mapModels["platform"], 0);
     newObj->setPosition(glm::vec4(1.0, 0.0, 1.0, 1.0));
     objects["tile2"] = newObj;
 
-    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj = new GameObject(g_mapModels["platform"], 0);
     newObj->setPosition(glm::vec4(1.0, 0.0, -1.0, 1.0));
     objects["tile3"] = newObj;
 
-    newObj = new GameObject(g_mapModels["plane"], 0);
+    newObj = new GameObject(g_mapModels["platform"], 0);
     newObj->setPosition(glm::vec4(-1.0, 0.0, -1.0, 1.0));
     objects["tile4"] = newObj;
 

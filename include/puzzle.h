@@ -179,6 +179,7 @@ class BallPuzzle : public Puzzle{
     GameObject* player;
     GameObject* ball;
     GameObject* ball_puzzle; // A bola com a resposta
+    GameObject* cur_ball;
 
     // Posição atual
     uint8_t curPos;

@@ -642,45 +642,73 @@ void BallPuzzle::setupRoom(){
 void BallPuzzle::updateState(){
     static float lastBallLaunched = (float) glfwGetTime();
     static bool ballLaunched = false;
+    static bool knockedOut = false; // Se o jogador foi atingido pela bola
     float cur_time = (float) glfwGetTime();
 
-    if((cur_time - lastBallLaunched) > 10.0f){
+    if(!knockedOut && ((cur_time - lastBallLaunched) > 10.0f)){
         // Lança bola
         ballLaunched = true;
         AnimationData animation;
-        GameObject* ballToLaunch;
         // Chance de ser a bola com a resposta do puzzle
-        if(std::rand() % 10){
-            ballToLaunch = ball;
+        if(std::rand() % 5){
+            cur_ball = ball;
         }
         else{
-            ballToLaunch = ball_puzzle;
+            cur_ball = ball_puzzle;
         }
 
         switch(std::rand() % 4){
             case 0:
-                ballToLaunch->setPosition(glm::vec4(-10.0, 1.0,-1.0, 1.0));
+                cur_ball->setPosition(glm::vec4(-10.0, 1.0,-1.0, 1.0));
                 animation.setDestinationPoint(glm::vec4(10.0, 0.0,-1.0, 1.0), 2.5);
                 break;
             case 1:
-                ballToLaunch->setPosition(glm::vec4(-10.0, 1.0, 1.0, 1.0));
+                cur_ball->setPosition(glm::vec4(-10.0, 1.0, 1.0, 1.0));
                 animation.setDestinationPoint(glm::vec4(10.0, 0.0,1.0, 1.0), 2.5);
                 break;
             case 2:
-                ballToLaunch->setPosition(glm::vec4(-1.0, 1.0,-10.0, 1.0));
+                cur_ball->setPosition(glm::vec4(-1.0, 1.0,-10.0, 1.0));
                 animation.setDestinationPoint(glm::vec4(-1.0, 0.0, 10.0, 1.0), 2.5);
                 break;
             case 3:
-                ballToLaunch->setPosition(glm::vec4(1.0, 1.0,-10.0, 1.0));
-                animation.setDestinationPoint(glm::vec4(-1.0, 0.0, 10.0, 1.0), 2.5);
+                cur_ball->setPosition(glm::vec4(1.0, 1.0,-10.0, 1.0));
+                animation.setDestinationPoint(glm::vec4(1.0, 0.0, 10.0, 1.0), 2.5);
                 break;
         }
-        ballMovementAnimationID = g_AnimationManager.addAnimatedObject(ballToLaunch, animation);
+        ballMovementAnimationID = g_AnimationManager.addAnimatedObject(cur_ball, animation);
         
         lastBallLaunched = cur_time;
     }
 
+    // Checa se houve colisão
+    if(checkCubeToCubeCollision(player, cur_ball)){
+        g_AnimationManager.removeAnimation(playerMovementAnimationID, true);
+        AnimationData animation;
+        auto knocked_pos = room.getCamera().getPosition();
+        // ()
+        knocked_pos.x += ((std::rand() % 3) - 1) * 0.1;
+        animation.setDestinationPoint(knocked_pos, 6.0);
+        playerMovementAnimationID = g_AnimationManager.addAnimatedObject(player, animation);
+        knockedOut = true;
+    }
+
+
+
     if(g_AnimationManager.hasAnimationFinished(playerMovementAnimationID, true)){
+        // Se o jogador for atingido, volta ao jogo 
+        if(knockedOut){
+            AnimationData animation;
+            // Desce do "céu" ao tile original
+            std::string tilename = std::string("tile") + std::to_string(curPos+1);
+            auto dest = objects[tilename]->getPosition();
+            auto start = dest;
+            start.y += 10.0f;
+            player->setPosition(start);
+            animation.setDestinationPoint(dest, 10.0);
+            playerMovementAnimationID = g_AnimationManager.addAnimatedObject(player, animation);
+            knockedOut = false;
+        }
+        
         if(g_wPressed){
             AnimationData animation;
             glm::vec4 start = player->getPosition();

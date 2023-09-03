@@ -9,4 +9,6 @@
 // Colisão entre AABBs
 bool checkPlaneToPlaneCollision(GameObject* obj1, GameObject* obj2);
 
+bool checkCubeToCubeCollision(GameObject* obj1, GameObject* obj2);
+
 #endif

@@ -34,16 +34,12 @@ uniform vec4 bbox_max;
 // Mapas de textura provenientes do material
 
 // Decide entre utilizar as normais do material ou as computadas
-uniform bool useBMap;
 
 uniform vec3 Kd0;
 uniform vec3 Ka0;
 uniform vec3 Ks0;
 uniform float ns; // Expoente especular
 uniform sampler2D diffMap;
-uniform sampler2D ambientMap;
-uniform sampler2D specularMap;
-uniform sampler2D bumpMap;
 
 // Posição, direção e abertura da fonte de luz da sala
 uniform vec4 light_position;
@@ -128,8 +124,8 @@ void main()
     */
 
     vec3 Kd = Kd0 * texture(diffMap, vec2(U,V) * object_texture_scale).rgb;
-    vec3 Ka = Ka0 * texture(ambientMap, vec2(U,V) * object_texture_scale).rgb;
-    vec3 Ks = Ks0 * texture(specularMap, vec2(U,V) * object_texture_scale).rgb; // Refletância especular do objeto
+    vec3 Ka = Ka0;
+    vec3 Ks = Ks0; // Refletância especular do objeto
     float q = ns; // Expoente especular para o modelo de iluminação de Phong
     vec3 final_color;
     

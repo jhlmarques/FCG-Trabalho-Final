@@ -221,6 +221,7 @@ void MainLobby::setupRoom(){
             newObj = new GameObject(g_mapModels["parquet"], 0);
             newObj->setPosition(coords);
             newObj->setScale(STEP_SIZE / 2.0, 1.0, STEP_SIZE / 2.0);
+            newObj->setIlluminationModel(BLINN_PHONG);
             std::string objName = (std::string("tile_") + std::to_string(i*LOBBY_WIDTH+j));
             objects[objName] = newObj;
         }
@@ -281,14 +282,12 @@ void MainLobby::setupRoom(){
     newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
     newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
     newObj->setEulerAngleY(M_PI_2);
-    newObj->setIlluminationModel(LAMBERT);
     objects["frame_crate"] = newObj;
 
     newObj = new GameObject(g_mapModels["frame_crate_canvas"], 0);
     newObj->setPosition(glm::vec4(-(STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
     newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
     newObj->setEulerAngleY(M_PI_2);
-    newObj->setIlluminationModel(LAMBERT);
     objects["frame_crate_canvas"] = newObj;
 
     // // Quadro do puzzle do gnomo
@@ -296,7 +295,6 @@ void MainLobby::setupRoom(){
     newObj->setPosition(glm::vec4((STEP_SIZE*LOBBY_SIDE_WIDTH + STEP_SIZE/2.0f) , CAMERA_HEAD_HEIGHT, -LOBBY_LENGTH*STEP_SIZE/2.0f, 1.0));
     newObj->setScale(1.0f, FRAME_SIZE, FRAME_SIZE*g_ScreenRatio);
     newObj->setEulerAngleY(-M_PI_2);
-    newObj->setIlluminationModel(LAMBERT);
     objects["frame_gnome"] = newObj;
 
 }

@@ -5,7 +5,7 @@
 // Carrega o objeto de índice "shape" de um arquivo .obj carregado
 // É possível que dê problemas para .obj com mais de um shape; cuidado (TO-DO)
 GameObject::GameObject(ObjModel* model, GLuint shapeIdx) :
-    textureScale(1.0), type(OBJ_GENERIC), illumination_model(BLINN_PHONG),
+    textureScale(1.0), type(OBJ_GENERIC), illumination_model(LAMBERT),
     position{0.0, 0.0, 0.0, 1.0},
     scaleMatrix(Matrix_Identity()), rotationMatrix(Matrix_Identity()),
     eulerAngleX(0.0), eulerAngleY(0.0), eulerAngleZ(0.0)

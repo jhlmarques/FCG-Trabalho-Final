@@ -9,9 +9,6 @@ Ni 1.450000
 d 1.000000
 illum 3
 map_Kd textures/lantern_chandelier_01_diff_1k.jpg
-map_Ns textures/lantern_chandelier_01_rough_1k.jpg
-map_refl textures/lantern_chandelier_01_metal_1k.jpg
-map_Bump -bm 1.000000 textures/lantern_chandelier_01_nor_gl_1k.jpg
 
 newmtl lantern_chandelier_01_glass
 Ns 200.000000

@@ -33,8 +33,6 @@ GLint g_bbox_max_uniform;
 
 // Samplers, os quais são associados a TEXTURE UNITs
 GLfloat g_diffMap_uniform;
-GLfloat g_ambientMap_uniform;
-GLfloat g_specularMap_uniform;
 
 GLint g_object_texture_scale;
 GLint g_object_type_uniform;

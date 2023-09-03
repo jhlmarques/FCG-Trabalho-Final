@@ -31,8 +31,6 @@ extern GLint g_object_type_uniform;
 extern GLint g_bbox_min_uniform;
 extern GLint g_bbox_max_uniform;
 extern GLfloat g_diffMap_uniform;
-extern GLfloat g_ambientMap_uniform;
-extern GLfloat g_specularMap_uniform;
 
 extern GLuint g_NumLoadedTextures;
 

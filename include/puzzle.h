@@ -118,7 +118,6 @@ class CratePuzzle : public Puzzle
     void updateState();
 
     void handleCursorMovement(float dx, float dy);
-    void handleScroll(double xoffset, double yoffset);
 };
 
 class GnomePuzzle : public Puzzle
@@ -128,14 +127,23 @@ class GnomePuzzle : public Puzzle
     void moveGnome();
     void checkColisions();
     float prev_time;
+    
     int gnomeJumpAnimationID;
+    int numberCanvasAnimationID;
+    int gnomeRotateAnimationID;
+
     int actual_num_gnomes;
     float speed;
 
+    bool already_ended;
+
+    // Animação que mostra o número
+    void showNumber();
+    // Aumenta a velocidade do gnomo
     void increaseSpeed();
 
-
     // Constantes da classe
+    const glm::vec4 camera_offset = glm::vec4(0.0f, 0.25f, -1.0f, 0.0f);
     const glm::vec4 gnome_initial_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     const float floor_size = 20.0f;
     const float collision_gnome_size = 0.5f;
@@ -147,6 +155,13 @@ class GnomePuzzle : public Puzzle
     const float control_point_disloc = jump_distance/2.0f;
     const float max_speed = 2.0f;
     const float max_distance = floor_size - 0.25f;
+
+    const glm::vec4 number_canvas_start_position = glm::vec4(-floor_size, 5.0f, 0.0f, 1.0f);
+    const glm::vec4 number_canvas_offset_from_gnome = glm::vec4(-0.5, 0.5f, 0.0f, 0.0f);
+
+    const float canvas_drop_velocity = 2.0f;
+    const float gnome_rotate_velocity = 20.0f;
+
 
     public:
     void updateCamera();

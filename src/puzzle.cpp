@@ -424,33 +424,29 @@ void CratePuzzle::handleCursorMovement(float dx, float dy){
     room.getCamera().updateViewVecLookAt();
 }
 
-void CratePuzzle::handleScroll(double xoffset, double yoffset){
-    return; // a príncipio não pode dar zoom nesse puzzle
-}
-
 // GNOMO
 
 GnomePuzzle::GnomePuzzle():
 prev_time((float)glfwGetTime()),
 actual_num_gnomes(0),
-speed(0.5f)
+speed(0.5f),
+already_ended(false)
 {
 
 }
 
 void GnomePuzzle::setupRoom(){
     gnomeJumpAnimationID = ANIMATION_ID_NONE;
+    gnomeRotateAnimationID = ANIMATION_ID_NONE;
+    numberCanvasAnimationID = ANIMATION_ID_NONE;
 
     // Câmera está olhando em direção ao gnomo e um pouco acima dele (offset no Y)
-    glm::vec4 gnome_position = glm::vec4(gnome_initial_position);
-    Camera camera(gnome_position + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));    
+    Camera camera(gnome_initial_position + camera_offset);    
     room.setCamera(camera);
 
     glm::vec4 lightPosition = camera.getPosition();
     LightSource lightSource(lightPosition);    
     room.setLightSource(lightSource);
-
-    room.setBackgroundColor(WHITE_BACKGROUND_COLOR);
 
     // Chão
     auto newObj = new GameObject(g_mapModels["parquet"], 0);
@@ -459,7 +455,7 @@ void GnomePuzzle::setupRoom(){
 
     // Gnomo principal que será movido
     newObj = new GameObject(g_mapModels["gnome"], 0);
-    newObj->setPosition(gnome_position);
+    newObj->setPosition(gnome_initial_position);
     newObj->setEulerAngleY(-M_PI_2);
     newObj->setIlluminationModel(BLINN_PHONG);
     objects["gnome"] = newObj;
@@ -480,17 +476,28 @@ void GnomePuzzle::setupRoom(){
         }
         possible_num_gnomes++;
     }
+
+    // Número que será mostrado no fim
+    newObj = new GameObject(g_mapModels["one_canvas"], 0);
+    newObj->setPosition(number_canvas_start_position);
+    newObj->setEulerAngleY(M_PI);
+    objects["number_canvas"] = newObj;
+    
 }
 
 void GnomePuzzle::updateState(){
-    moveGnome();
-    checkColisions();
-    
+    if (std::abs(objects["gnome"]->getPosition().x) < max_distance){
+        moveGnome();
+        checkColisions();
+    }
+    else if (!already_ended){
+        showNumber();
+    }
 }
 
 
 void GnomePuzzle::updateCamera(){
-    room.getCamera().setPositionFree(objects["gnome"]->getPosition() + glm::vec4(0.0f, 0.25f, -1.0f, 0.0f));
+    room.getCamera().setPositionFree(objects["gnome"]->getPosition() + camera_offset);
     Puzzle::updateCamera();
     room.getLightSource().setPosition(room.getCamera().getPosition());
 }
@@ -509,29 +516,26 @@ void GnomePuzzle::moveGnome(){
     glm::vec4 gnome_position = objects["gnome"]->getPosition();
     if(g_AnimationManager.hasAnimationFinished(gnomeJumpAnimationID, true)){
         // Anda para a direita
-        if (std::abs(gnome_position.x) < max_distance){
-            gnome_position.x -= speed*delta_t;
-            objects["gnome"]->setPosition(gnome_position);
-            // Pula
-            if (g_upPressed){
-                AnimationData animation;
-                glm::vec4 start = gnome_position;
+        gnome_position.x -= speed*delta_t;
+        objects["gnome"]->setPosition(gnome_position);
+        // Pula
+        if (g_upPressed){
+            AnimationData animation;
+            glm::vec4 start = gnome_position;
 
-                glm::vec4 end = gnome_position;
-                end.x -= jump_distance;
+            glm::vec4 end = gnome_position;
+            end.x -= jump_distance;
 
-                glm::vec4 p2 = start;
-                p2.x = start.x + control_point_disloc;
-                p2.y = start.y + jump_height;
+            glm::vec4 p2 = start;
+            p2.x = start.x + control_point_disloc;
+            p2.y = start.y + jump_height;
 
-                glm::vec4 p3 = end;
-                p3.x = end.x - control_point_disloc;
-                p3.y = start.y + jump_height;    
-                animation.setBezierCurveJump(start, p2, p3, end, speed);
-                gnomeJumpAnimationID = g_AnimationManager.addAnimatedObject(objects["gnome"], animation);
-            }
+            glm::vec4 p3 = end;
+            p3.x = end.x - control_point_disloc;
+            p3.y = start.y + jump_height;    
+            animation.setBezierCurveJump(start, p2, p3, end, speed);
+            gnomeJumpAnimationID = g_AnimationManager.addAnimatedObject(objects["gnome"], animation);
         }
-        
         increaseSpeed();
     }
     
@@ -549,6 +553,18 @@ void GnomePuzzle::checkColisions(){
             break;
         }
     }
+}
+
+void GnomePuzzle::showNumber(){
+    AnimationData animationCanvas;
+    glm::vec4 number_canvas_end_position = objects["gnome"]->getPosition() + number_canvas_offset_from_gnome;
+    animationCanvas.setDestinationPoint(number_canvas_end_position, canvas_drop_velocity);
+    numberCanvasAnimationID = g_AnimationManager.addAnimatedObject(objects["number_canvas"], animationCanvas);
+
+    AnimationData animationGnomeRotate;
+    animationGnomeRotate.setradiansToRotate(-M_PI_2, Y, gnome_rotate_velocity);
+    gnomeRotateAnimationID = g_AnimationManager.addAnimatedObject(objects["gnome"], animationGnomeRotate);
+    already_ended = true;
 }
 
 void BallPuzzle::setupRoom(){

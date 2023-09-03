@@ -144,6 +144,9 @@ int main(int argc, char* argv[])
     g_mapModels["lock_body"] = &model_lock_body;
     ObjModel model_door("../../data/door.obj", "../../data/");
     g_mapModels["door"] = &model_door;
+    ObjModel model_one_canvas("../../data/one_canvas.obj", "../../data/");
+    g_mapModels["one_canvas"] = &model_one_canvas;
+
 
     // Note que, no sistema de coordenadas da câmera, os planos near e far
     // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.

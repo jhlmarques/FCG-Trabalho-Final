@@ -130,6 +130,10 @@ class GnomePuzzle : public Puzzle
     float prev_time;
     int gnomeJumpAnimationID;
     int actual_num_gnomes;
+    float speed;
+
+    void increaseSpeed();
+
 
     // Constantes da classe
     const glm::vec4 gnome_initial_position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -137,10 +141,12 @@ class GnomePuzzle : public Puzzle
     const float collision_gnome_size = 0.5f;
     const float collision_gnome_offset = -1.5f;
     const int max_gnomes = 10;
-    const float speed = 0.5f;
-    const float jump_height = collision_gnome_size + 0.1f;
-    const float jump_distance = std::abs(collision_gnome_offset) - 0.4f;
+    const float speed_increase_rate = 0.005f;
+    const float jump_height = collision_gnome_size + 0.01f;
+    const float jump_distance = std::abs(collision_gnome_offset)/2.0f;
     const float control_point_disloc = jump_distance/2.0f;
+    const float max_speed = 2.0f;
+    const float max_distance = floor_size - 0.25f;
 
     public:
     void updateCamera();

@@ -116,7 +116,11 @@ void MainLobby::playerMove(){
                 playerPosition.z -= STEP_SIZE;
                 break;
             case EAST:
-                if(playerPosition.x == (STEP_SIZE*LOBBY_SIDE_WIDTH)){
+                // Checagem especial para fim do jogo (os modelos estarão à direita)
+                if(g_puzzlesCompleted && (playerPosition.x == (STEP_SIZE*LOBBY_SIDE_WIDTH - STEP_SIZE))){
+                    return;
+                }
+                else if(playerPosition.x == (STEP_SIZE*LOBBY_SIDE_WIDTH)){
                     return;
                 }
                 playerPosition.x += STEP_SIZE;
@@ -216,6 +220,14 @@ void MainLobby::handlePuzzlesCompleted(){
 
     // Arruma direção
     curFacingDirection = SOUTH;
+
+    // Coloca o texto e os dançarinos profissionais na sala
+    objects["victory_text"]->setPosition(glm::vec4(0.0, LOBBY_HEIGHT - 1.05, (STEP_SIZE/2.0)-0.01, 1.0));
+    objects["dancer_gnome"]->setPosition(glm::vec4(2*STEP_SIZE, 0.0, -3*STEP_SIZE-0.2, 1.0));
+    objects["dancer_statue"]->setPosition(glm::vec4(2*STEP_SIZE, 0.0, -2*STEP_SIZE+0.2, 1.0));
+    objects["dancer_crate"]->setPosition(glm::vec4(2*STEP_SIZE, 0.0, -STEP_SIZE, 1.0));
+
+
 }
 
 void MainLobby::setupRoom(){
@@ -347,11 +359,95 @@ void MainLobby::setupRoom(){
     newObj->setEulerAngleY(-M_PI_2);
     objects["door"] = newObj;
 
+    // Texto de vitória (fora da visão)
+    newObj = new GameObject(g_mapModels["victory_text"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.0, 2*STEP_SIZE, 1.0));
+    objects["victory_text"] = newObj;
+
+    // Objetos dançarinos (também fora de visão)
+    newObj = new GameObject(g_mapModels["gnome"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.0, 10*STEP_SIZE, 1.0));
+    newObj->setScale(10.0, 10.0, 10.0);
+    newObj->setEulerAngleY(-M_PI_2);
+    objects["dancer_gnome"] = newObj;
+
+    newObj = new GameObject(g_mapModels["bust"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.0, 10*STEP_SIZE, 1.0));
+    newObj->setScale(10.0, 10.0, 10.0);
+    newObj->setEulerAngleY(-M_PI_2);
+    objects["dancer_statue"] = newObj;
+
+    newObj = new GameObject(g_mapModels["wooden_crate"], 0);
+    newObj->setPosition(glm::vec4(0.0, 0.0, 10*STEP_SIZE, 1.0));
+    newObj->setScale(3.0, 3.0, 3.0);
+    newObj->setEulerAngleY(-M_PI_2);
+    objects["dancer_crate"] = newObj;
+
 }
 
 void MainLobby::updateState(){
-    static int statueAnimationID = ANIMATION_ID_NONE;
-    static bool statueStatus = false;
+    static int statueAnimationJumpID = ANIMATION_ID_NONE;
+    static int gnomeAnimationJumpID = ANIMATION_ID_NONE;
+    static int crateAnimationJumpID = ANIMATION_ID_NONE;
+    static int statueAnimationRotateID = ANIMATION_ID_NONE;
+    static int crateAnimationRotateID = ANIMATION_ID_NONE;
+    static int gnomeAnimationRotateID = ANIMATION_ID_NONE;
+
+    // Dança do fim do jogo
+    if(g_puzzlesCompleted){
+
+        if(g_AnimationManager.hasAnimationFinished(statueAnimationJumpID, true)){
+            AnimationData animation;
+            auto dancer = objects["dancer_statue"];
+            auto pos = dancer->getPosition();
+            auto controlPoint = pos;
+            controlPoint.y += 1.0;
+            animation.setBezierCurveJump(pos, controlPoint, controlPoint, pos, 1.5);
+            statueAnimationJumpID = g_AnimationManager.addAnimatedObject(dancer, animation);
+        }
+
+        if(g_AnimationManager.hasAnimationFinished(statueAnimationRotateID, true)){
+            AnimationData animation;
+            animation.setradiansToRotate(M_PI, Y, 180.0);
+            statueAnimationRotateID = g_AnimationManager.addAnimatedObject(objects["dancer_statue"], animation);
+        }
+    
+        if(g_AnimationManager.hasAnimationFinished(crateAnimationJumpID, true)){
+            AnimationData animation;
+            auto dancer = objects["dancer_crate"];
+            auto pos = dancer->getPosition();
+            auto controlPoint = pos;
+            controlPoint.y += 1.0;
+            animation.setBezierCurveJump(pos, controlPoint, controlPoint, pos, 1.45);
+            crateAnimationJumpID = g_AnimationManager.addAnimatedObject(dancer, animation);
+        }
+
+        if(g_AnimationManager.hasAnimationFinished(crateAnimationRotateID, true)){
+            AnimationData animation;
+            animation.setradiansToRotate(M_PI, Y, 185.0);
+            crateAnimationRotateID = g_AnimationManager.addAnimatedObject(objects["dancer_crate"], animation);
+        }
+
+        if(g_AnimationManager.hasAnimationFinished(gnomeAnimationJumpID, true)){
+            AnimationData animation;
+            auto dancer = objects["dancer_gnome"];
+            auto pos = dancer->getPosition();
+            auto controlPoint = pos;
+            controlPoint.y += 1.0;
+            animation.setBezierCurveJump(pos, controlPoint, controlPoint, pos, 1.4);
+            gnomeAnimationJumpID = g_AnimationManager.addAnimatedObject(dancer, animation);
+        }
+        
+        if(g_AnimationManager.hasAnimationFinished(gnomeAnimationRotateID, true)){
+            AnimationData animation;
+            animation.setradiansToRotate(M_PI, Y, 190.0);
+            gnomeAnimationRotateID = g_AnimationManager.addAnimatedObject(objects["dancer_gnome"], animation);
+        }
+
+
+    
+    }
+
     
 
     // Apenas realizamos um movimento se a câmera não está animando
@@ -643,6 +739,8 @@ void BallPuzzle::setupRoom()
     newObj->setScale(0.5,0.5,0.5);
     objects["ball_puzzle"] = newObj;
     ball_puzzle = newObj;
+
+    cur_ball = ball;
 }
 
 void BallPuzzle::updateState(){

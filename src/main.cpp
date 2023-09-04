@@ -150,6 +150,8 @@ int main(int argc, char* argv[])
     g_mapModels["door"] = &model_door;
     ObjModel model_one_canvas("../../data/one_canvas.obj", "../../data/");
     g_mapModels["one_canvas"] = &model_one_canvas;
+    ObjModel model_victory_text("../../data/texto_vitoria.obj", "../../data/");
+    g_mapModels["victory_text"] = &model_victory_text;
 
 
     // Note que, no sistema de coordenadas da câmera, os planos near e far

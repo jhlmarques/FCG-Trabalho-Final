@@ -1,9 +1,7 @@
 #include "puzzle.h"
 
 Puzzle::~Puzzle(){
-    for(auto pair : objects){
-        delete pair.second;
-    }
+    clearObjectMap();
 }
 
 void Puzzle::step()
@@ -27,6 +25,10 @@ void Puzzle::handleScroll(double xoffset, double yoffset){
     return;
 }
 
+void Puzzle::handleEntered(){
+    return;
+}
+
 void Puzzle::updateCamera(){
     // Transformação da câmera
     glm::mat4 const& view = room.getCamera().getViewMatrix();
@@ -41,6 +43,12 @@ void Puzzle::drawObjects(){
         model = Matrix_Translate(pos.x, pos.y, pos.z) * obj->getScaleMatrix() * obj->getRotationMatrix();
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         obj->draw(room.getLightSource());
+    }
+}
+
+void Puzzle::clearObjectMap(){
+    for(auto pair : objects){
+        delete pair.second;
     }
 }
 
@@ -545,12 +553,19 @@ void CratePuzzle::handleCursorMovement(float dx, float dy){
 // GNOMO
 
 GnomePuzzle::GnomePuzzle():
-prev_time((float)glfwGetTime()),
+prev_time(0.0f),
 actual_num_gnomes(0),
 speed(0.5f),
 already_ended(false)
 {
 
+}
+
+void GnomePuzzle::handleEntered(){
+    prev_time = (float) glfwGetTime();
+    if(!already_ended){
+        objects["gnome"]->setPosition(gnome_initial_position);
+    }
 }
 
 void GnomePuzzle::setupRoom(){
@@ -604,6 +619,8 @@ void GnomePuzzle::setupRoom(){
     newObj->setPosition(number_canvas_start_position);
     newObj->setEulerAngleY(M_PI);
     objects["number_canvas"] = newObj;
+
+    prev_time = (float) glfwGetTime();
     
 }
 
@@ -744,7 +761,6 @@ void BallPuzzle::setupRoom()
 }
 
 void BallPuzzle::updateState(){
-    static float lastBallLaunched = (float) glfwGetTime();
     static bool ballLaunched = false;
     static bool knockedOut = false; // Se o jogador foi atingido pela bola
     float cur_time = (float) glfwGetTime();
@@ -846,6 +862,10 @@ void BallPuzzle::updateState(){
         }
     }
 
+}
+
+void BallPuzzle::handleEntered(){
+    lastBallLaunched = (float) glfwGetTime();
 }
 
 void LockPuzzle::setupRoom(){

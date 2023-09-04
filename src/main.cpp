@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 
 
     /*
-        SETUP DO LOBBY PRINCIPAL
+        PUZZLES
     */
 
     MainLobby puzzle_lobby;
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
     /*
         SETUP DO PUZZLE DAS BOLAS
     */
-   BallPuzzle puzzle_balls;
+    BallPuzzle puzzle_balls;
    puzzle_balls.setupRoom();
 
     // Define se estamos no lobby principal ou num puzzle
@@ -244,6 +244,7 @@ int main(int argc, char* argv[])
                         isInLobby = true;
                         break;
                 }
+                currentPuzzle->handleEntered();
             }
             else{
                 puzzle_lobby.step();

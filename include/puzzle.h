@@ -35,6 +35,9 @@ class Puzzle{
     // Desenha objetos do puzzle
     void drawObjects();
 
+    // Limpa mapa de objetos
+    void clearObjectMap();
+
     public:
     ~Puzzle();
 
@@ -46,7 +49,8 @@ class Puzzle{
     // Scroll
     virtual void handleScroll(double xoffset, double yoffset);
 
-
+    // O que fazer quando o jogador entra no puzzle
+    virtual void handleEntered();
 
 };
 
@@ -78,11 +82,14 @@ class MainLobby : public Puzzle{
 
     // Animações
     int cameraAnimationID;
+    
+    
+    void updateState();
 
     public:
     MainLobby();
+    
     void setupRoom();
-    void updateState();
 
     // Verdadeiro se entra
     bool hasEnteredPuzzle();
@@ -105,19 +112,19 @@ class LockPuzzle : public Puzzle{
     uint8_t lock_ring_val1;
     uint8_t lock_ring_val2;
     uint8_t lock_ring_val3;
-    
+    void updateState();    
     public:
     void setupRoom();
-    void updateState();    
 };
 
 
 class CratePuzzle : public Puzzle
 {
-    public:
     void updateCamera();
-    void setupRoom();
     void updateState();
+    
+    public:
+    void setupRoom();
 
     void handleCursorMovement(float dx, float dy);
 };
@@ -164,13 +171,15 @@ class GnomePuzzle : public Puzzle
     const float canvas_drop_velocity = 2.0f;
     const float gnome_rotate_velocity = 20.0f;
 
-
-    public:
     void updateCamera();
-    void setupRoom();   
     void updateState();
 
+    public:
+    void setupRoom();   
+
     GnomePuzzle();
+
+    void handleEntered();
 };
 
 class BallPuzzle : public Puzzle{
@@ -192,12 +201,16 @@ class BallPuzzle : public Puzzle{
     int ballMovementAnimationID;
     int playerMovementAnimationID;
     
+    float lastBallLaunched;
+
+    void updateState();
+    
     public:
     void setupRoom();
-    void updateState();
     // Movimenta jogador (em círculo)
     void movePlayer();
 
+    void handleEntered();
 
 };
 

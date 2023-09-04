@@ -49,6 +49,12 @@ class Puzzle{
     // Scroll
     virtual void handleScroll(double xoffset, double yoffset);
 
+    // Botão esquerdo
+    virtual void handleLeftClick();
+
+    // Resize
+    virtual void handleResize(int width, int height);
+
     // O que fazer quando o jogador entra no puzzle
     virtual void handleEntered();
 
@@ -107,14 +113,36 @@ class MainLobby : public Puzzle{
 #define LOCK_PUZZLE_RING_ANSWER1 9 
 #define LOCK_PUZZLE_RING_ANSWER2 4
 #define LOCK_PUZZLE_RING_ANSWER3 1
+
 class LockPuzzle : public Puzzle{
     private:
     uint8_t lock_ring_val1;
+    glm::vec2 lock_ring_val1_bbox_max;
+    glm::vec2 lock_ring_val1_bbox_min;
+
     uint8_t lock_ring_val2;
+    glm::vec2 lock_ring_val2_bbox_max;
+    glm::vec2 lock_ring_val2_bbox_min;
+
     uint8_t lock_ring_val3;
-    void updateState();    
+    glm::vec2 lock_ring_val3_bbox_max;
+    glm::vec2 lock_ring_val3_bbox_min;
+
+    uint8_t curSelectedRing;
+    int animationPrevSel;
+    int animationSel;
+    uint8_t newSelectedRing;
+    uint8_t getRingClicked();
+    void updateLocksBbox(int width, int height);
+
+    
     public:
     void setupRoom();
+    void updateState();   
+    void handleLeftClick(); 
+    void handleResize(int width, int height);
+
+    LockPuzzle();
 };
 
 

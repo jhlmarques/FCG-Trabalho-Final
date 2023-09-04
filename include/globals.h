@@ -60,4 +60,7 @@ extern bool g_lockOpened;
 
 extern bool g_puzzlesCompleted;
 
+extern double g_LastCursorPosX;
+extern double g_LastCursorPosY;
+
 #endif // __GLOBALS_H__

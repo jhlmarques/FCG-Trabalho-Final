@@ -27,3 +27,12 @@ bool checkCubeToCubeCollision(GameObject* obj1, GameObject* obj2){
 
     return x_axis_collision && y_axis_collision && z_axis_collision;    
 }
+
+bool checkPointToPlaneCollision(glm::vec2 point, glm::vec2 plane_bbox_min, glm::vec2 plane_bbox_max)
+{
+    bool x_axis_collision, y_axis_collision;
+    x_axis_collision = point.x >= plane_bbox_min.x && point.x <= plane_bbox_max.x;
+    y_axis_collision = point.y <= plane_bbox_min.y && point.y >= plane_bbox_max.y;
+
+    return x_axis_collision && y_axis_collision;
+}

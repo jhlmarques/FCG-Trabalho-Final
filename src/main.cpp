@@ -279,10 +279,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-// Variáveis globais que armazenam a última posição do cursor do mouse, para
-// que possamos calcular quanto que o mouse se movimentou entre dois instantes
-// de tempo. Utilizadas no callback CursorPosCallback() abaixo.
-double g_LastCursorPosX, g_LastCursorPosY;
+
 
 bool isCurrentRoomLobby(){
     return g_lastNumberPressed == GLFW_KEY_0 || g_lastNumberPressed == GLFW_KEY_UNKNOWN;
@@ -309,6 +306,7 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
         // com o botão esquerdo pressionado.
         glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
         g_LeftMouseButtonPressed = true;
+        currentPuzzle->handleLeftClick();
     }
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
     {
@@ -421,8 +419,9 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 
     if (key == GLFW_KEY_LEFT)
     {
-        if (action == GLFW_PRESS)
+        if (action == GLFW_PRESS){
             g_leftPressed = true;
+        }
         else if (action == GLFW_RELEASE)
             g_leftPressed = false;
         else if (action == GLFW_REPEAT)
@@ -466,5 +465,25 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     currentPuzzle->handleScroll(xoffset, yoffset);
 }
 
-// set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
-// vim: set spell spelllang=pt_br :
+
+// Definição da função que será chamada sempre que a janela do sistema
+// operacional for redimensionada, por consequência alterando o tamanho do
+// "framebuffer" (região de memória onde são armazenados os pixels da imagem).
+void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
+{
+    // Indicamos que queremos renderizar em toda região do framebuffer. A
+    // função "glViewport" define o mapeamento das "normalized device
+    // coordinates" (NDC) para "pixel coordinates".  Essa é a operação de
+    // "Screen Mapping" ou "Viewport Mapping" vista em aula ({+ViewportMapping2+}).
+    glViewport(0, 0, width, height);
+    // Atualizamos também a razão que define a proporção da janela (largura /
+    // altura), a qual será utilizada na definição das matrizes de projeção,
+    // tal que não ocorra distorções durante o processo de "Screen Mapping"
+    // acima, quando NDC é mapeado para coordenadas de pixels. Veja slides 205-215 do documento Aula_09_Projecoes.pdf.
+    //
+    // O cast para float é necessário pois números inteiros são arredondados ao
+    // serem divididos!
+    g_ScreenRatio = (float)width / height;
+    if (currentPuzzle != nullptr)
+        currentPuzzle->handleResize(width, height);
+}

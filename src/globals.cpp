@@ -69,3 +69,9 @@ bool g_lockOpened = false;
 
 // Define se os puzzles estão completos
 bool g_puzzlesCompleted = false;
+
+// Variáveis globais que armazenam a última posição do cursor do mouse, para
+// que possamos calcular quanto que o mouse se movimentou entre dois instantes
+// de tempo. Utilizadas no callback CursorPosCallback() abaixo.
+double g_LastCursorPosX = 0.0;
+double g_LastCursorPosY = 0.0;

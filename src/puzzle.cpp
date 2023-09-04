@@ -25,6 +25,15 @@ void Puzzle::handleScroll(double xoffset, double yoffset){
     return;
 }
 
+void Puzzle::handleLeftClick(){
+    return;
+}
+
+void Puzzle::handleResize(int width, int height)
+{
+    return;
+}
+
 void Puzzle::handleEntered(){
     return;
 }
@@ -51,15 +60,6 @@ void Puzzle::clearObjectMap(){
         delete pair.second;
     }
 }
-
-// void Puzzle::addObject(std::string name, GameObject* obj){
-//     objects[name] = obj;
-// }
-
-
-// GameObject* Puzzle::getObject(std::string obj_name){
-//     return objects[obj_name];
-// }
 
 
 MainLobby::MainLobby() : 
@@ -483,26 +483,6 @@ void MainLobby::updateState(){
         // Senão, realizamos movimento
         playerMove();
     }
-
-    // // PLACEHOLDER / TESTAGEM
-    // if(g_AnimationManager.hasAnimationFinished(statueAnimationID, true)){
-    //     g_AnimationManager.removeAnimation(statueAnimationID, true);
-    //     AnimationData animation;
-    //     auto bust = objects["bust"];
-    //     auto pos = bust->getPosition();
-    //     if(statueStatus){
-    //         //animation.setDestinationPoint(glm::vec4(STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
-    //         animation.setBezierCurveJump(pos, glm::vec4(-1.0,2.0,0.0,1.0), glm::vec4(-2.0,1.0,0.0,1.0), glm::vec4(-3.0,0.0,0.0,1.0), 2.0f);
-    //     }
-    //     else{
-    //         //animation.setDestinationPoint(glm::vec4(-STEP_SIZE, 0.0f, -STEP_SIZE, 1.0f));
-    //         animation.setBezierCurveJump(pos, glm::vec4(1.0,2.0,0.0,1.0), glm::vec4(2.0,1.0,0.0,1.0), glm::vec4(3.0,0.0,0.0,1.0), 2.0f);
-    //     }
-    //     statueStatus = !statueStatus;
-    //     statueAnimationID = g_AnimationManager.addAnimatedObject(bust, animation);
-
-    // }
-
 }
 
 
@@ -898,16 +878,98 @@ void LockPuzzle::setupRoom(){
     newObj->setPosition(glm::vec4(0.0, 0.5, -3.5, 1.0));
     objects["lock_body"] = newObj;
 
+}
 
+void LockPuzzle::handleLeftClick(){
+    newSelectedRing = getRingClicked();
+    if(newSelectedRing != 255){
+        AnimationData anim1, anim2;
+        glm::vec4 pos_prev_selected;
+        glm::vec4 pos_selected;
+        GameObject* prev_selected;
+        GameObject* selected;
+        switch(curSelectedRing){
+            case 0:
+                prev_selected = objects["lock_ring1"];
+                break;
+            case 1:
+                prev_selected = objects["lock_ring2"];
+                break;
+            case 2:
+                prev_selected = objects["lock_ring3"];
+                break;
+        }
+        switch(newSelectedRing){
+            case 0:
+                selected = objects["lock_ring1"];
+                break;
+            case 1:
+                selected = objects["lock_ring2"];
+                break;
+            case 2:
+                selected = objects["lock_ring3"];
+                break;
+        }
+
+        pos_prev_selected = prev_selected->getPosition();
+        pos_prev_selected.z = -3.5;
+        pos_selected = selected->getPosition();
+        pos_selected.z = -3.2;
+        anim1.setDestinationPoint(pos_prev_selected, 3.0f);
+        anim2.setDestinationPoint(pos_selected, 3.0f);
+        animationPrevSel = g_AnimationManager.addAnimatedObject(prev_selected, anim1);
+        animationSel = g_AnimationManager.addAnimatedObject(selected, anim2);
+
+        curSelectedRing = newSelectedRing;
+    }
+}
+
+void LockPuzzle::handleResize(int width, int height){
+    updateLocksBbox(width, height);
+}
+
+LockPuzzle::LockPuzzle() :
+curSelectedRing(0),
+animationPrevSel(ANIMATION_ID_NONE),
+animationSel(ANIMATION_ID_NONE),
+// Essas são as bboxs iniciais com base nas coordenadas de tela 
+lock_ring_val1_bbox_max(glm::vec2(0.61125f*800, 0.39166f*600)),
+lock_ring_val1_bbox_min(glm::vec2(0.39125f*800, 0.445f*600)),
+lock_ring_val2_bbox_max(glm::vec2(0.61125f*800, 0.47167f*600)),
+lock_ring_val2_bbox_min(glm::vec2(0.39125f*800, 0.525f*600)),
+lock_ring_val3_bbox_max(glm::vec2(0.61125f*800, 0.551f*600)),
+lock_ring_val3_bbox_min(glm::vec2(0.39125f*800, 0.605f*600))
+{
+}
+
+uint8_t LockPuzzle::getRingClicked(){
+    glm::vec2 mousePos = glm::vec2(g_LastCursorPosX, g_LastCursorPosY);    
+    if (checkPointToPlaneCollision(mousePos, lock_ring_val1_bbox_min, lock_ring_val1_bbox_max)){
+        return 0;
+    }
+    else if (checkPointToPlaneCollision(mousePos, lock_ring_val2_bbox_min, lock_ring_val2_bbox_max)){
+        return 1;
+    }
+    else if (checkPointToPlaneCollision(mousePos, lock_ring_val3_bbox_min, lock_ring_val3_bbox_max)){
+        return 2;
+    }
+    return 255;
+}
+
+void LockPuzzle::updateLocksBbox(int width, int height)
+{    
+    lock_ring_val1_bbox_max = glm::vec2(0.61125f*width, 0.39166f*height);
+    lock_ring_val1_bbox_min = glm::vec2(0.39125f*width, 0.445f*height);
+    lock_ring_val2_bbox_max = glm::vec2(0.61125f*width, 0.47167f*height);
+    lock_ring_val2_bbox_min = glm::vec2(0.39125f*width, 0.525f*height);
+    lock_ring_val3_bbox_max = glm::vec2(0.61125f*width, 0.551f*height);
+    lock_ring_val3_bbox_min = glm::vec2(0.39125f*width, 0.605f*height);
 }
 
 void LockPuzzle::updateState(){
-    static uint8_t curSelectedRing = 0;
-    static int animationPrevSel = ANIMATION_ID_NONE;
-    static int animationSel = ANIMATION_ID_NONE;
     static int animationLockOpened = ANIMATION_ID_NONE;
     static bool startedLockAnimation = false;
-    static float lastProcessedInput = (float) glfwGetTime();;
+    static float lastProcessedInput = (float) glfwGetTime();
 
     // Checa se cadeado foi aberto; se sim, faz animação especial
     if(g_lockOpened){
@@ -926,9 +988,8 @@ void LockPuzzle::updateState(){
         }
     }
 
-
-
     float cur_time = (float) glfwGetTime();
+
     if((cur_time - lastProcessedInput) < 0.25f){
         return;
     }
@@ -938,74 +999,10 @@ void LockPuzzle::updateState(){
     ){
         return;
     }
-
-    if(g_downPressed){
-        AnimationData anim1, anim2;
-        glm::vec4 pos_prev_selected;
-        glm::vec4 pos_selected;
-        GameObject* prev_selected;
-        GameObject* selected;
-        switch(curSelectedRing){
-            case 0:
-                prev_selected = objects["lock_ring1"];
-                selected = objects["lock_ring2"];
-                curSelectedRing = 1;
-                break;
-            case 1:
-                prev_selected = objects["lock_ring2"];
-                selected = objects["lock_ring3"];
-                curSelectedRing = 2;
-                break;
-            case 2:
-                prev_selected = objects["lock_ring3"];
-                selected = objects["lock_ring1"];
-                curSelectedRing = 0;
-                break;
-        }
-
-        pos_prev_selected = prev_selected->getPosition();
-        pos_prev_selected.z = -3.5;
-        pos_selected = selected->getPosition();
-        pos_selected.z = -3.2;
-        anim1.setDestinationPoint(pos_prev_selected, 3.0f);
-        anim2.setDestinationPoint(pos_selected, 3.0f);
-        animationPrevSel = g_AnimationManager.addAnimatedObject(prev_selected, anim1);
-        animationSel = g_AnimationManager.addAnimatedObject(selected, anim2);
-    }
-    else if(g_upPressed){
-        AnimationData anim1, anim2;
-        glm::vec4 pos_prev_selected;
-        glm::vec4 pos_selected;
-        GameObject* prev_selected;
-        GameObject* selected;
-        switch(curSelectedRing){
-            case 0:
-                prev_selected = objects["lock_ring1"];
-                selected = objects["lock_ring3"];
-                curSelectedRing = 2;
-                break;
-            case 1:
-                prev_selected = objects["lock_ring2"];
-                selected = objects["lock_ring1"];
-                curSelectedRing = 0;
-                break;
-            case 2:
-                prev_selected = objects["lock_ring3"];
-                selected = objects["lock_ring2"];
-                curSelectedRing = 1;
-                break;
-        }
-
-        pos_prev_selected = prev_selected->getPosition();
-        pos_prev_selected.z = -3.5;
-        pos_selected = selected->getPosition();
-        pos_selected.z = -3.2;
-        anim1.setDestinationPoint(pos_prev_selected, 3.0f);
-        anim2.setDestinationPoint(pos_selected, 3.0f);
-        animationPrevSel = g_AnimationManager.addAnimatedObject(prev_selected, anim1);
-        animationSel = g_AnimationManager.addAnimatedObject(selected, anim2);
-    }
-    else if(g_rightPressed){
+    uint8_t newSelectedRing; 
+    // Checa se o jogador clicou em algum anel
+    
+    if(g_rightPressed){
         AnimationData animation;
         GameObject* selected;
         switch(curSelectedRing){

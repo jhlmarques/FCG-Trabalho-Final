@@ -1003,7 +1003,7 @@ void LockPuzzle::updateState(){
     uint8_t newSelectedRing; 
     // Checa se o jogador clicou em algum anel
     
-    if(g_rightPressed){
+    if(g_leftPressed){
         AnimationData animation;
         GameObject* selected;
         switch(curSelectedRing){
@@ -1023,7 +1023,7 @@ void LockPuzzle::updateState(){
         animation.setradiansToRotate(glm::radians(36.0f), Y, 102.0f);
         animationSel = g_AnimationManager.addAnimatedObject(selected, animation);        
     }
-    else if(g_leftPressed){
+    else if(g_rightPressed){
         AnimationData animation;
         GameObject* selected;
         switch(curSelectedRing){

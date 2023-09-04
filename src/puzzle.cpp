@@ -545,6 +545,7 @@ void GnomePuzzle::handleEntered(){
     prev_time = (float) glfwGetTime();
     if(!already_ended){
         objects["gnome"]->setPosition(gnome_initial_position);
+        speed = 0.5f;
     }
 }
 

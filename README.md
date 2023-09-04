@@ -1,6 +1,7 @@
 # FOGE FOGE
 
 Trabalho final de Fundamentos de Computação Gráfica (2023/1)
+
 O jogo desenvolvido se chama *FOGE FOGE*. 
 
 O objetivo do jogo é descobrir o número em cada um dos 3 puzzles, a fim de desbloquear a porta que está trancada com um cadeado.
